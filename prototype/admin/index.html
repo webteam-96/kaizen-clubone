@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23272729'/%3E%3Crect x='8' y='6' width='16' height='20' rx='1' fill='none' stroke='%23fff' stroke-width='1.6'/%3E%3Cpath d='M8 16h16M16 9v14' stroke='%23fff' stroke-width='1.6'/%3E%3C/svg%3E">
 <title>ClubOne Admin</title>
-<meta name="description" content="Kaizen ClubOne staff portal prototype: live floor, members, amenities, reception, finance and scanner station mode.">
+<meta name="description" content="Kaizen ClubOne staff portal prototype: live floor, members, amenities, reception, and finance.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..700&display=swap" rel="stylesheet">
@@ -180,6 +180,12 @@ tr.new td{animation:rowhl var(--t4) ease-out 1s backwards}
 /* ---------- members: one card per member, on the page itself ---------- */
 .mem-bar{display:flex;align-items:center;justify-content:space-between;gap:12px 16px;flex-wrap:wrap;margin:0 0 20px}
 .mem-bar .toolbar .input{width:340px;border-color:transparent;border-radius:12px;box-shadow:0 0 0 1px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04)}
+.opt-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--hair);border-radius:12px;cursor:pointer}
+.opt-row + .opt-row{margin-top:8px}
+.opt-row:has(input:checked){border-color:var(--blue);background:#f2f7fd}
+.opt-row b{display:block;font-weight:600}
+.opt-row small{display:block;color:var(--ink-80);font-size:14px}
+.opt-row input{width:18px;height:18px;accent-color:var(--blue);flex:none}
 .mgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
 .mgrid > .empty{grid-column:1/-1}
 .mcard{position:relative;display:flex;flex-direction:column;gap:18px;width:100%;margin:0;padding:20px 20px 16px;border:0;border-radius:22px;background:#fff;text-align:left;color:var(--ink);box-shadow:0 0 0 1px rgba(0,0,0,.045),0 1px 2px rgba(0,0,0,.04),0 12px 30px -16px rgba(0,0,0,.14);transition:transform .35s var(--ease),box-shadow .35s var(--ease)}
@@ -273,6 +279,8 @@ input[type="checkbox"]:not(.switch){accent-color:var(--blue)}
 .note.good{background:var(--admit-t)}
 .note.good .ic{color:var(--admit-ink)}
 .pill-opts{display:flex;flex-wrap:wrap;gap:8px}
+.pill-opts .opt{padding:9px 14px;font-weight:600;transition:background-color .2s,color .2s,border-color .2s}
+.pill-opts .opt[aria-pressed="true"]{background:var(--blue);border:1px solid var(--blue);color:#fff;padding:9px 14px}   /* a day that is open reads as on */
 .opt{border:1px solid var(--chip);background:#fff;border-radius:999px;padding:9px 18px;min-height:44px;text-align:left;display:flex;flex-direction:column;justify-content:center;line-height:1.25;font-size:14px;letter-spacing:-.224px;color:var(--ink)}
 .opt b{font-weight:600}
 .opt small{color:var(--ink-80);font-size:12px;letter-spacing:-.12px}
@@ -496,7 +504,8 @@ input[type="checkbox"]:not(.switch){accent-color:var(--blue)}
 .thumb{width:64px;height:48px;border-radius:8px;background:var(--tile1);overflow:hidden;flex:none;display:block}
 .thumb.sm{width:48px;height:36px}
 .thumb img,.am-photo img{display:block;width:100%;height:100%;object-fit:cover}
-.am-photo{position:relative;margin:0;border-radius:18px;overflow:hidden;background:var(--tile1);aspect-ratio:2/1}
+.am-photo{position:relative;margin:0;border-radius:18px;overflow:hidden;background:var(--tile1);height:clamp(180px,32vw,260px)}   /* a fixed height: in the drawer grid an aspect-ratio box that clips gets a zero-height row and covers the fields below */
+.am-photo img{width:100%;height:100%;object-fit:cover;display:block}
 .am-photo .btn{position:absolute;right:12px;bottom:12px}
 .am-photo.none{display:grid;place-items:center;background:var(--pearl);border:2px dashed var(--chip)}
 .am-photo.none .btn{position:static}
@@ -833,8 +842,8 @@ const MEMBERS = [
 MEMBERS[0].mobile='+91 98765 43210';
 const FAMILY = {KC1234:[
   {name:'Rahul Sharma',rel:'Primary member',no:'KC1234',status:'Active'},
-  {name:'Priya Sharma',rel:'Spouse',no:'KC1235',status:'Active'},
-  {name:'Aarav Sharma',rel:'Son, 12, dependant',no:'KC1234-D1',status:'Active'},
+  {name:'Priya Sharma',rel:'Spouse',no:'KC1235',status:'Active',mobile:'+91 98203 17919'},
+  {name:'Aarav Sharma',rel:'Son, 12',no:'KC1234-F2',status:'Active'},
 ]};
 const STATIONS = [
   {name:'Main entry',type:'Entry gate',loc:'Lobby',on:true,last:'6:10 PM',dev:'ENT-01 tablet and 2D imager'},
@@ -949,10 +958,10 @@ const AUDIT = [
   ['6:00 AM','System','Visits closed at closing time','3 visits flagged for review',''],
 ];
 const ROLES = {
-  manager:{label:'Club manager',name:'Meera Iyer',sid:'MGR-014',home:'dashboard',hint:'Live floor, approvals, reports',nav:['dashboard','access','members','amenities','bookings','reception','approvals','finance','station']},
-  reception:{label:'Receptionist',name:'Sneha Patil',sid:'RCP-022',home:'reception',hint:'Payments, walk-ins, slot changes',nav:['reception','members','bookings','access','station']},
-  accounts:{label:'Accounts',name:'Vikram Desai',sid:'ACC-007',home:'finance',hint:'Reconciliation, refunds, reports',nav:['finance','approvals','bookings','members']},
-  admin:{label:'Administrator',name:'Arjun Menon',sid:'ADM-001',home:'dashboard',hint:'Full access, masters, settings',nav:['dashboard','access','members','amenities','bookings','reception','approvals','finance','settings','station']},
+  manager:{label:'Club manager',name:'Meera Iyer',sid:'MGR-014',home:'dashboard',hint:'Live floor, approvals, reports',nav:['dashboard','access','members','amenities','bookings','reception','approvals','finance']},
+  reception:{label:'Receptionist',name:'Sneha Patil',sid:'RCP-022',home:'reception',hint:'Payments, walk-ins, slot changes',nav:['reception','members','bookings','access']},
+  accounts:{label:'Accounts',name:'Vikram Desai',sid:'ACC-007',home:'finance',hint:'Collections, refunds, reports',nav:['finance','approvals','bookings','members']},
+  admin:{label:'Administrator',name:'Arjun Menon',sid:'ADM-001',home:'dashboard',hint:'Full access, masters, settings',nav:['dashboard','access','members','amenities','bookings','reception','approvals','finance','settings']},
 };
 const NAV = {
   dashboard:{label:'Live floor',short:'Live floor',icon:'grid'},
@@ -1076,7 +1085,7 @@ function render() {
   if (view === 'login' || (!view && !S.role)) return showLogin();
   if (!S.role) signIn(ROLES[store.get('co-role')] ? store.get('co-role') : 'admin', true);
   if (!view) return go(ROLES[S.role].home);
-  if (!VIEWS[view] && view !== 'station') return go(ROLES[S.role].home);
+  if (!VIEWS[view]) return go(ROLES[S.role].home);   // station mode is switched off for every role
   const allowed = ROLES[S.role].nav.includes(view);
   if (view === 'station' && allowed) return showStation(sub);
   showShell(view, allowed ? sub : null);
@@ -1136,7 +1145,7 @@ const SUB = {
   reception: {tabs: () => [['', 'Payment queue', QUEUE.length, 'cnt-queue'], ['walkin', 'Walk-in booking'], ['change', 'Change or allot a slot'], ['guests', 'Guests today'], ['cash', 'Cash count']],
     cta: () => ({label: 'Collect payment', act: 'collect-pick'})},
   approvals: {},
-  finance: {tabs: () => [['', 'Overview'], ['trial', 'Trial balance'], ['recon', 'Reconciliation', UNMATCHED.length, 'cnt-recon'], ['refunds', 'Refunds'], ['reports', 'Reports']],
+  finance: {tabs: () => [['', 'Overview'], ['trial', 'Trial balance'], ['refunds', 'Refunds'], ['reports', 'Reports']],
     cta: () => ({label: 'Export', act: 'export', r: 'Revenue'})},
   settings: {tabs: () => [['', 'Operating rules'], ['fees', 'Membership fees'], ['stations', 'Stations and staff'], ['audit', 'Audit trail']],
     cta: sub => (sub === '' || sub === 'fees') && {label: 'Save changes', form: sub === 'fees' ? 'fees-form' : 'rules-form'}},
@@ -1549,7 +1558,6 @@ VIEWS.dashboard = () => {
     ['access', 'wifioff', 'warn', 'Squash door station offline', 'No contact for 24 min. It keeps scanning and syncs later.'],
     has('reception') && due.length && ['reception', 'receipt', 'info', `${due.length} charges due at reception`, `₹${num(due.reduce((s, q) => s + q.amt, 0))} still to collect`],
     denials.length && ['access', 'x', 'bad', `${denials.length} denied scans today`, `Latest: ${denials[0].reason}`],
-    has('finance') && UNMATCHED.length && ['finance/recon', 'rupee', 'info', `${UNMATCHED.length} payments to match`, 'Cashfree settlement for 27 Oct'],
   ].filter(Boolean);
   const fill = a => a.id === 'banquet' ? -1 : a.in / a.cap;
   onMount(() => {
@@ -1760,23 +1768,32 @@ function openMember(no, tab) {
   <div class="drawer-f">${isAdmin() ? `${m.status === 'Suspended' ? `<button class="btn" data-act="reinstate" data-no="${m.no}">${ic('check')}Reinstate</button>` : `<button class="btn" data-act="suspend" data-no="${m.no}">${ic('ban')}Suspend</button>`}<button class="btn" data-act="charge-fee" data-no="${m.no}">${ic('receipt')}Charge a fee</button><button class="btn btn-primary" data-act="renew" data-no="${m.no}">${ic('refresh')}Renew</button>` : `<span class="muted cap" style="margin-right:auto">Only the clubhouse administrator can change memberships.</span><button class="btn" data-act="close-drawer">Close</button>`}</div>`, m.name);
 }
 ACT.mtab = b => { memTab = b.dataset.k; $$('[data-act="mtab"]').forEach(x => x.setAttribute('aria-selected', x === b)); $('#mtab').innerHTML = memTabBody(memberBy(b.dataset.no), memTab); };
+/* a member's recent wallet entries; Rahul's match the member app entry for entry */
+const RAHUL_TX = [['28 Oct, 4:55 PM', 'Debit, swimming pool booking with guest', -155], ['27 Oct, 8:10 PM', 'Debit, lawn tennis booking', -50], ['26 Oct, 5:31 PM', 'Debit, badminton booking', -20], ['24 Oct, 9:12 AM', 'Top-up by UPI, CF-ORD-77120', 1000], ['21 Oct, 8:02 PM', 'Refund, squash booking cancelled', 15], ['21 Oct, 6:40 PM', 'Debit, squash booking', -15], ['20 Oct, 7:45 PM', 'Top-up by card, CF-ORD-76544', 1500]];
+function walletLedger(m, wallet) {
+  let tx = RAHUL_TX;
+  if (m.no !== 'KC1234' && m.no !== 'KC1235') {
+    const b = BOOKINGS.find(x => x.no === m.no), spend = b ? b.amt : 20, top = Math.floor((wallet + spend) / 500) * 500;
+    tx = [['27 Oct, 6:12 PM', `Debit, ${b ? b.am.split(',')[0].toLowerCase() : 'badminton'} booking`, -spend]];
+    if (top) tx.push(['22 Oct, 9:30 AM', 'Top-up by UPI', top]);
+  }
+  let bal = wallet;
+  const rows = tx.map(([d, t, a]) => { const r = {d, t, a, bal}; bal -= a; return r; });
+  return {rows, open: bal};
+}
 function memTabBody(m, k) {
   const wallet = m.wallet == null ? memberBy('KC1234').wallet : m.wallet;
-  if (k === 'overview') return `<dl class="kv"><dt>Membership</dt><dd>${m.type}</dd><dt>Valid till</dt><dd>${m.valid} <span class="muted">(${daysLeft(m.valid) >= 0 ? daysLeft(m.valid) + ' days left' : 'ended ' + -daysLeft(m.valid) + ' days ago'})</span></dd><dt>Member since</dt><dd>${m.since}</dd><dt>Mobile</dt><dd class="num">${m.mobile}</dd><dt>Email</dt><dd>${m.name.split(' ')[0].toLowerCase()}@example.com</dd><dt>Flat</dt><dd>${esc(m.flat)}</dd><dt>Emergency contact</dt><dd>${(c => c ? `${esc(c.name)}, ${esc(c.rel.toLowerCase())}, <span class="num">${esc(c.mobile)}</span>` : '<span class="muted">Not on file. Ask the member at the next visit.</span>')(m.ec || EC[m.no])}</dd><dt>Wallet</dt><dd>${m.wallet == null ? `Uses the primary member’s wallet, ${inr(wallet)}` : inr(wallet)}</dd><dt>Entry code</dt><dd>${m.status === 'Active' ? 'Issued, works at the gate' : 'Not generated while ' + m.status.toLowerCase()}</dd></dl>`;
+  if (k === 'overview') return `<dl class="kv"><dt>Membership</dt><dd>${m.type}</dd><dt>Valid till</dt><dd>${m.valid} <span class="muted">(${daysLeft(m.valid) >= 0 ? daysLeft(m.valid) + ' days left' : 'ended ' + -daysLeft(m.valid) + ' days ago'})</span></dd><dt>Member since</dt><dd>${m.since}</dd><dt>Mobile</dt><dd class="num">${m.mobile}</dd><dt>Email</dt><dd>${m.name.split(' ')[0].toLowerCase()}@example.com</dd><dt>Flat</dt><dd>${esc(m.flat)}</dd><dt>Emergency contact</dt><dd>${(c => c ? `${esc(c.name)}, ${esc(c.rel.toLowerCase())}, <span class="num">${esc(c.mobile)}</span>` : '<span class="muted">Not on file. Ask the member at the next visit.</span>')(ecOf(m))}${isAdmin() ? ` <button class="link" data-act="ec-pick" data-no="${m.no}">Change</button>` : ''}</dd><dt>Wallet</dt><dd>${m.wallet == null ? `Uses the primary member’s wallet, ${inr(wallet)}` : inr(wallet)}</dd></dl>`;
   if (k === 'wallet') {
     const bk = BOOKINGS.filter(b => b.no === m.no);
     return `<div class="row" style="margin-bottom:14px"><div><div class="muted cap">Wallet balance</div><div class="num" style="font:600 40px/1.1 var(--display)">${inr(wallet)}</div></div>${chip('Active', 'Top-ups through Cashfree')}</div>
-    <h3 style="margin:6px 0">Wallet transactions</h3><div class="tscroll"><table class="t"><thead><tr><th>Date</th><th>Entry</th><th class="r">Amount</th></tr></thead><tbody>
-    <tr><td class="nowrap">28 Oct, 5:51 PM</td><td>Debit, swimming pool booking with guest</td><td class="r num">−${inr(155)}</td></tr>
-    <tr><td class="nowrap">28 Oct, 5:49 PM</td><td>Top-up by UPI, ref CF-88251207</td><td class="r num" style="color:var(--admit-ink)">+${inr(1000)}</td></tr>
-    <tr><td class="nowrap">26 Oct, 6:02 PM</td><td>Debit, badminton</td><td class="r num">−${inr(20)}</td></tr>
-    <tr><td class="nowrap">24 Oct, 7:15 AM</td><td>Refund, lawn tennis cancelled by member</td><td class="r num" style="color:var(--admit-ink)">+${inr(50)}</td></tr></tbody></table></div>
+    <h3 style="margin:6px 0">Wallet transactions</h3>${(L => `<div class="tscroll"><table class="t"><thead><tr><th>Date</th><th>Entry</th><th class="r">Amount</th><th class="r">Balance after</th></tr></thead><tbody>${L.rows.map(r => `<tr><td class="nowrap">${r.d}</td><td>${r.t}</td><td class="r num"${r.a > 0 ? ' style="color:var(--admit-ink)"' : ''}>${r.a > 0 ? '+' : '−'}${inr(Math.abs(r.a))}</td><td class="r num">${inr(r.bal)}</td></tr>`).join('')}</tbody></table></div><p class="muted cap" style="margin-top:8px">Balance before these entries: ${inr(L.open)}. Each entry is worked from the balance, so the list always adds up.</p>`)(walletLedger(m, wallet))}
     <h3 style="margin:18px 0 6px">Bookings</h3>${bk.length ? `<ul class="list">${bk.map(b => `<li><div class="grow"><b>${esc(b.am)}</b><small>${b.day}, ${b.slot}, ${b.ref}</small></div>${chip(b.status)}</li>`).join('')}</ul>` : '<p class="muted">No bookings this week.</p>'}`;
   }
   if (k === 'family') {
-    const f = FAMILY[m.no] || FAMILY[m.no === 'KC1235' ? 'KC1234' : ''];
-    return f ? `<ul class="list">${f.map(p => `<li>${avatar(p.name)}<div class="grow"><b>${esc(p.name)}</b><small>${esc(p.rel)}, ${p.no}</small></div>${chip(p.status)}</li>`).join('')}</ul><div class="note" style="margin-top:12px">${ic('info')}<div>Each family member has an own entry code, linked to the primary member for booking and payment. A dependant costs ${inr(750)}.</div></div>${isAdmin() ? `<button class="btn" style="margin-top:12px" data-act="charge-fee" data-no="${m.no}" data-kind="dep">${ic('plus')}Add a dependant</button>` : ''}`
-      : `<div class="empty">${emptyArt()}<p>No family members linked yet.</p>${isAdmin() ? `<button class="btn" style="margin-top:12px" data-act="charge-fee" data-no="${m.no}" data-kind="dep">${ic('plus')}Add a dependant</button>` : ''}</div>`;
+    const f = famOf(m), ec = ecOf(m);
+    return `<ul class="list">${f.map((p, i) => `<li>${avatar(p.name)}<div class="grow"><b>${esc(p.name)}</b><small>${esc(p.rel)}${p.no ? ', ' + p.no : ''}${ec && ec.name === p.name ? ', emergency contact' : ''}</small></div>${chip(p.status)}${isAdmin() && p.rel !== 'Primary member' ? `<button class="iconbtn" data-act="fam-del" data-no="${m.no}" data-i="${i}" aria-label="Remove ${esc(p.name)}" title="Remove">${ic('x')}</button>` : ''}</li>`).join('')}</ul>
+    <div class="note" style="margin-top:12px">${ic('info')}<div>Family members get their own entry code and book on the primary member's wallet. They are active as soon as they are added.</div></div>${isAdmin() ? `<button class="btn" style="margin-top:12px" data-act="fam-add" data-no="${m.no}">${ic('plus')}Add family member</button>` : ''}`;
   }
   if (k === 'access') return `<ol class="timeline">
     ${m.inside ? '<li class="ok"><b>Inside the clubhouse</b><small>Entry scan at Main entry, 5:42 PM today</small></li>' : ''}
@@ -1786,8 +1803,67 @@ function memTabBody(m, k) {
     <li class="ok"><b>Visit, Thu 22 Oct</b><small>In 6:40 PM, out 8:12 PM.</small></li></ol>`;
   return m.type === 'Tenant'
     ? `<dl class="kv"><dt>Arrangement</dt><dd>Leave and licence</dd><dt>Licensee</dt><dd>${esc(m.name)}</dd><dt>Period of lease</dt><dd>1 Sep 2026 to 31 Aug 2027</dd><dt>Agreement</dt><dd><button class="link" data-act="doc">Leave and licence agreement.pdf</button></dd><dt>ID proof</dt><dd><button class="link" data-act="doc">ID proof.jpg</button></dd></dl><div class="note warn" style="margin-top:14px">${ic('clock')}<div>Membership validity follows the lease. Renewals past 31 Aug 2027 need a new agreement.</div></div>`
-    : `<dl class="kv"><dt>Arrangement</dt><dd>Owner, resident</dd><dt>Photo</dt><dd>On file, shown to the gate operator on manual admission</dd><dt>ID proof</dt><dd><button class="link" data-act="doc">ID proof.jpg</button></dd><dt>Printed card</dt><dd>Not issued (optional Code 128 card)</dd></dl>`;
+    : `<dl class="kv"><dt>Arrangement</dt><dd>Owner, resident</dd><dt>Photo</dt><dd>On file, shown to the gate operator on manual admission</dd><dt>ID proof</dt><dd><button class="link" data-act="doc">ID proof.jpg</button></dd></dl>`;
 }
+/* family and emergency contact: the emergency contact is always someone in the member's family */
+const RELS = ['Spouse', 'Parent', 'Child', 'Sibling', 'Other'];
+const ecOf = m => m.ec || EC[m.no];
+function famOf(m) {
+  const key = m.no === 'KC1235' ? 'KC1234' : m.no;
+  if (!FAMILY[key]) {
+    FAMILY[key] = [{name: m.name, rel: 'Primary member', no: m.no, status: 'Active'}];
+    const c = EC[m.no];
+    if (c) FAMILY[key].push({name: c.name, rel: c.rel, no: `${m.no}-F1`, status: 'Active', mobile: c.mobile});
+  }
+  return FAMILY[key];
+}
+const famAdd = (m, p) => { const f = famOf(m), q = {...p, no: `${m.no}-F${f.length}`, status: 'Active'}; f.push(q); return q; };
+const relSelect = (name, cur) => `<select class="input" name="${name}">${RELS.map(r => `<option${r === cur ? ' selected' : ''}>${r}</option>`).join('')}</select>`;
+const refreshMember = m => { const t = $('#mtab'); if (t) t.innerHTML = memTabBody(m, memTab); if (parse().view === 'members') memRefresh(); };
+ACT['fam-add'] = b => {
+  const m = memberBy(b.dataset.no);
+  openModal(`<form data-form="fam-add" data-no="${m.no}">${modalHead('Add a family member', `Linked to ${esc(m.name)}. Active as soon as you save.`)}
+  <div class="modal-b form"><div class="f3"><label class="field">${lab('Name')}<input class="input" name="fname" autocomplete="off"><span class="errmsg" hidden>Enter the name.</span></label><label class="field">${lab('Relationship')}${relSelect('frel', 'Child')}</label><label class="field">${lab('Mobile number', 'Optional')}<input class="input" name="fmobile" inputmode="tel" placeholder="+91 98200 12345"></label></div></div>
+  <div class="modal-f"><button type="button" class="btn" data-act="close-modal">Cancel</button><button class="btn btn-primary" type="submit">Add family member</button></div></form>`, 'Add family member');
+};
+FORM['fam-add'] = f => {
+  if (!need(f, ['fname'])) return;
+  const m = memberBy(f.dataset.no), q = famAdd(m, {name: f.elements.fname.value.trim(), rel: f.elements.frel.value, mobile: f.elements.fmobile.value.trim()});
+  AUDIT.unshift([hm(now()), ROLES[S.role].name, 'Family member added', `${q.name} to ${m.name}, ${m.no}`, '']);
+  closeModal(); toast(`${esc(q.name)} added to ${esc(m.name)}’s family as ${q.no}. Active now.`); refreshMember(m);
+};
+ACT['fam-del'] = b => {
+  const m = memberBy(b.dataset.no), f = famOf(m), p = f[+b.dataset.i];
+  if (!p) return;
+  f.splice(+b.dataset.i, 1);
+  const wasEc = ecOf(m) && ecOf(m).name === p.name;
+  if (wasEc) { m.ec = null; delete EC[m.no]; }
+  AUDIT.unshift([hm(now()), ROLES[S.role].name, 'Family member removed', `${p.name} from ${m.name}, ${m.no}`, '']);
+  toast(`${esc(p.name)} removed from the family.${wasEc ? ' Choose a new emergency contact.' : ''}`); refreshMember(m);
+};
+ACT['ec-pick'] = b => {
+  const m = memberBy(b.dataset.no), cur = ecOf(m), fam = famOf(m).filter(p => p.name !== m.name);
+  openModal(`<form data-form="ec-pick" data-no="${m.no}">${modalHead('Emergency contact', 'Choose someone from the family, or add a new person. A new person joins the family too.')}
+  <div class="modal-b form"><div>${fam.map((p, i) => `<label class="opt-row"><input type="radio" name="who" value="${i}"${cur && cur.name === p.name ? ' checked' : ''}><span><b>${esc(p.name)}</b><small>${esc(p.rel)}${p.mobile ? ', ' + esc(p.mobile) : ', no mobile on file'}</small></span></label>`).join('')}<label class="opt-row"><input type="radio" name="who" value="new"${fam.length ? '' : ' checked'}><span><b>Someone else</b><small>Added to the family as well</small></span></label></div>
+  <div class="f3" style="margin-top:12px"><label class="field">${lab('Name')}<input class="input" name="ename" autocomplete="off"><span class="errmsg" hidden>Enter the name.</span></label><label class="field">${lab('Relationship')}${relSelect('erel', 'Spouse')}</label><label class="field">${lab('Mobile number')}<input class="input" name="emobile" inputmode="tel" placeholder="+91 98200 12345"><span class="errmsg" hidden>Enter the mobile number.</span></label></div></div>
+  <div class="modal-f"><button type="button" class="btn" data-act="close-modal">Cancel</button><button class="btn btn-primary" type="submit">Save</button></div></form>`, 'Emergency contact');
+};
+FORM['ec-pick'] = f => {
+  const m = memberBy(f.dataset.no), fam = famOf(m).filter(p => p.name !== m.name), v = (f.querySelector('input[name=who]:checked') || {}).value;
+  const ten = x => (x || '').replace(/\D/g, '').slice(-10);
+  let c;
+  if (v === 'new' || v == null) {
+    if (!need(f, ['ename', 'emobile'])) return;
+    if (ten(f.elements.emobile.value) === ten(m.mobile)) { toast('The emergency contact needs a different mobile number from the member.', true); return; }
+    c = famAdd(m, {name: f.elements.ename.value.trim(), rel: f.elements.erel.value, mobile: f.elements.emobile.value.trim()});
+  } else {
+    c = fam[+v];
+    if (!c.mobile) { toast(`${esc(c.name)} has no mobile number on file. Add it, or choose someone else.`, true); return; }
+  }
+  m.ec = {name: c.name, rel: c.rel, mobile: c.mobile};
+  AUDIT.unshift([hm(now()), ROLES[S.role].name, 'Emergency contact changed', `${m.name}, ${m.no}: ${c.name}`, '']);
+  closeModal(); toast(`${esc(c.name)} is now ${esc(m.name)}’s emergency contact.`); refreshMember(m);
+};
 ACT.doc = () => toast('Opening documents is not part of this prototype.');
 function feeModal(m, kinds, title, sub) {
   return `<form data-form="fee" data-no="${m.no}">${modalHead(title, sub)}
@@ -1832,10 +1908,10 @@ ACT['add-member'] = () => openModal(`<form data-form="add-member">${modalHead('A
   <label class="field">${lab('Membership')}<select class="input" name="type"><option>Resident</option><option>Tenant</option></select></label>
   <label class="field">${lab('Valid from')}<input class="input" name="from" type="date" value="2026-10-28"></label>
   <label class="field">${lab('Valid till')}<input class="input" name="till" type="date" value="2027-03-31"></label></div>
-  <fieldset class="fs"><legend>${ic('phone')}Emergency contact</legend><p class="fs-sub">Who the club calls if something happens at the pool, the gym or anywhere in the club.</p>
+  <fieldset class="fs"><legend>${ic('phone')}Emergency contact</legend><p class="fs-sub">Who the club calls if something happens at the pool, the gym or anywhere in the club. They are saved in the member's family too.</p>
   <div class="f3">
   <label class="field">${lab('Name')}<input class="input" name="ecname" placeholder="Full name" autocomplete="off"><span class="errmsg" hidden>Enter the contact’s name.</span></label>
-  <label class="field">${lab('Relationship')}<select class="input" name="ecrel"><option>Spouse</option><option>Parent</option><option>Child</option><option>Sibling</option><option>Friend</option><option>Other</option></select></label>
+  <label class="field">${lab('Relationship')}${relSelect('ecrel', 'Spouse')}</label>
   <label class="field">${lab('Mobile number')}<input class="input" name="ecmobile" inputmode="tel" placeholder="+91 98200 12345"><span class="errmsg" hidden>Enter the contact’s mobile number.</span></label>
   </div></fieldset>
   <label class="field">${lab('Photo', 'Optional')}<input class="input" type="file" accept="image/*" name="photo"><small class="hint">Shown to gate staff for the face check. You can add it later.</small></label></div>
@@ -1848,7 +1924,8 @@ FORM['add-member'] = f => {
   if (ten(ecm) === ten(mob)) { const el = f.elements.ecmobile; el.classList.add('err'); el.focus(); toast('The emergency contact needs a different mobile number from the member.', true); return; }
   const d = new Date(f.elements.till.value || '2027-03-31');
   MEMBERS.unshift({no, name, type: f.elements.type.value, status: 'Active', valid: fmtD(d), flat: f.elements.flat.value.trim(), wallet: 0, inside: false, mobile: mob, since: 2026, fresh: true, ec: {name: f.elements.ecname.value.trim(), rel: f.elements.ecrel.value, mobile: ecm}});
-  closeModal(); toast(`${esc(name)} added as ${no}. They can sign in to the app with ${esc(mob)}.`);
+  const nm = MEMBERS[0]; famAdd(nm, {name: nm.ec.name, rel: nm.ec.rel, mobile: nm.ec.mobile});
+  closeModal(); toast(`${esc(name)} added as ${no}. ${esc(nm.ec.name)} is saved as emergency contact and family member.`);
   memRefresh();
 };
 ACT.import = () => openModal(`${modalHead('Import members', 'Upload the member file in the template. Valid rows are created; rejected rows come back with the reason.')}
@@ -1993,7 +2070,7 @@ function bkHistory(b) {
   if (b.status === 'Payment pending') return [['ok', 'Booked in the app', '6:06 PM'], ['', 'Wallet top-up waiting for Cashfree', 'No seat is taken until the booking is paid']];
   if (['Admitted', 'Completed'].includes(b.status)) h.push(['ok', `Admitted at the ${b.am.split(',')[0].toLowerCase()} door`, `${b.people} of ${b.people} people`]);
   if (b.status === 'Completed') h.push(['ok', 'Scanned out', 'Within the grace period, no extra time']);
-  if (b.status === 'Cancelled') h.push(['bad', 'Cancelled by the member', `Full refund of ₹${num(b.amt)} to the wallet, completed`]);
+  if (b.status === 'Cancelled') h.push(['bad', 'Cancelled by the member', `${b.why ? `Reason: ${b.why}. ` : ''}Full refund of ₹${num(b.amt)} to the wallet, completed`]);
   return h;
 }
 function openBooking(ref) {
@@ -2260,13 +2337,11 @@ function revenueChart() {
 VIEWS.finance = sub => {
   const head = `<div class="vhead"><div><p>Every rupee from the gateway and the reception desk, matched to a wallet top-up, a booking or a membership fee.</p></div></div>`;
   if (sub === 'trial') return head + trialHTML();
-  if (sub === 'recon') return head + reconHTML();
   if (sub === 'refunds') return head + `<section class="panel"><div class="tscroll"><table class="t"><thead><tr><th>Refund</th><th>Member</th><th>Reason</th><th class="r">Amount</th><th>Status</th><th></th></tr></thead><tbody>${REFUNDS.map(r => `<tr><td class="nowrap"><b>${r.id}</b><br><small class="muted">${r.at}</small></td><td>${esc(r.who)}</td><td>${esc(r.why)}</td><td class="r num">${inr(r.amt)}</td><td>${chip(r.status)}</td><td class="r">${r.status === 'Needs club action' ? `<button class="btn btn-sm" data-act="refund-fix" data-id="${r.id}">Refund by another route</button>` : ''}</td></tr>`).join('')}</tbody></table></div><div class="panel-b"><div class="note">${ic('info')}<div>Refunds go back to the member’s wallet. Each one moves through initiated, processing and completed; a failure alerts accounts.</div></div></div></section>`;
   if (sub === 'reports') return head + `<section class="panel"><div class="tscroll"><table class="t"><thead><tr><th>Report</th><th>What it shows</th><th>Seen by</th><th></th></tr></thead><tbody>${REPORTS.map(([n, d, w]) => `<tr><td><b>${n}</b></td><td>${d}</td><td class="muted">${w}</td><td class="r"><button class="btn btn-sm" data-act="export" data-r="${esc(n)}">${ic('download')}Export</button></td></tr>`).join('')}</tbody></table></div><div class="panel-b"><p class="muted cap">Every report filters by date range and exports to Excel and PDF.</p></div></section>`;
   const cash = COLLECT.reduce((s, c) => s + c.cash, 0), upi = COLLECT.reduce((s, c) => s + c.upi, 0), gw = S.collected - cash - upi;
   return head + `<div class="panel kpis"><div class="stat"><b>${inr(S.collected)}</b><span>Collected today</span></div><div class="stat"><b>${inr(gw)}</b><span>App top-ups through Cashfree</span></div><div class="stat"><b>${inr(cash)}</b><span>Cash at reception</span></div><div class="stat"><b>${inr(upi)}</b><span>UPI at reception</span></div></div>
-  <div class="cols c-side"><section class="panel"><div class="panel-h"><div><h2>Collections, last 14 days</h2><p>Weekends run highest. Today so far is the blue bar.</p></div></div><div class="panel-b">${revenueChart()}</div></section>
-  <section class="panel"><div class="panel-h"><h2>Reconciliation</h2>${UNMATCHED.length ? chip('Unmatched', UNMATCHED.length + ' to resolve') : chip('Reconciled')}</div><div class="panel-b"><p>Cashfree settlement for 27 Oct, fetched at 6:00 AM.</p><div class="meter" style="margin:12px 0 8px"><i style="transform:scaleX(${(483 / 486).toFixed(3)})"></i></div><p class="muted cap">483 of 486 payments matched, ${inr(412650)} in total.</p><a class="btn" href="#/finance/recon" style="margin-top:14px">Resolve unmatched</a></div></section></div>
+  <section class="panel"><div class="panel-h"><div><h2>Collections, last 14 days</h2><p>Weekends run highest. Today so far is the blue bar.</p></div></div><div class="panel-b">${revenueChart()}</div></section>
   <section class="panel" style="margin-top:20px"><div class="panel-h"><div><h2>Reception collections today</h2><p>Saved as paid at once. A second payment for the same charge is blocked.</p></div></div><div class="tscroll"><table class="t"><thead><tr><th>Staff</th><th class="r">Cash</th><th class="r">UPI</th><th class="r">Total</th><th>Cash count</th></tr></thead><tbody>${COLLECT.map(c => `<tr><td><div class="who">${avatar(c.by)}<b>${c.by}</b></div></td><td class="r num">${inr(c.cash)}</td><td class="r num">${inr(c.upi)}</td><td class="r num"><b>${inr(c.cash + c.upi)}</b></td><td>${chip('Pending', 'Shift open')}</td></tr>`).join('')}</tbody><tfoot><tr><td>Total</td><td class="r num">${inr(cash)}</td><td class="r num">${inr(upi)}</td><td class="r num">${inr(cash + upi)}</td><td></td></tr></tfoot></table></div></section>`;
 };
 function trialHTML() {
@@ -2453,7 +2528,7 @@ function pullAppBookings(live) {
   const added = [];
   list.forEach(x => {
     const old = BOOKINGS.find(b => b.ref === x.ref);
-    if (old) { if (live && old.status !== x.status) toast(`${esc(x.who)} cancelled ${x.ref} in the member app. The refund went to the wallet.`); Object.assign(old, x); }
+    if (old) { if (live && old.status !== x.status) toast(`${esc(x.who)} cancelled ${x.ref} in the member app${x.why ? ` (${esc(x.why.toLowerCase())})` : ''}. The refund went to the wallet.`); Object.assign(old, x); }
     else { BOOKINGS.unshift({...x, fresh: live}); added.push(x); }
   });
   if (!live) return;
