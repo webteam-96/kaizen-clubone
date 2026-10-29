@@ -1,0 +1,6 @@
+# Client source material and the rate-card photo (it shows a real member's personal details): kept out of the repo
+*.pdf
+*.docx
+IMG_*.jpeg
+# test output
+.webcheck/

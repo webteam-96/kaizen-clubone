@@ -1,0 +1,2205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23272729'/%3E%3Crect x='8' y='6' width='16' height='20' rx='1' fill='none' stroke='%23fff' stroke-width='1.6'/%3E%3Cpath d='M8 16h16M16 9v14' stroke='%23fff' stroke-width='1.6'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#f5f5f7">
+<meta name="description" content="Kaizen ClubOne member app prototype: entry QR, amenity booking, wallet and guest passes.">
+<title>ClubOne Member App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#0066cc;--focus:#0071e3;--blue-dark:#2997ff;
+  --ink:#1d1d1f;--ink2:#333333;--ink3:#7a7a7a;--on-dark2:#cccccc;
+  --page:#f5f5f7;--card:#ffffff;--pearl:#fafafc;--soft:#f0f0f0;--hair:#e0e0e0;--chip:#d2d2d7;
+  --tile1:#272729;--tile2:#2a2a2c;--tile3:#252527;
+  --ok:#087A55;--bad:#B42828;--wait:#9A5B00;
+  --ok-t:rgba(8,122,85,.1);--bad-t:rgba(180,40,40,.1);--wait-t:rgba(154,91,0,.1);--mute-t:rgba(0,0,0,.05);
+  --frost:rgba(245,245,247,.8);--line:rgba(0,0,0,.08);
+  --product:3px 5px 30px rgba(0,0,0,.22);
+  --eo:cubic-bezier(.2,.8,.2,1);
+  --display:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",system-ui,sans-serif;
+  --text:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif;
+  --top:50px;--bot:22px;--tabh:70px;
+  /* elevation by role: quiet surfaces sit on the page, objects lift off it, chrome floats above everything */
+  --flat:0 0 0 1px rgba(0,0,0,.035),0 1px 2px rgba(0,0,0,.035);
+  --lift:0 0 0 1px rgba(0,0,0,.03),0 2px 4px rgba(0,0,0,.03),0 14px 32px -10px rgba(0,0,0,.14);
+  --float:0 0 0 .5px rgba(0,0,0,.08),0 12px 40px rgba(0,0,0,.16);
+  --object:inset 0 1px 0 rgba(255,255,255,.1),inset 0 0 0 1px rgba(255,255,255,.06),0 24px 48px -16px rgba(0,0,0,.5),0 8px 16px -8px rgba(0,0,0,.25);
+  --graphite:#161618;--sec-t:rgba(0,102,204,.1);--track:rgba(118,118,128,.12);
+  /* springs: JS samples real spring curves into these; the fallbacks are plain ease-outs */
+  --sp-press:cubic-bezier(.2,.8,.2,1);--sp-press-d:.45s;
+  --sp-pill:cubic-bezier(.2,.8,.2,1);--sp-pill-d:.45s;
+  --sp-soft:cubic-bezier(.2,.8,.2,1);--sp-soft-d:.5s;
+  --sp-bouncy:cubic-bezier(.34,1.56,.64,1);--sp-bouncy-d:.6s;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{min-height:100vh;font-family:var(--text);font-size:17px;font-weight:400;line-height:1.44;letter-spacing:-.374px;color:var(--ink);background:var(--page);-webkit-font-smoothing:antialiased;font-feature-settings:"ss03"}
+button,input,textarea{font:inherit;color:inherit;letter-spacing:inherit}
+button{cursor:pointer;background:none;border:0;text-align:inherit}
+/* press: in fast, out on a spring, so every tap lands like a physical key */
+button,.acard,.rcard,.tab{transition:transform var(--sp-press-d) var(--sp-press)}
+:is(button,.acard,.rcard,.tab):active{transform:scale(.96);transition:transform .1s cubic-bezier(.3,0,.5,1)}
+:is(.bcard,.acard,.rcard,.me,.slot,.opt):active{transform:scale(.98)}
+a{color:inherit;text-decoration:none}
+svg{display:block;flex:none}
+ul{list-style:none}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+[tabindex="-1"]:focus{outline:none}
+[hidden]{display:none!important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.num{font-variant-numeric:tabular-nums}
+.cur{font-size:.8em;margin-right:.04em}
+.money{white-space:nowrap}
+
+/* Desktop: the phone rests on a parchment page */
+.stage{min-height:100vh;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:48px;padding:24px}
+.devwrap{position:relative;flex:none;width:calc(414px * var(--s,1));height:calc(868px * var(--s,1))}
+.device{position:absolute;left:0;top:0;width:414px;height:868px;padding:11px;border-radius:64px;background:#000;border:1px solid #3a3a3c;transform:scale(var(--s,1));transform-origin:0 0;box-shadow:inset 0 0 0 2px #1c1c1e,0 60px 90px -30px rgba(0,0,0,.45),0 30px 50px -30px rgba(0,0,0,.4)}
+/* black behind the screens: it shows when a sheet pushes the screen back */
+.app{position:relative;width:390px;height:844px;border-radius:52px;overflow:hidden;background:#000;isolation:isolate}
+.statusbar{position:absolute;left:0;right:0;top:0;height:50px;padding:17px 30px 0 44px;display:flex;justify-content:space-between;align-items:flex-start;font:600 16px/1 var(--text);letter-spacing:-.2px;z-index:70;pointer-events:none;color:var(--sb,var(--ink))}
+.statusbar .icons{display:flex;gap:6px;align-items:center;margin-top:1px}
+.statusbar svg{width:18px;height:12px}
+.island{position:absolute;top:11px;left:50%;width:124px;height:36px;margin-left:-62px;border-radius:9999px;background:#000;z-index:71;pointer-events:none}
+.homeind{position:absolute;bottom:8px;left:50%;width:136px;height:5px;margin-left:-68px;border-radius:9999px;background:var(--sb,var(--ink));z-index:72;pointer-events:none}
+.app[data-tone=dark],.app.sheet-on{--sb:#fff}
+@media (max-width:599px){
+  :root{--top:env(safe-area-inset-top,0px);--bot:env(safe-area-inset-bottom,0px)}
+  .stage{display:block;padding:0;min-height:0}
+  .devwrap{width:auto;height:auto}
+  .device{position:relative;width:100%;height:100vh;height:100dvh;padding:0;border:0;border-radius:0;background:none;transform:none}
+  .app{width:100%;height:100%;border-radius:0}
+  .statusbar,.island,.homeind,.demo{display:none}
+}
+
+/* Screens and frosted bars */
+.screens{position:absolute;inset:0;overflow:hidden;background:var(--page);transition:transform var(--sp-soft-d) var(--sp-soft),border-radius var(--sp-soft-d) var(--sp-soft)}
+/* a sheet pushes the screen back, the way a phone stacks cards */
+.app.sheet-on .screens{transform:translateY(calc(var(--top) * .28)) scale(.92);border-radius:22px}
+.screen{position:absolute;inset:0;overflow-x:hidden;overflow-y:auto;background:var(--page);padding:calc(var(--top) + 8px) 20px calc(var(--bot) + 32px);scrollbar-width:none;overscroll-behavior:contain}
+.screen::-webkit-scrollbar{display:none}
+.screen.has-tabs{padding-bottom:calc(var(--tabh) + var(--bot) + 32px)}
+.tf{position:sticky;top:calc(-9px - var(--top));z-index:20;box-sizing:content-box;height:var(--top);padding-top:1px;margin:calc(-9px - var(--top)) -20px 8px;background:var(--frost);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px)}
+/* the bar is clear at rest and frosts, with its hairline, once content slides under it */
+.bar{position:sticky;top:calc(-8px - var(--top));z-index:20;display:flex;align-items:center;gap:4px;min-height:calc(var(--top) + 52px);margin:calc(-8px - var(--top)) -20px 16px;padding:var(--top) 8px 0;background:rgba(245,245,247,0);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid transparent;transition:background-color .3s,border-color .3s}
+.bar.on{background:var(--frost);border-bottom-color:var(--line)}
+.bar h1{flex:1;font:600 17px/1.24 var(--text);letter-spacing:-.374px;text-align:center}
+.bar .sp{width:44px;flex:none}
+.ib{position:relative;width:44px;height:44px;display:grid;place-items:center;border-radius:9999px;color:var(--blue);flex:none}
+.ib svg{width:22px;height:22px}
+.ib.frost{background:rgba(255,255,255,.75);color:var(--ink);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);box-shadow:0 0 0 .5px rgba(0,0,0,.06),0 6px 16px rgba(0,0,0,.14)}
+.tf.clear{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
+.tf.clear.on{background:var(--frost);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px)}
+.title{font:700 34px/1.12 var(--display);letter-spacing:-.022em;margin:8px 0 12px}
+.title span{display:block;font:500 17px/1.44 var(--text);letter-spacing:-.374px;color:var(--ink2);margin-bottom:2px}
+.lede{color:#6e6e73;margin-bottom:24px;max-width:36ch}
+/* tab screens (Book, My bookings, Wallet, More): the heading and its intro line sit centred */
+.screen.has-tabs > h1.title{text-align:center}
+.screen.has-tabs > h1.title + .lede{margin-left:auto;margin-right:auto;text-align:center}
+h2.sec{display:flex;align-items:center;justify-content:space-between;gap:12px;font:650 22px/1.2 var(--display);letter-spacing:-.018em;margin:36px 0 14px}
+h2.sec button{font:400 17px/1.24 var(--text);letter-spacing:-.374px;color:var(--blue);min-height:44px;padding:0 4px}
+h2.sec .cap{font-weight:400}
+.link{display:inline-block;padding:8px 2px;margin:-8px 0;color:var(--blue)}
+.fine{font-size:14px;line-height:1.43;letter-spacing:-.224px;color:var(--ink2);text-align:center;margin-top:12px}
+.legal,.ver{font-size:12px;line-height:1.33;letter-spacing:-.12px;color:var(--ink3);text-align:center;margin-top:12px}
+.ver{margin-top:24px}
+.cap{display:block;font-size:14px;line-height:1.43;letter-spacing:-.224px;color:var(--ink2)}
+.progress{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:0 0 24px}
+.progress i{height:4px;border-radius:9999px;background:var(--track);overflow:hidden}
+.progress i.on::after{content:"";display:block;height:100%;border-radius:inherit;background:var(--ink);transform-origin:left}
+
+/* Buttons: Action Blue pills; every button presses to .95 */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:52px;padding:11px 22px;border-radius:9999px;font:600 17px/1.24 var(--text);letter-spacing:-.374px;text-align:center;transition:transform var(--sp-press-d) var(--sp-press),background-color .3s,color .3s,box-shadow .3s}
+.btn svg{width:20px;height:20px}
+.btn.pri{background:var(--blue);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 10px 22px -10px rgba(0,102,204,.7)}
+.btn.sec{background:var(--sec-t);color:var(--blue)}
+.btn.txt{color:var(--blue);min-height:44px;font-weight:500}
+.btn.sm{display:inline-flex;width:auto;min-height:44px;padding:11px 22px}
+.btn:disabled{background:#e4e4e9;color:#8e8e93;box-shadow:none;pointer-events:none}
+.stack{display:grid;gap:12px}
+.dock{position:sticky;bottom:calc(-32px - var(--bot));z-index:5;margin:24px -20px calc(-32px - var(--bot));padding:12px 20px calc(12px + var(--bot));background:rgba(245,245,247,.82);-webkit-backdrop-filter:saturate(180%) blur(24px);backdrop-filter:saturate(180%) blur(24px);border-top:1px solid var(--line)}
+.dock.split{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.dock.split .btn{width:auto;flex:none}
+.dk-t b{display:block;font:600 21px/1.19 var(--display);letter-spacing:-.2px}
+.dk-t small{display:block;font-size:14px;letter-spacing:-.224px;color:var(--ink2)}
+.spin{width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,.45);border-top-color:#fff;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Status: pill chips, colour only means status */
+.chip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px 0 10px;border-radius:9999px;font:600 14px/1 var(--text);letter-spacing:-.224px;white-space:nowrap;flex:none}
+.chip svg{width:14px;height:14px}
+.chip.ok{background:var(--ok-t);color:var(--ok)}
+.chip.bad{background:var(--bad-t);color:var(--bad)}
+.chip.wait{background:var(--wait-t);color:var(--wait)}
+.chip.info,.chip.mute{background:var(--mute-t);color:var(--ink2)}
+.dot{display:block;width:8px;height:8px;border-radius:50%;background:currentColor;flex:none}
+.dot.live{position:relative}
+.dot.live::after{content:"";position:absolute;inset:0;border-radius:50%;background:currentColor;animation:ping 1.8s cubic-bezier(0,0,.2,1) infinite}
+@keyframes ping{from{transform:scale(1);opacity:.55}to{transform:scale(2.8);opacity:0}}
+
+/* Photos: each sits on its amenity colour, so a missing file is a colour block. Tints are flat, never gradients */
+.pic{position:relative;display:block;overflow:hidden;border-radius:20px;background:var(--tile1);flex:none}
+.pic img{display:block;width:100%;height:100%;object-fit:cover;transition:opacity .6s ease}
+.pic img.wait{opacity:0}   /* photos still on their way fade in over their colour */
+.pic.tint::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,var(--tint,.35))}
+.zoomer{position:absolute;z-index:60;object-fit:cover;pointer-events:none}
+.pic img[src$="/clubhouse.jpg"]{object-position:center 35%}
+.pic img[src$="/snooker.jpg"]{object-position:center 30%}
+.pic img[src$="/tt.jpg"]{object-position:center 65%}
+.pic img[src$="/kids.jpg"]{object-position:65% center}
+.hero{position:relative;height:var(--hh,320px);margin:calc(-8px - var(--top)) -20px 0}
+.hero > .pic{position:absolute;inset:0;border-radius:0}
+.hero > .pic img{transform-origin:50% 100%}
+.hbar{position:absolute;left:12px;top:calc(var(--top) + 6px)}
+.lv{display:inline-flex;align-items:center;gap:6px;font-size:14px;line-height:1.43;letter-spacing:-.224px;color:var(--ink2)}
+.lv .dot{color:var(--ok)}
+.lv.busy .dot{color:var(--wait)}
+.lv.full .dot{color:var(--bad)}
+
+/* Home: the clubhouse photo, the pass resting on its lower edge */
+.hero.home{--hh:308px}
+.hero.home > .pic{--tint:.45}
+.hh-txt{position:absolute;left:20px;right:76px;bottom:100px}
+.hh-txt .title{margin:0;color:#fff;font-size:40px}
+.hh-txt .title span{color:rgba(255,255,255,.82);font-size:17px;letter-spacing:-.374px}
+.hh-bell{position:absolute;right:12px;top:calc(var(--top) + 6px)}
+.hh-bell svg{transform-origin:50% 12%}
+.dotb{position:absolute;top:9px;right:9px;width:10px;height:10px;border-radius:50%;background:var(--bad);border:2px solid #fff}
+/* the pass is an object: graphite with fine rings, leaning toward the pointer under a light that follows it */
+.pass{position:relative;overflow:hidden;border-radius:24px;background:var(--graphite) var(--rings,none) no-repeat right -400px top -400px/800px 800px;color:#fff;padding:24px;box-shadow:var(--object);transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .8s var(--sp-soft)}
+.pass::after,.balance::after{content:"";position:absolute;inset:0;z-index:0;border-radius:inherit;pointer-events:none;background:radial-gradient(340px circle at var(--mx,50%) var(--my,0%),rgba(255,255,255,.15),transparent 60%);opacity:var(--glow,0);transition:opacity .5s}
+.pass > *,.balance > *{position:relative;z-index:1}
+.hero.home + .pass{margin-top:-84px}
+.pass-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.brand{display:block;font:700 21px/1.19 var(--display);letter-spacing:-.02em}
+.brand small{display:block;margin-top:2px;font:400 14px/1.43 var(--text);letter-spacing:-.224px;color:rgba(255,255,255,.62)}
+.pass .chip{background:#fff}
+.pass-mid{display:grid;grid-template-columns:64px minmax(0,1fr);gap:16px;align-items:center;margin-top:22px}
+.pass-mid .av{box-shadow:0 0 0 2px rgba(255,255,255,.14)}
+.pass-name{display:block;font:700 27px/1.12 var(--display);letter-spacing:-.022em}
+.pass-meta{display:flex;gap:24px;margin-top:8px;font-size:13px;line-height:1.43;letter-spacing:-.1px;color:rgba(255,255,255,.62)}
+.pass-meta b{display:block;font:600 17px/1.24 var(--text);letter-spacing:-.374px;color:#fff}
+.pass .btn{margin-top:24px}
+.pass .btn.pri,.balance .btn.pri{background:#fff;color:var(--ink);box-shadow:0 8px 20px -8px rgba(0,0,0,.6)}
+.book-cta{margin-top:20px}
+.rail{display:grid;grid-auto-flow:column;grid-auto-columns:64%;gap:14px;overflow-x:auto;margin:0 -20px;padding:4px 20px 6px;scroll-snap-type:x mandatory;scroll-padding-inline:20px;overscroll-behavior-x:contain;scrollbar-width:none}
+.rail::-webkit-scrollbar{display:none}
+.rail li{min-width:0;scroll-snap-align:start}
+.rcard{display:block}
+.rcard .pic{aspect-ratio:4/3;box-shadow:0 10px 24px -14px rgba(0,0,0,.5)}
+.rc-t{display:flex;flex-direction:column;gap:2px;padding:10px 2px 0}
+.rc-t b{font:600 17px/1.24 var(--text);letter-spacing:-.374px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rc-n{font-size:14px;line-height:1.43;letter-spacing:-.224px;color:#6e6e73}
+.wcard{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-top:24px;padding:22px 22px 22px 24px;background:var(--card);border-radius:24px;box-shadow:var(--lift)}
+.wbal{display:block;margin-top:4px;font:700 38px/1.1 var(--display);letter-spacing:-.025em}
+.admit{display:block;padding:24px;margin-top:16px;background:var(--card);border-radius:24px;box-shadow:var(--lift)}
+.admit .chip{margin-bottom:12px}
+.ad-h{display:block;font:600 21px/1.19 var(--display);letter-spacing:-.2px}
+.ad-s{display:block;margin-top:4px;font-size:14px;line-height:1.43;letter-spacing:-.224px;color:var(--ink2)}
+.ad-s b{color:var(--ink)}
+.admit .btn{margin-top:16px}
+
+/* Utility cards and lists */
+.tickets{display:grid;gap:12px}
+.bcard{display:flex;align-items:center;gap:16px;width:100%;padding:14px 16px 14px 14px;background:var(--card);border-radius:22px;text-align:left;box-shadow:var(--lift)}
+.bcard .pic{width:68px;height:68px;border-radius:15px}
+.bc-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.bc-h{font:600 17px/1.24 var(--text);letter-spacing:-.374px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bc-s{font-size:14px;line-height:1.43;letter-spacing:-.224px;color:var(--ink2)}
+.bc-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px}
+.list{background:var(--card);border-radius:20px;overflow:hidden;box-shadow:var(--flat)}
+.row{display:flex;align-items:center;gap:16px;width:100%;min-height:56px;padding:12px 16px;text-align:left;border-bottom:1px solid #f0f0f3;background:var(--card);transition:background-color .35s}
+.row:last-child{border-bottom:0}
+button.row:active{transform:none;background:#ececf0;transition:background-color 0s}
+.row > svg{width:22px;height:22px;color:var(--ink2)}
+.row .grow{flex:1;min-width:0}
+.row b{display:block;font-weight:600}
+.row small{display:block;font-size:14px;line-height:1.43;letter-spacing:-.224px;color:var(--ink2)}
+.kv .row{justify-content:space-between}
+.kv .row > span:first-child{color:var(--ink2)}
+.kv .row b{text-align:right}
+.av{position:relative;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;overflow:hidden;background:var(--tile1);color:#fff;font:600 15px/1 var(--text);letter-spacing:0;flex:none}
+.av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.av.g{background:var(--chip);color:var(--ink)}
+.av.lg{width:56px;height:56px;font-size:19px}
+.av.xl{width:64px;height:64px;font-size:21px;background:#3a3a3c}
+.tog{display:inline-flex;align-items:center;gap:4px;min-height:40px;padding:0 16px;border-radius:9999px;background:var(--sec-t);color:var(--blue);font:600 14px/1 var(--text);letter-spacing:-.224px;flex:none;transition:transform var(--sp-press-d) var(--sp-press),background-color .3s,color .3s}
+.tog svg{width:15px;height:15px;stroke-width:2.6}
+.tog[aria-pressed=true]{background:var(--blue);color:#fff;padding-left:12px}
+.price{flex:none}
+
+/* Amenities: photo cards; the detail page is a photo with a sheet over its lower edge */
+/* one highlight per choice group, gliding to whatever was picked (JS places .pill under the pressed button) */
+.pills{position:relative}
+.pills > button{position:relative;z-index:1}
+.pill{position:absolute;left:0;top:0;z-index:0;border-radius:9999px;background:var(--blue);box-shadow:0 8px 18px -8px rgba(0,102,204,.75);pointer-events:none;transition:left var(--sp-pill-d) var(--sp-pill),top var(--sp-pill-d) var(--sp-pill),width var(--sp-pill-d) var(--sp-pill),height var(--sp-pill-d) var(--sp-pill)}
+.filters{display:flex;gap:2px;overflow-x:auto;margin:0 -20px 18px;padding:2px 20px;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.fchip{flex:none;min-height:40px;padding:0 16px;border-radius:9999px;font:500 15px/1 var(--text);letter-spacing:-.24px;color:var(--ink2);transition:transform var(--sp-press-d) var(--sp-press),color .3s}
+.fchip[aria-pressed=true]{background:var(--blue);color:#fff}
+.pilled > [aria-pressed=true]{background:transparent!important;box-shadow:none!important}
+.chips .fchip{background:var(--card);box-shadow:var(--flat);color:var(--ink)}
+.chips .fchip[aria-pressed=true]{background:var(--blue);color:#fff;box-shadow:0 8px 18px -8px rgba(0,102,204,.75)}
+.acards{display:grid;gap:30px}
+.acard{display:block}
+.acard .pic{aspect-ratio:16/9;border-radius:24px;box-shadow:0 14px 30px -18px rgba(0,0,0,.55)}
+.ac-t{display:flex;flex-direction:column;gap:2px;padding:12px 4px 0}
+.ac-t b{font:700 21px/1.19 var(--display);letter-spacing:-.018em}
+.ac-s{font-size:14px;line-height:1.43;letter-spacing:-.224px;color:#6e6e73}
+.ac-r{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:6px}
+.empty{text-align:center;padding:8px 0}
+.empty .pic{width:100%;aspect-ratio:16/9;margin-bottom:24px}
+.empty h2{font:600 21px/1.19 var(--display);letter-spacing:-.2px;margin-bottom:8px}
+.empty p{color:var(--ink2);margin:0 auto 24px;max-width:32ch}
+.sheetc{position:relative;margin:-30px -20px 0;padding:26px 20px 0;background:var(--page);border-radius:30px 30px 0 0}
+.sheetc > .title{margin-top:0}
+.sheetc > .lv{display:flex;margin:-6px 0 12px}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#ececf0;border-radius:20px;overflow:hidden;margin:8px 0;box-shadow:var(--flat)}
+.fact{background:var(--card);padding:16px 20px}
+.fact.w{grid-column:1/-1}
+.fact > span{display:block;font-size:13px;letter-spacing:-.1px;color:#6e6e73}
+.fact b{display:block;margin-top:2px;font:650 21px/1.19 var(--display);letter-spacing:-.018em}
+.flnote{display:flex;gap:8px;align-items:flex-start;font-size:14px;line-height:1.43;letter-spacing:-.224px;color:var(--ink2);margin:12px 4px 0}
+.flnote svg{width:18px;height:18px}
+.rules{background:var(--card);border-radius:20px;padding:4px 20px;box-shadow:var(--flat)}
+.rules li{padding:14px 0;border-bottom:1px solid #f0f0f3}
+.rules li:last-child{border-bottom:0}
+
+/* Booking flow */
+.sum{display:flex;align-items:center;gap:16px;padding:14px;background:var(--card);border-radius:22px;margin-bottom:18px;box-shadow:var(--flat)}
+.sum .pic{width:54px;height:54px;border-radius:14px}
+.sum b{display:block;font-weight:600}
+.sum small{display:block;font-size:14px;letter-spacing:-.224px;color:#6e6e73}
+.dates{display:flex;gap:6px;overflow-x:auto;margin:0 -20px 12px;padding:4px 20px 10px;scrollbar-width:none}
+.dates::-webkit-scrollbar{display:none}
+.date{flex:none;width:62px;height:80px;border-radius:9999px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;transition:transform var(--sp-press-d) var(--sp-press),color .3s}
+.date small{font-size:12px;font-weight:500;letter-spacing:-.12px;color:#6e6e73;transition:color .3s}
+.date b{font:650 22px/1 var(--display);letter-spacing:-.02em}
+.date[aria-pressed=true]{background:var(--blue);color:#fff}
+.date[aria-pressed=true] small{color:rgba(255,255,255,.85)}
+.slots{display:grid;gap:12px;margin-top:16px}
+.slot{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px 12px;width:100%;padding:16px 20px;border-radius:20px;background:var(--card);text-align:left;box-shadow:var(--flat);transition:transform var(--sp-press-d) var(--sp-press),box-shadow .25s}
+.slot .tm{font:650 21px/1.19 var(--display);letter-spacing:-.018em;transition:color .25s}
+.slot .sl{font-size:14px;letter-spacing:-.224px;color:var(--ink2)}
+.slot .sl.low{color:var(--wait);font-weight:600}
+.slot .sl.full{color:var(--bad);font-weight:600}
+.meter{grid-column:1/-1;height:4px;border-radius:9999px;background:var(--track);overflow:hidden}
+.meter i{display:block;height:100%;border-radius:inherit;background:#aeaeb2;transform-origin:left;transition:background-color .25s}
+.meter i.low{background:var(--wait)}
+.meter i.full{background:var(--bad)}
+.slot .fl{grid-column:1/-1;display:flex;align-items:center;gap:6px;font-size:14px;letter-spacing:-.224px;color:var(--ink2)}
+.slot .fl svg{width:16px;height:16px}
+.slot[aria-pressed=true]{box-shadow:0 0 0 2px var(--blue),0 14px 30px -16px rgba(0,102,204,.6)}
+.slot[aria-pressed=true] .tm{color:var(--blue)}
+.slot[aria-pressed=true] .meter i:not(.low):not(.full){background:var(--blue)}
+.slot:disabled{background:transparent;color:var(--ink3);box-shadow:inset 0 0 0 1px #e3e3e8}
+.line{display:flex;gap:16px;align-items:flex-start;padding:16px;border-bottom:1px solid var(--soft)}
+.line:last-child{border-bottom:0}
+.ln-t{flex:1;min-width:0}
+.ln-t b{display:block;font-weight:600}
+.ln-t small{display:block;font-size:14px;line-height:1.43;letter-spacing:-.224px;color:var(--ink2)}
+.ln-a{flex:none;font-weight:600}
+/* segmented control: a grey track with a white thumb that slides */
+.seg{display:inline-flex;gap:0;padding:3px;margin-top:12px;border-radius:9999px;background:var(--track)}
+.seg button{min-height:38px;padding:0 14px;border-radius:9999px;font:500 14px/1 var(--text);letter-spacing:-.224px;white-space:nowrap;color:var(--ink2);transition:transform var(--sp-press-d) var(--sp-press),color .3s}
+.seg button[aria-pressed=true],.seg .pill{background:#fff;color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.06),0 4px 10px rgba(0,0,0,.08)}
+.seg.wide{display:flex;width:100%;margin:0 0 18px}
+.seg.wide button{flex:1;padding:0 6px;text-align:center}
+.totals{display:grid;gap:12px;margin-top:16px;padding:20px;background:var(--card);border-radius:22px;box-shadow:var(--flat)}
+.tl{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.tl > span:first-child{color:var(--ink2)}
+.tl.big > span:first-child{color:var(--ink);font-weight:600}
+.tl.big .num{font:600 21px/1.19 var(--display);letter-spacing:-.2px}
+.note{display:flex;gap:12px;padding:16px;margin-top:16px;border-radius:18px;background:var(--mute-t);color:var(--ink2);font-size:14px;line-height:1.43;letter-spacing:-.224px;text-align:left}
+.note svg{width:20px;height:20px;flex:none}
+.note.warn{background:var(--wait-t);color:var(--wait)}
+.note.err{background:var(--bad-t);color:var(--bad)}
+.paying{min-height:calc(100% - 40px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding-bottom:40px}
+.paying .lede{margin:0 auto}
+.hg{position:relative;display:grid;place-items:center;width:88px;height:88px;border-radius:50%;background:var(--card);box-shadow:var(--lift);color:var(--ink);margin-bottom:28px}
+.hg::after{content:"";position:absolute;inset:-8px;border-radius:50%;border:2.5px solid transparent;border-top-color:var(--blue);border-right-color:rgba(0,102,204,.35);animation:spin 1.1s cubic-bezier(.5,.15,.5,.85) infinite}
+.hg svg{width:36px;height:36px;animation:turn 1.6s var(--eo) infinite}
+@keyframes turn{0%,40%{transform:rotate(0)}60%,100%{transform:rotate(180deg)}}
+
+/* Booking confirmed: the QR ticket is the product */
+.cf-head{position:relative;text-align:center;padding-top:8px}
+.cf-head .check{position:relative;z-index:1;width:60px;height:60px;margin:0 auto 14px;filter:drop-shadow(0 8px 14px rgba(8,122,85,.35))}
+.cf-head .lede{margin:0 auto 24px}
+.cf-fx{position:absolute;left:50%;top:38px;width:0;height:0;pointer-events:none}
+.cf-fx i{position:absolute;left:-4px;top:-6px;width:8px;height:12px;border-radius:2px}
+.cf-fx .ripple{left:-30px;top:-30px;width:60px;height:60px;border-radius:50%;border:2px solid var(--ok)}
+.slotbar{position:relative;z-index:2;height:14px;border-radius:9999px;background:var(--ink);box-shadow:inset 0 -3px 0 #000}
+.paper{overflow:hidden;margin:-7px -20px 0;padding:7px 32px 40px}
+.tk-big{position:relative;background:var(--card);border-radius:0 0 24px 24px;padding:24px;box-shadow:0 0 0 1px rgba(0,0,0,.03),0 24px 50px -24px rgba(0,0,0,.35),0 6px 14px -6px rgba(0,0,0,.08)}
+.tk-big.solo{border-radius:24px}
+.tb-top{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.tb-top .chip{margin-left:60px}   /* beside the title when it fits, under it (lined up with the text) when it doesn't */
+.tb-top .pic{width:48px;height:48px;border-radius:13px}
+.tk-band{height:150px;margin:-24px -24px 20px;border-radius:0}
+.tb-top .grow{flex:1 1 auto;min-width:0}
+.tb-top b{display:block;font-weight:600}
+.tb-top small{display:block;font-size:14px;letter-spacing:-.224px;color:#6e6e73}
+/* the tear line, with the two notches a paper ticket has */
+.perf{position:relative;height:0;margin:22px -24px;border-top:2px dashed #e3e3e8}
+.perf::before,.perf::after{content:"";position:absolute;top:-12px;width:22px;height:22px;border-radius:50%;background:var(--page)}
+.perf::before{left:-11px}
+.perf::after{right:-11px}
+.qrwrap{position:relative;width:208px;margin:0 auto;background:#fff}
+.qrwrap svg{width:100%;height:auto}
+.qrwrap.ring{border-radius:16px;padding:10px;box-shadow:0 0 0 1px #ececf0}
+.scanline{position:absolute;left:0;right:0;top:0;height:2px;background:var(--ink);opacity:0;pointer-events:none}
+.tb-meta{display:flex;justify-content:space-between;gap:12px;margin-top:20px;font-size:12px;letter-spacing:-.12px;color:var(--ink2)}
+.tb-meta b{display:block;font:600 17px/1.24 var(--text);letter-spacing:-.374px;color:var(--ink)}
+.tb-meta span:last-child{text-align:right}
+.gpass{margin-top:16px;padding:20px;background:var(--card);border-radius:24px;box-shadow:var(--lift)}
+.gp-top{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.gp-top .grow{flex:1;min-width:0}
+.gp-top b{display:block;font-weight:600}
+.gp-top small{display:block;font-size:14px;line-height:1.43;letter-spacing:-.224px;color:var(--ink2)}
+.gpass .note{margin-top:0}
+
+/* Wallet */
+.balance{position:relative;overflow:hidden;margin:8px 0 24px;padding:28px 24px 24px;border-radius:26px;background:var(--graphite) var(--rings,none) no-repeat left -400px bottom -400px/800px 800px;color:#fff;box-shadow:var(--object);transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .8s var(--sp-soft)}
+.balance .cap{color:rgba(255,255,255,.62)}
+.bal{display:flex;align-items:flex-end;margin:6px 0 8px;font:700 48px/1.1 var(--display);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.bal .cur{font-size:30px;margin:0 4px 5px 0;line-height:1}
+.od{display:inline-block;height:1.1em;overflow:hidden}
+.ods{display:block;transform:translateY(calc(var(--d) * -1.1em));transition:transform .4s var(--eo)}
+.ods span{display:block;height:1.1em;line-height:1.1em}
+.balance .sub{font-size:14px;line-height:1.43;letter-spacing:-.224px;color:rgba(255,255,255,.62);margin-bottom:22px;max-width:32ch}
+.txi{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;flex:none;background:#f0f0f3;color:var(--ink)}
+.txi svg{width:20px;height:20px}
+.txi.topup{background:var(--ok-t);color:var(--ok)}
+.tx-a{flex:none;font-weight:600}
+.tx-a.topup,.tx-a.refund{color:var(--ok)}
+.amt{display:flex;align-items:center;justify-content:center;gap:4px;margin:32px 0 20px;padding-bottom:12px;border-bottom:2px solid var(--hair)}
+.amt:focus-within{border-color:var(--focus)}
+.amt .cur{font:600 34px/1 var(--display)}
+.amt input{field-sizing:content;width:6ch;min-width:2ch;max-width:8ch;border:0;background:none;outline:none;font:600 56px/1.07 var(--display);letter-spacing:-.28px;font-variant-numeric:tabular-nums}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.cfh{display:flex;align-items:center;gap:12px;padding-bottom:16px;margin-bottom:8px;border-bottom:1px solid var(--soft)}
+.cfh .grow{flex:1;min-width:0}
+.cfh b{display:block;font-weight:600}
+.cfh small{display:block;font-size:12px;letter-spacing:-.12px;color:var(--ink2)}
+.cfh .num{font:600 21px/1.19 var(--display);letter-spacing:-.2px}
+.cfi{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--ok-t);color:var(--ok);flex:none}
+.cfi svg{width:22px;height:22px}
+.cfs{font:600 14px/1.29 var(--text);letter-spacing:-.224px;color:var(--ink2);margin:20px 0 8px}
+.upis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.upi{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:84px;padding:8px 4px;border-radius:16px;background:var(--pearl);border:2px solid #ececf0;font:500 12px/1.2 var(--text);letter-spacing:-.12px;color:var(--ink2);text-align:center;transition:transform var(--sp-press-d) var(--sp-press),border-color .25s,background-color .25s}
+.upi i{display:grid;place-items:center;width:32px;height:32px;border-radius:9px;background:var(--ink);color:#fff;font:600 15px/1 var(--text);font-style:normal}
+.cfm{border:2px solid #ececf0;border-radius:16px;background:var(--pearl);margin-bottom:8px;transition:border-color .25s,background-color .25s}
+.upi[aria-pressed=true],.cfm[aria-pressed=true]{border-color:var(--blue);background:#f2f7fd}
+.cfstate{text-align:center;padding:16px 0 8px}
+.cfstate .hg{margin:0 auto 16px}
+.cfstate p{color:var(--ink2);margin:0 auto 24px;max-width:30ch}
+.bigic{display:grid;place-items:center;width:72px;height:72px;border-radius:50%;margin:0 auto 16px;background:var(--page);color:var(--ink)}
+.bigic svg{width:32px;height:32px}
+.bigic.bad{background:var(--bad-t);color:var(--bad)}
+.bigic.ok{background:var(--ok-t);color:var(--ok)}
+
+/* Sheets and fields */
+.sheets{position:absolute;inset:0;z-index:80}
+.scrim{position:absolute;inset:0;background:rgba(0,0,0,.28)}
+/* the sheet floats inside the screen's rounded corners and can be dragged down to close */
+.sheet{position:absolute;left:8px;right:8px;bottom:8px;max-height:calc(100% - var(--top) - 24px);overflow-y:auto;padding:8px 22px calc(18px + var(--bot));background:var(--card);border-radius:34px 34px 44px 44px;box-shadow:0 -10px 40px rgba(0,0,0,.18);scrollbar-width:none;overscroll-behavior:contain;-webkit-user-select:none;user-select:none}
+.grab{position:relative;width:40px;height:5px;margin:0 auto 18px;border-radius:9999px;background:#d8d8de;touch-action:none;cursor:grab}
+.grab::before{content:"";position:absolute;left:-40px;right:-40px;top:-8px;bottom:-16px}   /* a bigger handle to catch the drag */
+.sheet h2{font:700 22px/1.2 var(--display);letter-spacing:-.018em;margin-bottom:8px}
+.sheet .sub{color:#6e6e73;margin-bottom:20px}
+.sheet .btn + .btn{margin-top:12px}
+.center{text-align:center}
+.field{display:block;margin-bottom:16px}
+.field > span{display:block;font:600 14px/1.29 var(--text);letter-spacing:-.224px;color:var(--ink2);margin-bottom:8px}
+.input{width:100%;height:52px;padding:0 16px;border-radius:14px;border:1px solid #d2d2d7;background:#fff;font:400 17px/1.2 var(--text);letter-spacing:-.374px;outline:none;transition:border-color .2s,box-shadow .25s}
+.input:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(0,102,204,.16)}
+.input.bad{border-color:var(--bad);box-shadow:0 0 0 4px rgba(180,40,40,.12)}
+textarea.input{height:120px;padding:14px 16px;resize:none;line-height:1.44}
+.field > .phone{display:flex;align-items:center;gap:8px;margin:0;font:inherit;letter-spacing:inherit;color:inherit}
+.cc{display:grid;place-items:center;height:52px;padding:0 16px;border-radius:14px;background:#ececf0;font-weight:500;flex:none}
+.ferr{display:flex;gap:6px;align-items:center;color:var(--bad);font-size:14px;letter-spacing:-.224px;margin:-4px 0 12px}
+.ferr svg{width:18px;height:18px}
+.checkl{display:flex;gap:12px;align-items:center;min-height:48px;margin-bottom:8px;cursor:pointer}
+.checkl input{width:22px;height:22px;accent-color:var(--blue);flex:none}
+.checkl small{display:block;font-size:14px;letter-spacing:-.224px;color:var(--ink2)}
+.opts{display:grid;gap:8px;margin-bottom:16px}
+.opt{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:14px 20px;border-radius:20px;background:var(--card);border:2px solid #ececf0;text-align:left;transition:transform var(--sp-press-d) var(--sp-press),border-color .25s,background-color .25s}
+.opt b{display:block;font-weight:600}
+.opt small{display:block;font-size:14px;letter-spacing:-.224px;color:var(--ink2)}
+.opt[aria-checked=true]{border-color:var(--blue);background:#f2f7fd}
+
+/* Sign in: the clubhouse photo above a sheet */
+.screen.auth{display:flex;flex-direction:column;padding:0}
+.auth-ph{position:relative;flex:0 0 var(--ph,42%);min-height:200px}
+.auth-ph > .pic{position:absolute;inset:0;border-radius:0}
+.auth-back{position:absolute;left:12px;top:calc(var(--top) + 6px)}
+.auth-wm{position:absolute;left:20px;bottom:50px;color:#fff;font:700 32px/1.1 var(--display);letter-spacing:-.025em}
+.auth-sheet{position:relative;flex:1 0 auto;display:flex;flex-direction:column;margin-top:-30px;padding:26px 20px calc(var(--bot) + 32px);background:var(--page);border-radius:30px 30px 0 0}
+.auth-sheet > .dock{margin-top:auto}
+.otp{position:relative;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:8px 0 16px}
+.otp input{width:100%;height:60px;padding:0;text-align:center;font:650 28px/1 var(--display);letter-spacing:0;border-radius:14px;border:1.5px solid #d2d2d7;background:#fff;outline:none;caret-color:var(--blue);font-variant-numeric:tabular-nums;transition:border-color .2s,background-color .2s,box-shadow .2s}
+.otp input:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(0,102,204,.16)}
+.otp input.on{border-color:var(--blue);background:#f0f6fd}
+.otp.bad input{border-color:var(--bad);background:#fff;animation:shake .38s}
+/* complete code: the boxes fly together into one pill, which turns into the success tick */
+.otp-pill{position:absolute;left:50%;top:50%;display:inline-flex;align-items:center;justify-content:center;gap:10px;height:58px;padding:0 24px;border-radius:999px;background:var(--blue);color:#fff;font:600 17px/1 var(--text);letter-spacing:-.374px;white-space:nowrap;transform:translate(-50%,-50%);overflow:hidden}
+.otp-pill.ok{width:58px;padding:0;background:#087A55}
+.otp-pill svg{width:30px;height:30px;flex:none}
+@keyframes shake{20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
+.resend{font-size:14px;letter-spacing:-.224px;color:var(--ink2);min-height:24px}
+.smsbar{display:flex;align-items:center;gap:12px;width:100%;margin-top:24px;padding:8px 16px;min-height:60px;border-radius:18px;background:var(--card);box-shadow:var(--lift);text-align:left;color:var(--ink2)}
+.smsbar small{display:block;font-size:12px;letter-spacing:-.12px}
+.smsbar b{margin-left:auto;font:600 21px/1 var(--display);letter-spacing:.06em;color:var(--ink);font-variant-numeric:tabular-nums}
+.smsbar svg{width:22px;height:22px;color:var(--ink)}
+/* Splash: the clubhouse at night, a slow push in, the name rising once */
+.screen.splash{padding:0;background:#000}
+.splash-hit{position:absolute;inset:0;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 32px;color:#fff;text-align:center}
+.splash-hit:active{transform:none}
+.splash-ph{position:absolute;inset:0;border-radius:0;--tint:.45}
+.splash-ph img{animation:kb 10s linear both}
+@keyframes kb{from{transform:scale(1)}to{transform:scale(1.08)}}
+/* the name arrives letter by letter, each one sharpening out of a blur */
+.wm{position:relative;display:block;font:700 54px/1.08 var(--display);letter-spacing:-.03em}
+.wm span{display:inline-block;animation:letter .9s calc(.25s + var(--i) * 60ms) cubic-bezier(.2,.8,.2,1) both}
+@keyframes letter{from{opacity:0;transform:translateY(.42em) scale(.94);filter:blur(12px)}to{opacity:1;transform:none;filter:blur(0)}}
+.splash .by{position:relative;display:block;max-width:26ch;margin-top:14px;font:400 17px/1.44 var(--text);letter-spacing:-.374px;color:rgba(255,255,255,.86);animation:rise .7s .8s var(--eo) both}
+.splash-club{position:absolute;left:0;right:0;bottom:calc(var(--bot) + 40px);font-size:14px;letter-spacing:-.224px;color:rgba(255,255,255,.7);animation:rise .7s 1s var(--eo) both}
+@keyframes rise{from{opacity:0;transform:translateY(10px);filter:blur(4px)}to{opacity:1;transform:none;filter:blur(0)}}
+
+/* Entry QR */
+.screen.qrscreen{background:var(--card)}
+.qrcard{border-radius:28px;background:var(--card);box-shadow:0 0 0 1px rgba(0,0,0,.04),0 30px 60px -24px rgba(0,0,0,.4),0 10px 20px -10px rgba(0,0,0,.12);overflow:hidden;margin-top:8px}
+.qc-top{position:relative;overflow:hidden;display:flex;align-items:center;gap:12px;padding:20px 24px;background:var(--graphite) var(--rings,none) no-repeat right -400px top -400px/800px 800px;color:#fff}
+.qc-top .grow{flex:1;min-width:0}
+.qc-top b{display:block;font:700 21px/1.19 var(--display);letter-spacing:-.018em}
+.qc-top small{display:block;font-size:14px;letter-spacing:-.224px;color:rgba(255,255,255,.62)}
+/* a glint crosses the name strip every few seconds: the pass is live, not a picture. It never crosses the code, so scanning is never affected */
+.qc-top::after{content:"";position:absolute;top:0;bottom:0;left:0;width:40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.2) 50%,transparent);transform:translateX(-120%) skewX(-12deg);animation:glint 4.8s 1.4s cubic-bezier(.4,0,.2,1) infinite;pointer-events:none}
+@keyframes glint{0%{transform:translateX(-120%) skewX(-12deg)}28%,100%{transform:translateX(330%) skewX(-12deg)}}
+.qc-code{padding:24px 40px 8px}
+.qc-code svg{width:100%;height:auto}
+.qc-valid{text-align:center;padding:4px 0 24px;color:var(--ink2);font-size:14px;letter-spacing:-.224px}
+.qc-valid b{color:var(--ink)}
+.qr-help{display:flex;gap:12px;margin-top:24px;color:var(--ink2);font-size:14px;line-height:1.43;letter-spacing:-.224px}
+.qr-help svg{width:22px;height:22px;color:var(--ink)}
+.bloom{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:10}
+
+/* Scanner result: full-bleed status tile */
+#overlay{position:absolute;inset:0;z-index:95;pointer-events:none}
+.scanov{position:absolute;inset:0;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 28px;text-align:center;color:#fff;background:var(--ok);pointer-events:auto}
+.scanov:active{transform:none}
+.scanov.bad{background:var(--bad)}
+.scanov.shot{background:rgba(29,29,31,.96)}
+.scanov.shot .h{font-size:34px}
+/* share sheet: app icons, the message as it arrives, and the guest's live pass page */
+.share-apps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;margin-top:20px}
+.sapp{display:flex;flex-direction:column;align-items:center;gap:7px;min-height:86px;padding:4px 0;border:0;background:none;font:400 12px/1.2 var(--text);letter-spacing:-.12px;color:var(--ink);text-align:center}
+.sapp svg{width:54px;height:54px;transition:transform .12s var(--eo)}
+.sapp:active svg{transform:scale(.92)}
+.shotnote{display:flex;gap:10px;align-items:flex-start;margin-top:16px;padding:12px 14px;border-radius:12px;background:var(--soft);font-size:14px;line-height:1.4;letter-spacing:-.15px;color:var(--ink)}
+.shotnote svg{flex:none;width:20px;height:20px;margin-top:1px}
+.chat{border:1px solid var(--hair);border-radius:16px;overflow:hidden;margin-bottom:16px}
+.chat-h{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f6f6f6;border-bottom:1px solid var(--hair)}
+.chat-h .av{width:36px;height:36px;font-size:13px}
+.chat-h b{display:block;font-size:15px;letter-spacing:-.2px}
+.chat-h small{display:block;font-size:12px;color:var(--ink2)}
+.chat-b{padding:14px 12px 16px;background:#efeae2}
+.chat.sms .chat-b{background:#fff}
+.bub{margin-left:auto;max-width:88%;padding:5px;border-radius:12px 12px 4px 12px;background:#d9fdd3;color:#111b21;font-size:14px;line-height:1.38;letter-spacing:-.1px}
+.chat.sms .bub{border-radius:18px 18px 4px 18px;background:#e9e9eb}
+.lp{display:block;overflow:hidden;border-radius:9px;background:rgba(0,0,0,.05)}
+.lp .pic{height:92px;border-radius:0}
+.lp b{display:block;padding:8px 10px 0;font-size:14px}
+.lp small{display:block;padding:2px 10px 9px;font-size:12px;color:#54656f}
+.bub p{padding:7px 5px 2px}
+.bub .meta{display:flex;justify-content:flex-end;align-items:center;gap:3px;padding:0 5px 1px;font-size:11px;color:#667781}
+.bub .meta svg{width:16px;height:11px}
+.mail{border:1px solid var(--hair);border-radius:16px;padding:16px;margin-bottom:16px;background:#fff;font-size:14px;line-height:1.45}
+.mail .from{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.mail .from small{display:block;color:var(--ink2);font-size:12px}
+.mail h3{font:600 17px/1.3 var(--text);margin-bottom:8px}
+.gview{border:1px solid var(--hair);border-radius:18px;overflow:hidden;margin-bottom:16px;background:#fff}
+.gv-url{display:flex;align-items:center;justify-content:center;gap:6px;padding:8px;background:#f2f2f7;font-size:12px;color:var(--ink2)}
+.gv-url svg{width:12px;height:12px}
+.gv-page{padding:18px 18px 20px;text-align:center}
+.gv-page .brand{font:600 15px/1.2 var(--display)}
+.gv-page .brand small{display:block;font-weight:400;font-size:12px;color:var(--ink2)}
+.gv-page h3{font:600 28px/1.15 var(--display);letter-spacing:-.3px;margin:14px 0 2px}
+.gv-page .qrwrap{width:172px;margin:16px auto 6px}
+.gv-count{font-size:13px;color:var(--ink2);font-variant-numeric:tabular-nums}
+.gv-facts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0;text-align:left}
+.gv-facts span{display:block;font-size:12px;color:var(--ink2)}
+.gv-facts b{display:block;margin-top:2px;font-size:15px}
+.gv-page .shotnote{text-align:left}
+.scanov .big{display:grid;place-items:center;width:72px;height:72px;border-radius:50%;border:2px solid #fff;margin-bottom:28px}
+.scanov .big svg{width:36px;height:36px}
+.scanov .h{display:block;font:600 44px/1.07 var(--display);letter-spacing:-.4px}
+.scanov .p{display:block;margin-top:16px;max-width:24ch;font:400 21px/1.3 var(--display);letter-spacing:-.2px}
+.scanov .k{display:block;margin-top:32px;font-size:14px;letter-spacing:-.224px}
+/* toasts grow out of the island at the top of the phone */
+.toast{position:absolute;left:11px;right:11px;top:11px;z-index:96;display:flex;align-items:center;gap:12px;min-height:58px;padding:12px 20px 12px 13px;border-radius:29px;background:#000;color:#fff;font-size:15px;line-height:1.35;letter-spacing:-.2px;box-shadow:0 14px 34px rgba(0,0,0,.28)}
+.toast .ti{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:#1f9d6a;flex:none}
+.toast.bad .ti{background:#d33a3a}
+.toast svg{width:18px;height:18px;stroke-width:2.6}
+
+/* Tab bar: a floating glass capsule; the highlight glides to the chosen tab */
+.tabbar{position:absolute;left:16px;right:16px;bottom:calc(var(--bot) + 6px);z-index:40;display:grid;grid-template-columns:repeat(5,1fr);height:64px;padding:6px;border-radius:9999px;background:rgba(250,250,252,.72);-webkit-backdrop-filter:saturate(180%) blur(24px);backdrop-filter:saturate(180%) blur(24px);box-shadow:inset 0 1px 0 rgba(255,255,255,.75),0 0 0 .5px rgba(0,0,0,.08),0 12px 34px rgba(0,0,0,.14)}
+.tab-pill{position:absolute;left:6px;top:6px;bottom:6px;width:calc((100% - 12px) / 5);border-radius:9999px;background:rgba(0,102,204,.1);transform:translateX(calc(var(--ti,0) * 100%));transition:transform var(--sp-pill-d) var(--sp-pill)}
+.tab{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:9999px;font:500 11px/1 var(--text);letter-spacing:-.06px;color:#6e6e73}
+.tab svg{width:24px;height:24px;transition:stroke-width .2s}
+.tab[aria-current=page]{color:var(--blue);font-weight:600}
+.tab[aria-current=page] svg{stroke-width:2.2}
+
+/* Refund steps, More, Help */
+.steps{margin-top:16px;padding:20px;background:var(--card);border-radius:22px;box-shadow:var(--flat)}
+.steps h3{font:600 17px/1.24 var(--text);letter-spacing:-.374px;margin-bottom:16px}
+.step{position:relative;display:flex;gap:12px;padding-bottom:16px}
+.step:last-child{padding-bottom:0}
+.step i{position:relative;z-index:1;display:grid;place-items:center;width:22px;height:22px;border-radius:50%;border:2px solid var(--chip);background:#fff;color:#fff;flex:none}
+.step i svg{width:13px;height:13px}
+.step.done i{background:var(--ok);border-color:var(--ok)}
+.step.now i{border-color:var(--wait)}
+.step:not(:last-child)::before{content:"";position:absolute;left:10px;top:22px;bottom:0;width:2px;background:var(--chip)}
+.step.done:not(:last-child)::before{background:var(--ok)}
+.step b{display:block;font-weight:600}
+.step small{display:block;font-size:14px;letter-spacing:-.224px;color:var(--ink2)}
+.me{display:flex;align-items:center;gap:16px;width:100%;padding:18px 20px;margin-bottom:24px;border-radius:24px;background:var(--card);text-align:left;box-shadow:var(--lift)}
+.me .grow{flex:1;min-width:0}
+.me b{display:block;font:600 21px/1.19 var(--display);letter-spacing:-.2px}
+.me small{display:block;font-size:14px;letter-spacing:-.224px;color:var(--ink2)}
+.me > svg{width:20px;height:20px;color:var(--ink3)}
+.nt{align-items:flex-start}
+.nt .txi{margin-top:2px}
+.nt > svg:last-child{width:18px;height:18px;color:#c7c7cc;align-self:center}
+.nd-head{text-align:center;padding-top:8px}
+.nd-head .lede{margin:0 auto 24px}
+.nd-ic{width:72px;height:72px;margin:0 auto 16px}
+.nd-ic svg{width:32px;height:32px}
+.ud{width:10px;height:10px;border-radius:50%;background:var(--ink);margin-top:8px;flex:none}
+details.faq{border-bottom:1px solid var(--soft)}
+details.faq:last-child{border-bottom:0}
+details.faq summary{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px;padding:0 16px;font-weight:600;cursor:pointer;list-style:none}
+details.faq summary::-webkit-details-marker{display:none}
+details.faq summary svg{width:18px;height:18px;color:var(--ink3);transition:transform .2s var(--eo)}
+details.faq[open] summary svg{transform:rotate(90deg)}
+details.faq p{padding:0 16px 16px;color:var(--ink2)}
+@supports selector(::details-content){   /* answers slide open instead of snapping */
+  details.faq{interpolate-size:allow-keywords}
+  details.faq::details-content{block-size:0;overflow:hidden;transition:block-size .45s cubic-bezier(.2,.8,.2,1),content-visibility .45s allow-discrete}
+  details.faq[open]::details-content{block-size:auto}
+}
+.visit{margin:0 0 24px}
+.visit .pic{aspect-ratio:3/2;margin-bottom:12px}
+.visit figcaption{font-size:14px;line-height:1.43;letter-spacing:-.224px;color:var(--ink2)}
+
+/* Demo controls: white card, dark utility buttons */
+.demo{width:300px;flex:none;align-self:center;padding:24px;border-radius:24px;background:var(--card);box-shadow:var(--lift)}
+.demo h2{font:600 21px/1.19 var(--display);letter-spacing:-.2px}
+.demo > p,.demo-in > p{font-size:14px;line-height:1.43;letter-spacing:-.224px;color:var(--ink2);margin-top:8px}
+.demo h3,.demo-in h3{font:600 14px/1.29 var(--text);letter-spacing:-.224px;color:var(--ink2);margin:24px 0 8px}
+.dbtn{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:44px;padding:8px 15px;margin-bottom:8px;border-radius:8px;background:var(--ink);color:#fff;font:400 14px/1.29 var(--text);letter-spacing:-.224px;text-align:left;transition:transform .12s var(--eo)}
+.dbtn svg{width:18px;height:18px}
+.dtog{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:52px;padding:4px 0;border-bottom:1px solid var(--soft);font:400 14px/1.29 var(--text);letter-spacing:-.224px;text-align:left}
+.dtog:active{transform:none}
+.sw{position:relative;width:51px;height:31px;border-radius:9999px;background:#e3e3e8;flex:none;transition:background .25s}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:9999px;background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.15),0 1px 1px rgba(0,0,0,.08);transition:transform var(--sp-pill-d) var(--sp-pill),width var(--sp-pill-d) var(--sp-pill)}
+.dtog[aria-pressed=true] .sw{background:var(--blue)}
+.dtog[aria-pressed=true] .sw::after{transform:translateX(20px)}
+.dtog:active .sw::after{width:33px}   /* the knob stretches under the finger */
+.dtog[aria-pressed=true]:active .sw::after{transform:translateX(14px)}
+.vstat{display:flex;align-items:center;gap:8px;font:600 14px/1.29 var(--text);letter-spacing:-.224px}
+.vstat .dot{color:var(--ink3)}
+.vstat .dot.in{color:var(--ok)}
+.demo-in{padding-bottom:8px}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-delay:0ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .splash-ph img{animation:none}
+  .dot.live{animation:none}
+}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="devwrap">
+    <div class="device">
+      <div class="app" id="app" data-tone="light">
+        <div class="statusbar" aria-hidden="true"><span class="num">5:48</span><span class="icons" id="sbicons"></span></div>
+        <div class="island" aria-hidden="true"></div>
+        <main class="screens" id="screens"><nav class="tabbar" id="tabbar" aria-label="Main" hidden></nav></main>
+        <div class="sheets" id="sheets" hidden></div>
+        <div id="overlay"></div>
+        <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+        <div class="homeind" aria-hidden="true"></div>
+      </div>
+    </div>
+  </div>
+  <aside class="demo" id="demo" aria-label="Demo controls"></aside>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+'use strict';
+/* ---------- Basics ---------- */
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const EO = 'cubic-bezier(.2,.8,.2,1)', ES = 'cubic-bezier(.34,1.56,.64,1)';
+/* Springs: a damped spring (stiffness k, damping c, mass 1) sampled into a CSS linear() easing,
+   so CSS transitions and Web Animations share one physical feel. Older engines get a plain ease-out. */
+const LIN = CSS.supports('transition-timing-function', 'linear(0, 1)');
+function spring(k, c) {
+  const w = Math.sqrt(k), z = c / (2 * w), wd = w * Math.sqrt(Math.max(1e-6, 1 - z * z));
+  const x = t => z < 1 ? 1 - Math.exp(-z * w * t) * (Math.cos(wd * t) + z * w / wd * Math.sin(wd * t)) : 1 - Math.exp(-w * t) * (1 + w * t);
+  let T = 0;
+  for (let t = 0; t < 3; t += 1 / 120) if (Math.abs(1 - x(t)) > .002) T = t;
+  T += 1 / 120;
+  return LIN ? { e: `linear(${Array.from({ length: 61 }, (_, i) => +x(T * i / 60).toFixed(4)).join(',')})`, d: Math.round(T * 1000) } : { e: EO, d: Math.min(500, Math.round(T * 1000)) };
+}
+const SP = { press: spring(520, 24), pill: spring(380, 30), soft: spring(240, 31), sheet: spring(300, 30), bouncy: spring(420, 15) };
+Object.entries(SP).forEach(([k, v]) => { document.documentElement.style.setProperty('--sp-' + k, v.e); document.documentElement.style.setProperty('--sp-' + k + '-d', v.d + 'ms'); });
+const buzz = p => { if (navigator.vibrate && navigator.userActivation && navigator.userActivation.hasBeenActive) navigator.vibrate(p); };
+/* fine rings for the graphite cards: one image, drawn once */
+document.documentElement.style.setProperty('--rings', `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='-420 -420 840 840'><g fill='none' stroke='#fff' stroke-opacity='.075'>${Array.from({ length: 24 }, (_, i) => `<circle r='${30 + i * 16}'/>`).join('')}</g></svg>`)}")`);
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const inr = n => Math.round(n).toLocaleString('en-IN');
+const rs = n => `<span class="money"><span class="cur">₹</span>${inr(n)}</span>`;  // one inline unit, so flex gaps never split ₹ from the digits
+const hash = s => { let x = 2166136261; for (let i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = Math.imul(x, 16777619); } return x >>> 0; };
+const initials = n => n.split(' ').map(w => w[0]).slice(0, 2).join('');
+const ppl = n => n === 1 ? '1 person' : `${n} people`;
+const isGuest = p => p.t === 'guest' || p.t === 'coach';
+
+/* ---------- Clock and dates (demo clock is fixed at Wed 28 Oct 2026, 5:48 PM) ---------- */
+const TODAY = '2026-10-28', NOW = 17.8, CLOCK = '5:48 PM', STAMP = '28 Oct, 5:48 PM';
+const WD = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MO = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const D = s => new Date(s + 'T00:00:00Z');
+const addDays = (s, n) => new Date(D(s).getTime() + n * 864e5).toISOString().slice(0, 10);
+const fmtDay = s => { const d = D(s); return `${WD[d.getUTCDay()]} ${d.getUTCDate()} ${MO[d.getUTCMonth()]}`; };
+const fmtLong = s => { const d = D(s); return `${d.getUTCDate()} ${MO[d.getUTCMonth()]} ${d.getUTCFullYear()}`; };
+const dayWord = s => s === TODAY ? 'Today' : s === addDays(TODAY, 1) ? 'Tomorrow' : fmtDay(s);
+const hm = h => { let H = Math.floor(h), m = Math.round((h - H) * 60); if (m === 60) { H++; m = 0; } return `${(H + 11) % 12 + 1}:${String(m).padStart(2, '0')} ${H >= 12 && H < 24 ? 'PM' : 'AM'}`; };
+const span = b => { const a = hm(b.h), z = hm(b.end); return a.slice(-2) === z.slice(-2) ? `${a.slice(0, -3)} to ${z}` : `${a} to ${z}`; };
+const hoursUntil = b => (D(b.date) - D(TODAY)) / 36e5 + b.h - NOW;
+function addMonths(iso, m) {
+  const d = D(iso), y = d.getUTCFullYear(), mo = d.getUTCMonth(), day = d.getUTCDate();
+  const isLast = day === new Date(Date.UTC(y, mo + 1, 0)).getUTCDate();
+  const last = new Date(Date.UTC(y, mo + m + 1, 0)).getUTCDate();
+  return new Date(Date.UTC(y, mo + m, isLast ? last : Math.min(day, last))).toISOString().slice(0, 10);
+}
+
+/* ---------- Icons ---------- */
+const P = {
+  home: '<path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9v11h13V9"/><path d="M10 20v-5.5h4V20"/>',
+  ticket: '<path d="M3.5 7.5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2V10a2 2 0 0 0 0 4v2.5a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2V14a2 2 0 0 0 0-4z"/><path d="M14.5 6v2.5M14.5 11v2M14.5 15.5V18"/>',
+  wallet: '<path d="M4 7.5V18a2 2 0 0 0 2 2h14V9H6a2 2 0 0 1-2-2 2 2 0 0 1 2-2h11.5v4"/><circle cx="16" cy="14.5" r="1.3"/>',
+  more: '<rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/>',
+  back: '<path d="M15 5l-7 7 7 7"/>',
+  close: '<path d="M6 6l12 12M18 6 6 18"/>',
+  chev: '<path d="M9.5 5.5 16 12l-6.5 6.5"/>',
+  qr: '<rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2.5v2.5H14zM17.5 17.5H20V20h-2.5zM14 19.5h1.5M19.5 14v1.5"/>',
+  bell: '<path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2.1 2.1 0 0 0 4 0"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  xc: '<circle cx="12" cy="12" r="8.5"/><path d="M9 9l6 6M15 9l-6 6"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c1.4-3.6 4.2-5.5 7.5-5.5s6.1 1.9 7.5 5.5"/>',
+  userplus: '<circle cx="10" cy="8" r="4"/><path d="M2.5 20.5c1.4-3.6 4.2-5.5 7.5-5.5 1.5 0 2.9.4 4.1 1.1"/><path d="M18.5 13.5v6M15.5 16.5h6"/>',
+  share: '<path d="M12 15V3.5M7.5 8 12 3.5 16.5 8"/><path d="M5 12.5V19a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6.5"/>',
+  noshot: '<path d="M3 3l18 18"/><path d="M9.5 5.5h5l1.6 2.2h2.4A1.5 1.5 0 0 1 20 9.2v8.3M16.8 19.5H4.5A1.5 1.5 0 0 1 3 18V9.2a1.5 1.5 0 0 1 1.5-1.5H7"/><path d="M14.3 14.3a3.2 3.2 0 0 1-4.6-4.6"/>',
+  link: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 1 0-5.7-5.7l-1.1 1.1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 1 0 5.7 5.7l1.1-1.1"/>',
+  cal: '<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+  clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+  card: '<rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19M6.5 15h4"/>',
+  bank: '<path d="M3 9.5 12 4l9 5.5"/><path d="M5.5 10.5v7M10 10.5v7M14 10.5v7M18.5 10.5v7M3.5 20h17"/>',
+  finger: '<path d="M12 11.5v3c0 2.1-.6 4-1.7 5.6"/><path d="M8.6 9.8a3.5 3.5 0 0 1 6.9.7v3c0 2.5-.6 4.8-1.8 6.7"/><path d="M5.6 13V10.5a6.4 6.4 0 0 1 11.8-3.4"/><path d="M18.3 10.3c.1.5.2 1 .2 1.5v1.7c0 2.1-.4 4.1-1.1 5.9"/><path d="M5.6 16c0 1.4-.3 2.7-.8 3.8"/>',
+  face: '<path d="M4 8.5v-2A2.5 2.5 0 0 1 6.5 4h2M15.5 4h2A2.5 2.5 0 0 1 20 6.5v2M20 15.5v2a2.5 2.5 0 0 1-2.5 2.5h-2M8.5 20h-2A2.5 2.5 0 0 1 4 17.5v-2"/><path d="M9 9.5v1.2M15 9.5v1.2M12.2 9.5v3.6h-1"/><path d="M9.5 16c1.5 1 3.5 1 5 0"/>',
+  lock: '<rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/>',
+  help: '<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.1-2.4 3.7"/><path d="M12 17h.01"/>',
+  logout: '<path d="M14 4h3.5A2.5 2.5 0 0 1 20 6.5v11a2.5 2.5 0 0 1-2.5 2.5H14"/><path d="M10 16l-4-4 4-4M6 12h10"/>',
+  alert: '<path d="M12 4 21 19.5H3z"/><path d="M12 10v4M12 16.8h.01"/>',
+  info: '<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 8h.01"/>',
+  down: '<path d="M17 7 7 17M7 9.5V17h7.5"/>',
+  up: '<path d="M7 17 17 7M9.5 7H17v7.5"/>',
+  refund: '<path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.5v4h4"/>',
+  bulb: '<path d="M9.5 18h5M10.5 21h3"/><path d="M12 3a6 6 0 0 0-3.4 10.9c.6.4.9 1 .9 1.7v.4h5v-.4c0-.7.3-1.3.9-1.7A6 6 0 0 0 12 3z"/>',
+  phone: '<path d="M6 3.5h3l1.5 4.5-2 1.3a10.5 10.5 0 0 0 6.2 6.2l1.3-2 4.5 1.5v3a2 2 0 0 1-2 2A16.5 16.5 0 0 1 4 5.5a2 2 0 0 1 2-2z"/>',
+  shield: '<path d="M12 3 5 6v5.5c0 4.4 2.9 7.7 7 9.5 4.1-1.8 7-5.1 7-9.5V6z"/><path d="M9 12l2.2 2.2L15.5 10"/>',
+  door: '<path d="M13.5 3.5H19v17h-5.5"/><path d="M3.5 12h11M11 8l4 4-4 4"/>',
+  exit: '<path d="M10.5 3.5H5v17h5.5"/><path d="M9.5 12h11M17 8l4 4-4 4"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/>',
+  hour: '<path d="M6.5 3h11M6.5 21h11"/><path d="M7.5 3c0 4 2 6 4.5 9-2.5 3-4.5 5-4.5 9M16.5 3c0 4-2 6-4.5 9 2.5 3 4.5 5 4.5 9"/>',
+  sliders: '<path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/>',
+  msg: '<path d="M4 5.5h16v11H9l-5 4z"/>',
+  minus: '<circle cx="12" cy="12" r="8.5"/><path d="M8.5 12h7"/>',
+  receipt: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/>',
+};
+const ic = (n, c = '') => `<svg${c ? ` class="${c}"` : ''} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]}</svg>`;
+const SB = '<svg viewBox="0 0 18 12" aria-hidden="true"><rect y="8" width="3" height="4" rx="1" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx="1" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx="1" fill="currentColor"/><rect x="15" width="3" height="12" rx="1" fill="currentColor"/></svg><svg viewBox="0 0 16 12" aria-hidden="true"><path d="M8 11.5 5.6 9a3.4 3.4 0 0 1 4.8 0z" fill="currentColor"/><path d="M3.3 6.8a6.6 6.6 0 0 1 9.4 0M1 4.5a9.9 9.9 0 0 1 14 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><svg viewBox="0 0 27 12" style="width:27px" aria-hidden="true"><rect x=".5" y=".5" width="23" height="11" rx="3" fill="none" stroke="currentColor" opacity=".45"/><rect x="2" y="2" width="17" height="8" rx="1.8" fill="currentColor"/><path d="M25 4v4a2 2 0 0 0 0-4z" fill="currentColor" opacity=".45"/></svg>';
+
+/* ---------- Photos: ../assets/img, each on its amenity colour so a missing file degrades to a colour block ---------- */
+const IMG = '../assets/img/';
+const pic = (src, hue, cls = '', eager = false, w = 1200, h = 800) => `<span class="pic${cls ? ' ' + cls : ''}" style="background-color:${hue}"><img src="${IMG}${src}" alt="" width="${w}" height="${h}" decoding="async"${eager ? '' : ' loading="lazy"'}></span>`;
+const amPic = (a, cls, eager) => pic(a.id + '.jpg', a.hue, cls, eager);
+const club = (cls, eager) => pic('clubhouse.jpg', '#1d2733', cls, eager, 1920, 1280);
+const FACE = { 'Rahul Sharma': 'm1', 'Priya Sharma': 'f1' };
+const av = (n, cls = '') => `<span class="av${cls}">${initials(n)}${FACE[n] ? `<img src="${IMG}people/${FACE[n]}.jpg" alt="" width="400" height="400" decoding="async">` : ''}</span>`;
+addEventListener('error', e => { if (e.target.tagName === 'IMG') e.target.style.visibility = 'hidden'; }, true);
+
+/* ---------- QR codes (real codes via qrcode-generator; deterministic stand-in offline) ---------- */
+function fakeQR(text, n) {
+  let x = hash(text) || 1;
+  const rnd = () => (x = (Math.imul(x, 1664525) + 1013904223) >>> 0) / 4294967296;
+  const g = Array.from({ length: n }, () => Array.from({ length: n }, () => rnd() > .5));
+  const finder = (r0, c0) => {
+    for (let r = -1; r <= 7; r++) for (let c = -1; c <= 7; c++) {
+      const R = r0 + r, C = c0 + c;
+      if (R < 0 || C < 0 || R >= n || C >= n) continue;
+      g[R][C] = r >= 0 && r <= 6 && c >= 0 && c <= 6 && (r === 0 || r === 6 || c === 0 || c === 6 || (r >= 2 && r <= 4 && c >= 2 && c <= 4));
+    }
+  };
+  finder(0, 0); finder(0, n - 7); finder(n - 7, 0);
+  return (r, c) => g[r][c];
+}
+function qrSVG(text, label = 'QR code') {
+  let n = 0, dark;
+  try { if (window.qrcode) { const q = qrcode(0, 'M'); q.addData(text); q.make(); n = q.getModuleCount(); dark = (r, c) => q.isDark(r, c); } } catch (e) { n = 0; }
+  if (!n) { n = 29; dark = fakeQR(text, n); }
+  let d = '';
+  for (let r = 0; r < n; r++) {
+    let c = 0;
+    while (c < n) {
+      if (dark(r, c)) { const s = c; while (c < n && dark(r, c)) c++; d += `M${s} ${r}h${c - s}v1h${s - c}z`; } else c++;
+    }
+  }
+  return `<svg class="qr" viewBox="-2 -2 ${n + 4} ${n + 4}" shape-rendering="crispEdges" role="img" aria-label="${label}"><rect x="-2" y="-2" width="${n + 4}" height="${n + 4}" fill="#fff"/><path d="${d}" fill="#1d1d1f"/></svg>`;
+}
+const sig = s => hash(s + ':clubone').toString(36);
+
+/* ---------- Club data (rate card from the club's current system; everything else illustrative) ---------- */
+const AM = [
+  { id: 'pool', name: 'Swimming pool', short: 'Main pool, 6 lanes', cat: 'pool', hue: '#0E8FB8', m: 5, g: 150, cap: 40, open: 6, close: 21, len: 1, desc: 'Six-lane main pool with a shallow end. A lifeguard is on duty during every slot.', rules: ['Shower before you enter the pool', 'Children under 12 swim with an adult', 'Swim caps are required in the main pool'] },
+  { id: 'kids', name: 'Kids pool', short: 'Splash pool for under 10s', cat: 'pool', hue: '#1597BD', m: 5, g: null, cap: 15, open: 7, close: 20, len: 1, desc: 'A shallow pool for children up to 10, with an adult in the water.', rules: ['An adult stays in the water with each child', 'Swim nappies for toddlers'] },
+  { id: 'tennis', name: 'Lawn tennis', short: '2 floodlit hard courts', cat: 'sports', hue: '#2E5E9E', m: 50, g: 200, c: 100, fl: { m: 150, g: 350, c: 150, from: 18 }, cap: 4, open: 6, close: 22, len: 1, desc: 'Two hard courts with flood lights for evening play.', rules: ['Non-marking tennis shoes only', 'Coaches enter as guests with a guest coach pass', 'Flood-light rates apply from 6:00 PM'] },
+  { id: 'badminton', name: 'Badminton', short: '3 indoor courts', cat: 'sports', hue: '#1F7A55', m: 20, g: 150, c: 100, cap: 4, open: 6, close: 22, len: 1, desc: 'Three wooden-floor courts with tournament lighting.', rules: ['Non-marking shoes only', 'Bring your own racquet and shuttles'] },
+  { id: 'squash', name: 'Squash', short: '2 glass-back courts', cat: 'sports', hue: '#B9773D', m: 15, g: 100, c: 50, cap: 2, open: 6, close: 22, len: 1, desc: 'Two glass-back courts. Eye protection is recommended.', rules: ['Non-marking shoes only', 'Eye protection for under 18s'] },
+  { id: 'tt', name: 'Table tennis', short: '4 tables', cat: 'sports', hue: '#23408E', m: 30, g: 100, cap: 4, open: 6, close: 22, len: 1, desc: 'Four competition tables in the games room.', rules: ['Bats and balls at the games room desk'] },
+  { id: 'snooker', name: 'Snooker', short: 'Full-size table', cat: 'sports', hue: '#17603F', m: 50, g: 120, cap: 4, open: 10, close: 22, len: 1, desc: 'A full-size snooker table in the games room.', rules: ['Members aged 16 and over', 'Cues at the games room desk'], minAge: 16 },
+  { id: 'pooltable', name: 'Pool table', short: '2 tables', cat: 'sports', hue: '#1E6B4A', m: 50, g: 120, cap: 4, open: 10, close: 22, len: 1, desc: 'Two pool tables in the games room.', rules: ['Cues at the games room desk'] },
+  { id: 'gym', name: 'Gymnasium', short: 'Free weights and machines', cat: 'fitness', hue: '#2B3445', m: 2, g: 100, cap: 25, open: 6, close: 22, len: 1, desc: 'Free weights, racks and machines. A trainer is on the floor from 6:00 to 10:00 AM and 5:00 to 9:00 PM.', rules: ['Members aged 16 and over', 'Carry a towel and wipe down equipment'], minAge: 16 },
+  { id: 'cardio', name: 'Cardio gym', short: 'Treadmills, bikes, rowers', cat: 'fitness', hue: '#3A4458', m: 0, g: null, cap: 20, open: 6, close: 22, len: 1, desc: 'Treadmills, bikes and rowers. Free for members.', rules: ['Members aged 16 and over', '30 minutes per machine at busy times'], minAge: 16 },
+  { id: 'steam', name: 'Steam room', short: 'Up to 6 at a time', cat: 'fitness', hue: '#5E7F9C', m: 20, g: 100, cap: 6, open: 7, close: 21, len: 1, desc: 'Steam room beside the pool changing rooms.', rules: ['Members aged 18 and over', 'Shower before entering', '20 minutes at a time'], minAge: 18 },
+  { id: 'banquet', name: 'Banquet hall', short: 'Seats 150', cat: 'halls', hue: '#5B3B7A', m: 5500, per: true, cap: 1, open: 10, close: 22, len: 4, desc: 'For parties and functions. One price per booking.', rules: ['Decorations must be removed by the end of the booking', 'Outside caterers register at the office'] },
+  { id: 'studio', name: 'Studio hall', short: 'Yoga, dance, meetings', cat: 'halls', hue: '#9A6B3F', m: 400, per: true, cap: 1, open: 6, close: 22, len: 2, desc: 'Mirrored studio with a sprung floor. One price per booking.', rules: ['Bare feet or studio shoes only'] },
+];
+// People inside each amenity now: the same numbers the admin live floor shows at 5:48 PM.
+const LIVE = { pool: [32, 40], kids: [9, 15], tennis: [6, 8], badminton: [10, 12], squash: [2, 4], tt: [4, 8], snooker: [4, 4], pooltable: [2, 4], gym: [21, 25], cardio: [11, 20], steam: [3, 6], studio: [14, 20] };
+function liveHTML(a) {
+  const l = LIVE[a.id];
+  if (!l) return '';
+  const full = l[0] >= l[1];
+  return `<span class="lv${full ? ' full' : l[0] / l[1] >= .85 ? ' busy' : ''}"><i class="dot"></i>${full ? 'Full now' : `${l[0]} of ${l[1]} inside`}</span>`;
+}
+const nextFree = a => { const s = slotsFor(a, TODAY).find(x => x.left > 0); return s ? `Next free ${hm(s.h)}` : 'No slots left today'; };
+const FILTERS = [['all', 'All'], ['sports', 'Sports'], ['fitness', 'Fitness'], ['pool', 'Pool'], ['halls', 'Halls']];
+const ME = { n: 'Rahul Sharma', t: 'member', me: true, pay: 'wallet' };
+const FAM = [{ n: 'Priya Sharma', t: 'member', rel: 'Spouse', no: 'KC1235', age: 38 }, { n: 'Aarav Sharma', t: 'dependant', rel: 'Son', no: 'KC1234-D1', age: 12 }];
+const FEES = [{ l: '3 months', m: 3, a: 200 }, { l: '6 months', m: 6, a: 300 }, { l: '9 months', m: 9, a: 400 }, { l: '1 year', m: 12, a: 600 }];
+const EXPIRED_ON = '2026-10-27';
+const amOf = id => AM.find(a => a.id === id) || AM[0];
+const priceAt = (a, h) => a.fl && h >= a.fl.from ? { m: a.fl.m, g: a.fl.g, c: a.fl.c, fl: true } : { m: a.m, g: a.g, c: a.c };
+const priceOf = (p, pr) => p.t === 'guest' ? pr.g : p.t === 'coach' ? pr.c : pr.m;
+const typeLabel = t => ({ member: 'Member', dependant: 'Dependant', guest: 'Guest', coach: 'Guest coach' })[t];
+const priceLine = a => a.per ? `${rs(a.m)} per booking` : a.m === 0 ? 'Free for members' : a.g != null ? `${rs(a.m)} member, ${rs(a.g)} guest` : `${rs(a.m)} per member`;
+
+function fresh() {
+  return {
+    signed: false, visit: 'outside', since: CLOCK, admit: null, wallet: 2500, till: '2027-03-31',
+    expired: false, failTop: false, fillSlot: false, lock: '', full: [],
+    bookings: [
+      { id: 'CB-261028-0142', am: 'pool', date: TODAY, h: 18, end: 19, st: 'confirmed', paid: 155, people: [{ ...ME, p: 5 }, { n: 'Amit Shah', t: 'guest', p: 150, pay: 'wallet', mob: '+91 98200 12345' }] },
+      { id: 'CB-261029-0057', am: 'tennis', date: '2026-10-29', h: 7, end: 8, st: 'confirmed', paid: 50, people: [{ ...ME, p: 50 }] },
+      { id: 'CB-261026-0311', am: 'badminton', date: '2026-10-26', h: 18, end: 19, st: 'used', paid: 20, people: [{ ...ME, p: 20 }] },
+      { id: 'CB-261022-0190', am: 'squash', date: '2026-10-22', h: 7, end: 8, st: 'cancelled', paid: 15, refund: 'completed', people: [{ ...ME, p: 15 }] },
+    ],
+    txns: [
+      { id: 'TX-9012', k: 'debit', t: 'Swimming pool booking', d: '28 Oct, 4:55 PM', a: 155, ref: 'CB-261028-0142', m: 'Wallet' },
+      { id: 'TX-8977', k: 'debit', t: 'Badminton booking', d: '26 Oct, 5:31 PM', a: 20, ref: 'CB-261026-0311', m: 'Wallet' },
+      { id: 'TX-8930', k: 'topup', t: 'Wallet top-up', d: '24 Oct, 9:12 AM', a: 1000, ref: 'CF-ORD-77120', m: 'UPI' },
+      { id: 'TX-8901', k: 'refund', t: 'Refund: squash booking cancelled', d: '21 Oct, 8:02 PM', a: 15, ref: 'CB-261022-0190', m: 'Wallet' },
+      { id: 'TX-8862', k: 'topup', t: 'Wallet top-up', d: '20 Oct, 7:45 PM', a: 2000, ref: 'CF-ORD-76544', m: 'Card' },
+    ],
+    notes: [
+      { t: 'Booking confirmed', b: 'Swimming pool today, 6:00 to 7:00 PM. Your QR code is ready in My bookings.', d: 'Today, 4:55 PM', ic: 'check', unread: true, ref: 'CB-261028-0142' },
+      { t: 'Guest pass issued', b: 'Amit Shah can use his pass at the club entry and the pool today.', d: 'Today, 4:55 PM', ic: 'userplus', unread: true, ref: 'CB-261028-0142' },
+      { t: 'Wallet top-up received', b: '₹1,000 was added to your wallet by UPI.', d: '24 Oct', ic: 'wallet', ref: 'CF-ORD-77120' },
+      { t: 'Refund completed', b: '₹15 for your cancelled squash booking is back in your wallet.', d: '21 Oct', ic: 'refund', ref: 'CB-261022-0190' },
+    ],
+    draft: null, bkTab: 'up', wTab: 'all', filter: 'all', topAmt: 1000, cfm: 'Google Pay', returnTo: null, roll: null, flip: null,
+  };
+}
+let S = fresh();
+const bk = id => S.bookings.find(b => b.id === id);
+const upcoming = () => S.bookings.filter(b => b.st === 'confirmed' || b.st === 'inuse').sort((x, y) => (x.date + String(x.h).padStart(2, '0')).localeCompare(y.date + String(y.h).padStart(2, '0')));
+function slotsFor(a, date) {
+  const out = [];
+  for (let h = a.open; h + a.len <= a.close; h += a.len) {
+    if (date === TODAY && h < NOW) continue;
+    const key = `${a.id}|${date}|${h}`;
+    let left = a.cap === 1 ? (hash(key) % 3 === 0 ? 0 : 1) : a.cap - hash(key) % (a.cap + 1);
+    if (a.id === 'pool' && date === TODAY && h === 18) left = 3;
+    if (S.full.includes(key)) left = 0;
+    out.push({ h, end: h + a.len, left, key, price: priceAt(a, h) });
+  }
+  return out;
+}
+function newDraft(id, withSlot) {
+  const a = amOf(id), f = withSlot ? slotsFor(a, TODAY).find(s => s.left > 0) : null;
+  return { am: a.id, date: TODAY, slot: f ? f.h : null, people: [{ ...ME }] };
+}
+function ensureDraft() {
+  if (!S.draft) S.draft = newDraft('pool', true);
+  const d = S.draft;
+  if (d.slot == null) { const f = slotsFor(amOf(d.am), d.date).find(s => s.left > 0); d.slot = f ? f.h : amOf(d.am).open; }
+  return d;
+}
+
+/* ---------- Shared fragments ---------- */
+const bar = (t, x = 'back') => `<div class="bar"><button class="ib" data-back aria-label="${x === 'close' ? 'Close' : 'Back'}">${ic(x)}</button>${t ? `<h1>${t}</h1>` : '<span style="flex:1"></span>'}<span class="sp"></span></div>`;
+const statusChip = b => ({
+  confirmed: `<span class="chip ok">${ic('check')}Confirmed</span>`,
+  inuse: '<span class="chip ok"><i class="dot live"></i>Admitted</span>',
+  used: `<span class="chip mute">${ic('check')}Used</span>`,
+  expired: `<span class="chip mute">${ic('clock')}Expired</span>`,
+  cancelled: `<span class="chip bad">${ic('xc')}Cancelled</span>`,
+})[b.st] || '';
+function ticketHTML(b) {
+  const a = amOf(b.am);
+  return `<button class="bcard" data-go="booking/${b.id}">${amPic(a)}<span class="bc-main"><span class="bc-h">${a.name}</span><span class="bc-s num">${dayWord(b.date)}, ${span(b)}</span><span class="bc-row"><span class="bc-s">${a.per ? 'Whole hall' : ppl(b.people.length)}</span>${statusChip(b)}</span></span></button>`;
+}
+const TF = '<div class="tf" aria-hidden="true"></div>';
+const TFC = '<div class="tf clear" aria-hidden="true"></div>';   // clear over a photo, frosted once the photo scrolls away
+
+/* ---------- Timers scoped to the current screen ---------- */
+let T = [], IV = [];
+const later = (fn, ms) => { const id = setTimeout(fn, ms); T.push(id); return id; };
+const every = (fn, ms) => { const id = setInterval(fn, ms); IV.push(id); return id; };
+const clearT = () => { T.forEach(clearTimeout); IV.forEach(clearInterval); T = []; IV = []; };
+
+/* ---------- Router ---------- */
+const screensEl = $('#screens'), tabbar = $('#tabbar'), app = $('#app'), sheetsEl = $('#sheets');
+const PUBLIC = new Set(['splash', 'signin', 'otp']);
+const TABS = new Set(['home', 'amenities', 'bookings', 'wallet', 'more']);
+let R = [];               // filled in after the screens are defined
+let stack = [], cur = null, curPath = '', first = true, SCALE = 1;
+function match(path) {
+  const b = path.split('/');
+  for (const [pat, fn] of R) {
+    const a = pat.split('/');
+    if (a.length !== b.length) continue;
+    const params = {}; let ok = true;
+    a.forEach((seg, i) => { if (seg[0] === ':') params[seg.slice(1)] = decodeURIComponent(b[i]); else if (seg !== b[i]) ok = false; });
+    if (ok) return { fn, params, key: a[0] };
+  }
+  return null;
+}
+function go(path, replace) {
+  if (replace) { stack.pop(); history.replaceState(null, '', '#/' + path); route(); }
+  else if (location.hash === '#/' + path) route();
+  else location.hash = '#/' + path;
+}
+function back() { if (stack.length > 1) history.back(); else go('home'); }
+function route() {
+  let path = location.hash.replace(/^#\/?/, '');
+  if (!path) path = S.signed ? 'home' : 'splash';
+  let m = match(path);
+  if (!m) { path = 'home'; m = match(path); }
+  if (!PUBLIC.has(m.key) && !S.signed) {
+    if (first) S.signed = true;            // deep links open signed in, so every screen can be shown directly
+    else { go('signin', true); return; }
+  }
+  first = false;
+  let dir;
+  if (stack.length > 1 && stack[stack.length - 2] === path) { stack.pop(); dir = 'back'; }
+  else if (TABS.has(m.key) || m.key === 'splash') { dir = cur ? 'fade' : 'none'; stack = [path]; }
+  else { dir = cur ? 'push' : 'none'; if (stack[stack.length - 1] !== path) stack.push(path); }
+  curPath = path;
+  clearT();
+  paint(m.fn(m.params) || {}, dir, m.key);
+}
+function paint(v, dir, key) {
+  const el = document.createElement('section');
+  el.className = 'screen' + (v.tabs ? ' has-tabs' : '') + (v.cls ? ' ' + v.cls : '');
+  el.setAttribute('aria-label', v.label || key);
+  el.innerHTML = v.html || '';
+  screensEl.appendChild(el);
+  const old = cur; cur = el;
+  closeSheet(true);
+  if (v.enter && old && dir !== 'back') dir = v.enter;
+  transition(old, el, dir);
+  showTabs(!!v.tabs, !!old);
+  setTab(v.tab);
+  app.dataset.tone = v.tone || 'light';
+  el.addEventListener('scroll', () => barState(el), { passive: true });
+  settle(el);
+  if (dir === 'push' && !RM) { const p = $$('.progress i.on', el).pop(); if (p) p.animate([{ transform: 'scaleX(0)' }, { transform: 'none' }], { pseudoElement: '::after', duration: 700, delay: 200, easing: SP.soft.e, fill: 'backwards' }); }
+  if (v.after) v.after(el, false);
+  if (!el.contains(document.activeElement)) { const h = $('h1', el); if (h) { h.tabIndex = -1; h.focus({ preventScroll: true }); } }
+}
+function rerender() {
+  const m = cur && match(curPath);
+  if (!m) return;
+  clearT();
+  const v = m.fn(m.params) || {}, st = cur.scrollTop, pm = pillMemo(cur), rm = rollMemo(cur);
+  cur.className = 'screen' + (v.tabs ? ' has-tabs' : '') + (v.cls ? ' ' + v.cls : '');
+  cur.innerHTML = v.html || '';
+  cur.scrollTop = st;
+  settle(cur, pm);
+  rolls(cur, rm);
+  if (v.after) v.after(cur, true);
+}
+/* after every render: photos fade in as they arrive, choice pills sit under their pick, the bar frosts once scrolled */
+function settle(el, pm) {
+  fadeImgs(el);
+  pills(el, pm);
+  barState(el);
+}
+const fadeImgs = el => $$('img', el).forEach(i => { if (!i.complete) i.classList.add('wait'); });
+document.addEventListener('load', e => { if (e.target.tagName === 'IMG') e.target.classList.remove('wait'); }, true);   // load never reaches window
+const barState = el => { const b = $('.bar', el); if (b) b.classList.toggle('on', el.scrollTop > 4); };
+/* choice groups (.pills): one highlight glides to the pressed button; pm carries its old place across a re-render */
+const pillMemo = root => $$('.pills', root).map(g => { const p = $(':scope > .pill', g); return p ? { css: p.style.cssText, sl: g.scrollLeft } : null; });
+function pills(root, pm = []) {
+  $$('.pills', root).forEach((g, k) => {
+    const on = $(':scope > [aria-pressed=true]', g);
+    let p = $(':scope > .pill', g), fresh = !p;
+    if (fresh) {
+      p = document.createElement('i'); p.className = 'pill'; p.setAttribute('aria-hidden', 'true'); g.prepend(p); g.classList.add('pilled');
+      if (pm[k]) { p.style.cssText = pm[k].css; g.scrollLeft = pm[k].sl; void p.offsetWidth; fresh = false; } else p.style.transition = 'none';
+    }
+    if (on) Object.assign(p.style, { opacity: 1, left: on.offsetLeft + 'px', top: on.offsetTop + 'px', width: on.offsetWidth + 'px', height: on.offsetHeight + 'px' });
+    else p.style.opacity = 0;
+    if (fresh) { void p.offsetWidth; p.style.transition = ''; }
+    else if (on && pm[k]) pop(on);
+  });
+}
+/* numbers marked data-roll change by rolling their changed digits, up when the number grows and down when it shrinks */
+const rollMemo = root => Object.fromEntries($$('[data-roll]', root).map(e => [e.dataset.roll, +e.dataset.v]));
+const rolls = (root, rm) => $$('[data-roll]', root).forEach(e => { const a = rm[e.dataset.roll]; if (a != null && a !== +e.dataset.v) rollText(e, a, +e.dataset.v); });
+function rollText(el, from, to) {
+  if (RM || from === to) return;
+  const a = inr(from), b = inr(to), up = to > from, pad = b.length - a.length;
+  el.innerHTML = `<span class="money"><span class="cur">₹</span>${[...b].map((ch, i) => a[i - pad] === ch ? ch : `<span class="rd">${ch}</span>`).join('')}</span>`;
+  $$('.rd', el).forEach((d, i) => d.animate([{ transform: `translateY(${up ? .55 : -.55}em)`, opacity: 0, filter: 'blur(3px)' }, { transform: 'none', opacity: 1, filter: 'blur(0)' }], { duration: SP.pill.d, delay: i * 35, easing: SP.pill.e, fill: 'backwards' }));
+}
+/* the tab bar drops away on pushed screens and rises back on tab screens */
+let wantTabs = false, curTab = null;
+function showTabs(on, animate) {
+  if (on === wantTabs && on === !tabbar.hidden) return;
+  wantTabs = on;
+  tabbar.getAnimations().forEach(a => a.cancel());
+  if (RM || !animate) { tabbar.hidden = !on; return; }
+  if (on) { tabbar.hidden = false; tabbar.animate([{ transform: 'translateY(150%)' }, { transform: 'none' }], { duration: SP.sheet.d, delay: 60, easing: SP.sheet.e, fill: 'backwards' }); }
+  else tabbar.animate([{ transform: 'none' }, { transform: 'translateY(150%)' }], { duration: 240, easing: 'cubic-bezier(.4,0,1,1)', fill: 'forwards' }).onfinish = () => { if (!wantTabs) tabbar.hidden = true; tabbar.getAnimations().forEach(a => a.cancel()); };
+}
+function setTab(tab) {
+  const tabs = $$('.tab', tabbar), i = tabs.findIndex(t => t.dataset.tab === tab);
+  tabs.forEach((t, k) => k === i ? t.setAttribute('aria-current', 'page') : t.removeAttribute('aria-current'));
+  if (i < 0) return;
+  tabbar.style.setProperty('--ti', i);
+  if (curTab && tab !== curTab && !RM) { $('svg', tabs[i]).animate([{ transform: 'scale(.7) translateY(3px)' }, { transform: 'none' }], { duration: SP.bouncy.d, easing: SP.bouncy.e }); buzz(8); }
+  curTab = tab;
+}
+/* push: the new screen slides over from the right while the old one parks under it, dimmed; back reverses it.
+   Tab switches settle the new screen in place. All on the same critically damped spring. */
+function transition(old, el, dir) {
+  if (!old) return;
+  old.style.pointerEvents = 'none';
+  const done = () => old.remove();
+  if (dir === 'none') { done(); return; }
+  if (RM) {
+    el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 120 });
+    old.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 120, fill: 'forwards' }).onfinish = done;
+    return;
+  }
+  const o = { duration: SP.soft.d, easing: SP.soft.e };
+  if (dir === 'fade') {   // fade through: the old screen clears quickly, then the new one settles in
+    el.style.zIndex = 2; old.style.zIndex = 1;
+    el.animate([{ opacity: 0, transform: 'translateY(14px) scale(.985)' }, { opacity: 1, transform: 'none' }], { ...o, delay: 70, fill: 'backwards' });
+    old.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 140, easing: 'cubic-bezier(.4,0,1,1)', fill: 'forwards' }).onfinish = done;
+    return;
+  }
+  const back = dir === 'back', top = back ? old : el, under = back ? el : old;
+  top.style.zIndex = 2; under.style.zIndex = 1;
+  top.style.boxShadow = '0 0 44px rgba(0,0,0,.2)';
+  const slide = [{ transform: 'translateX(100%)' }, { transform: 'none' }], park = [{ transform: 'translateX(-30%)', filter: 'brightness(.88)' }, { transform: 'none', filter: 'brightness(1)' }];
+  if (back) {
+    old.animate([...slide].reverse(), { ...o, fill: 'forwards' }).onfinish = done;
+    el.animate(park, o);
+  } else {
+    el.animate(slide, o).onfinish = () => { el.style.boxShadow = ''; };
+    old.animate([...park].reverse(), { ...o, fill: 'forwards' }).onfinish = done;
+  }
+}
+function flipFrom(el, r) {
+  if (!r || RM || !el) return;
+  const last = el.getBoundingClientRect();
+  if (!last.width) return;
+  const dx = (r.left - last.left) / SCALE, dy = (r.top - last.top) / SCALE;
+  el.animate([{ transformOrigin: '0 0', transform: `translate(${dx}px,${dy}px) scale(${r.width / last.width},${r.height / last.height})`, borderRadius: '24px' }, { transformOrigin: '0 0', transform: 'none' }], { duration: SP.sheet.d, easing: SP.sheet.e });
+}
+
+// Shared-element zoom: the tapped amenity photo grows from its card into the detail header.
+let ZOOM = null;
+document.addEventListener('click', e => {
+  const c = e.target.closest('[data-zoom]'), im = c && $('img', c);
+  ZOOM = im && im.naturalWidth ? { id: c.dataset.zoom, r: im.getBoundingClientRect(), src: im.currentSrc || im.src, op: getComputedStyle(im).objectPosition } : null;
+}, true);
+function zoomInto(z, to) {
+  if (!z || RM || !to) return;
+  const ar = app.getBoundingClientRect(), r2 = to.getBoundingClientRect();
+  const box = r => ({ left: (r.left - ar.left) / SCALE + 'px', top: (r.top - ar.top) / SCALE + 'px', width: r.width / SCALE + 'px', height: r.height / SCALE + 'px' });
+  const c = document.createElement('img');
+  c.className = 'zoomer'; c.alt = ''; c.src = z.src; c.style.objectPosition = z.op;
+  app.appendChild(c);
+  c.animate([{ ...box(z.r), borderRadius: '22px' }, { ...box(r2), borderRadius: '0px' }], { duration: SP.sheet.d, easing: SP.sheet.e, fill: 'forwards' }).onfinish = () => c.remove();
+}
+// Photo headers: the photo moves at 0.4x the scroll, grows on overscroll, and the status bar turns dark once it has gone.
+function heroScroll(el) {
+  const h = $('.hero', el), img = h && $('img', h), tf = $('.tf', el);
+  if (!h) return;
+  let raf = 0;
+  const set = () => {
+    raf = 0;
+    if (el !== cur) return;
+    const y = el.scrollTop, past = y > h.offsetHeight - 72;
+    if (img && !RM) img.style.transform = y < 0 ? `scale(${(1 - y / 280).toFixed(3)})` : `translateY(${(y * .4).toFixed(1)}px)`;
+    if (tf) tf.classList.toggle('on', past);
+    app.dataset.tone = past ? 'light' : 'dark';
+  };
+  el.onscroll = () => { if (!raf) raf = requestAnimationFrame(set); };
+  set();
+}
+// One short entrance per list: up to 8 items, 45ms apart, each rising on the soft spring.
+const stagger = (els, d0 = 60) => { if (!RM) els.slice(0, 8).forEach((e, i) => e.animate([{ opacity: 0, transform: 'translateY(18px) scale(.98)' }, { opacity: 1, transform: 'none' }], { duration: SP.soft.d, delay: d0 + i * 45, easing: SP.soft.e, fill: 'backwards' })); };
+/* a small spring on whatever was just chosen, and ticks that draw themselves */
+const pop = (el, from = .92) => { if (el && !RM) el.animate([{ transform: `scale(${from})` }, { transform: 'none' }], { duration: SP.bouncy.d, easing: SP.bouncy.e }); };
+const draw = (p, delay = 0, d = 340) => { if (!p || RM) return; p.setAttribute('pathLength', 1); p.animate([{ strokeDasharray: '1', strokeDashoffset: 1 }, { strokeDasharray: '1', strokeDashoffset: 0 }], { duration: d, delay, easing: EO, fill: 'backwards' }); };
+/* Cards you can almost hold: the pass and the wallet card lean toward the mouse, under a light that follows it */
+let tiltEl = null;
+const untilt = c => ['--rx', '--ry', '--mx', '--my', '--glow'].forEach(p => c.style.removeProperty(p));
+document.addEventListener('pointermove', e => {
+  const c = !RM && e.pointerType === 'mouse' ? e.target.closest('.pass,.balance') : null;
+  if (tiltEl && tiltEl !== c) untilt(tiltEl);
+  tiltEl = c;
+  if (!c) return;
+  const r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+  c.style.setProperty('--rx', ((.5 - y) * 8).toFixed(2) + 'deg'); c.style.setProperty('--ry', ((x - .5) * 10).toFixed(2) + 'deg');
+  c.style.setProperty('--mx', (x * 100).toFixed(1) + '%'); c.style.setProperty('--my', (y * 100).toFixed(1) + '%'); c.style.setProperty('--glow', 1);
+}, { passive: true });
+app.addEventListener('pointerleave', () => { if (tiltEl) { untilt(tiltEl); tiltEl = null; } });
+
+/* ---------- Sheets, toast, scanner result ---------- */
+let sheetGen = 0;
+/* A sheet rises on a spring while the screen behind it steps back; it closes by its handle, the scrim, Escape or a drag down. */
+function openSheet(html, after) {
+  const g = ++sheetGen, again = !sheetsEl.hidden;
+  sheetsEl.innerHTML = `<div class="scrim" data-act="closeSheet"></div><div class="sheet" role="dialog" aria-modal="true"><div class="grab" aria-hidden="true"></div>${html}</div>`;
+  sheetsEl.hidden = false;
+  app.classList.add('sheet-on');
+  const sh = $('.sheet', sheetsEl);
+  if (!again) $('.scrim', sheetsEl).animate([{ opacity: 0 }, { opacity: 1 }], { duration: 320 });
+  sh.animate(RM ? [{ opacity: 0 }, { opacity: 1 }] : [{ transform: 'translateY(110%)' }, { transform: 'none' }], { duration: RM ? 120 : SP.sheet.d, easing: RM ? 'linear' : SP.sheet.e });
+  fadeImgs(sh);
+  dragSheet(sh);
+  if (after) after(sh);
+  const f = $('input,textarea,button:not(.scrim)', sh);
+  if (f && g === sheetGen) f.focus({ preventScroll: true });
+}
+function closeSheet(instant) {
+  if (sheetsEl.hidden) return;
+  const g = sheetGen;
+  app.classList.remove('sheet-on');
+  const wipe = () => { if (g === sheetGen) { sheetsEl.hidden = true; sheetsEl.innerHTML = ''; } };
+  if (instant === true) { sheetGen++; sheetsEl.hidden = true; sheetsEl.innerHTML = ''; return; }
+  const sh = $('.sheet', sheetsEl), sc = $('.scrim', sheetsEl);
+  if (!sh) { wipe(); return; }
+  const from = sh.style.transform || 'none';
+  sh.style.transform = '';
+  sc.animate([{ opacity: getComputedStyle(sc).opacity }, { opacity: 0 }], { duration: 280, fill: 'forwards' });
+  sh.animate(RM ? [{ opacity: 1 }, { opacity: 0 }] : [{ transform: from }, { transform: 'translateY(110%)' }], { duration: RM ? 120 : 320, easing: 'cubic-bezier(.3,.5,.4,1)', fill: 'forwards' }).onfinish = wipe;
+}
+function dragSheet(sh) {
+  const sc = $('.scrim', sheetsEl);
+  let st = null;
+  sh.addEventListener('pointerdown', e => {
+    if (RM || e.button > 0 || e.target.closest('input,textarea,select') || (sh.scrollTop > 0 && !e.target.closest('.grab'))) return;
+    st = { y: e.clientY, id: e.pointerId, on: false, dy: 0, v: 0, t: e.timeStamp };
+  });
+  sh.addEventListener('pointermove', e => {
+    if (!st || e.pointerId !== st.id) return;
+    const raw = (e.clientY - st.y) / SCALE;
+    if (!st.on) { if (Math.abs(raw) < 8) return; st.on = true; sh.setPointerCapture(e.pointerId); sh.getAnimations().forEach(a => a.cancel()); }
+    const dy = raw > 0 ? raw : -Math.sqrt(-raw) * 3;   // pulling up only stretches a little
+    st.v = (dy - st.dy) / Math.max(1, e.timeStamp - st.t); st.dy = dy; st.t = e.timeStamp;
+    sh.style.transform = `translateY(${dy.toFixed(1)}px)`;
+    sc.style.opacity = Math.max(0, 1 - dy / 500).toFixed(3);
+  });
+  const end = e => {
+    if (!st || e.pointerId !== st.id) return;
+    const s = st; st = null;
+    if (!s.on) return;
+    if (s.dy > 120 || (s.dy > 24 && s.v > .45)) { closeSheet(); return; }
+    sh.style.transform = ''; sc.style.opacity = '';
+    sh.animate([{ transform: `translateY(${s.dy}px)` }, { transform: 'none' }], { duration: SP.pill.d, easing: SP.pill.e });
+  };
+  sh.addEventListener('pointerup', end);
+  sh.addEventListener('pointercancel', end);
+}
+const sheetBody = html => {
+  const sh = $('.sheet', sheetsEl);
+  if (!sh) return sh;
+  sh.innerHTML = '<div class="grab" aria-hidden="true"></div>' + html;
+  fadeImgs(sh);
+  if (!RM) stagger([...sh.children].slice(1), 0);   // the next step of a sheet settles in place
+  return sh;
+};
+/* Toasts grow out of the island at the top of the phone and shrink back into it */
+let toastT;
+const islandClip = t => { const x = Math.max(0, (t.offsetWidth - 124) / 2); return `inset(0px ${x}px ${Math.max(0, t.offsetHeight - 36)}px ${x}px round 18px)`; };
+function toast(msg, kind) {
+  const t = $('#toast');
+  t.getAnimations({ subtree: true }).forEach(a => a.cancel());
+  t.className = 'toast' + (kind ? ' ' + kind : '');
+  t.innerHTML = `<span class="ti">${ic(kind === 'bad' ? 'close' : 'check')}</span><span>${msg}</span>`;
+  t.hidden = false;
+  if (RM) t.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 120 });
+  else {
+    t.animate([{ clipPath: islandClip(t) }, { clipPath: 'inset(0px 0px 0px 0px round 29px)' }], { duration: SP.sheet.d, easing: SP.sheet.e });
+    [...t.children].forEach((s, i) => s.animate([{ opacity: 0, transform: 'scale(.85)', filter: 'blur(6px)' }, { opacity: 1, transform: 'none', filter: 'blur(0)' }], { duration: 420, delay: 110 + i * 60, easing: SP.soft.e, fill: 'backwards' }));
+    draw($('.ti path', t), 240, 360);
+  }
+  clearTimeout(toastT);
+  toastT = setTimeout(() => {
+    const gone = () => { t.hidden = true; t.getAnimations({ subtree: true }).forEach(a => a.cancel()); };
+    if (RM) { t.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 150, fill: 'forwards' }).onfinish = gone; return; }
+    [...t.children].forEach(s => s.animate([{ opacity: 1 }, { opacity: 0, filter: 'blur(4px)' }], { duration: 160, fill: 'forwards' }));
+    const noIsland = getComputedStyle($('.island')).display === 'none';
+    t.animate([{ clipPath: 'inset(0px 0px 0px 0px round 29px)', opacity: 1 }, { clipPath: islandClip(t), opacity: noIsland ? 0 : 1 }], { duration: 420, delay: 90, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' }).onfinish = gone;
+  }, 2800);
+}
+let scanT;
+function scanResult(ok, title, sub, kind) {
+  const o = $('#overlay'), shot = kind === 'shot';
+  o.innerHTML = `<button class="scanov${shot ? ' shot' : ok ? '' : ' bad'}" data-act="dismissScan" role="alert"><span class="big">${ic(shot ? 'noshot' : ok ? 'check' : 'close')}</span><span class="h">${title}</span><span class="p">${sub}</span><span class="k">${shot ? 'Tap to close.' : 'Scanner result. Tap to close.'}</span></button>`;
+  const b = o.firstChild;
+  if (RM) b.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 120 });
+  else {
+    /* the colour opens out from the middle, then the mark draws itself */
+    b.animate([{ clipPath: 'circle(0% at 50% 45%)' }, { clipPath: 'circle(80% at 50% 45%)' }], { duration: 620, easing: SP.soft.e });
+    $('.big', b).animate([{ transform: 'scale(.4)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: SP.bouncy.d, delay: 120, easing: SP.bouncy.e, fill: 'backwards' });
+    $$('.big path', b).forEach((p, i) => draw(p, 260 + i * 90, 380));
+    stagger([...b.children].slice(1), 200);
+  }
+  buzz(ok ? 30 : [40, 60, 40]);
+  clearTimeout(scanT);
+  scanT = setTimeout(dismissScan, 2400);
+  b.focus({ preventScroll: true });
+}
+function dismissScan() {
+  const b = $('#overlay').firstChild;
+  if (!b) return;
+  clearTimeout(scanT);
+  b.animate(RM ? [{ opacity: 1 }, { opacity: 0 }] : [{ clipPath: 'circle(80% at 50% 45%)', opacity: 1 }, { clipPath: 'circle(0% at 50% 45%)', opacity: .6 }], { duration: RM ? 80 : 380, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' }).onfinish = () => { $('#overlay').innerHTML = ''; };
+}
+
+/* ---------- Odometer for the wallet balance ---------- */
+function odoHTML(n, from) {
+  const s = inr(n), f = from == null ? null : inr(from).padStart(s.length, ' ');
+  let out = `<span class="sr">₹${s}</span><span class="cur" aria-hidden="true">₹</span>`;
+  [...s].forEach((ch, i) => {
+    if (/\d/.test(ch)) {
+      const start = f ? (/\d/.test(f[i]) ? f[i] : '0') : ch;
+      out += `<span class="od" aria-hidden="true"><span class="ods" data-to="${ch}" style="--d:${start}">${[...'0123456789'].map(x => `<span>${x}</span>`).join('')}</span></span>`;
+    } else out += `<span aria-hidden="true">${ch}</span>`;
+  });
+  return out;
+}
+function rollOdo(el, from, to) {
+  if (!el) return;
+  el.innerHTML = odoHTML(to, from);
+  void el.offsetWidth;
+  requestAnimationFrame(() => $$('.ods', el).forEach((d, i) => { d.style.transitionDelay = i * 40 + 'ms'; d.style.setProperty('--d', d.dataset.to); }));
+}
+
+/* ---------- Actions (more are added by each screen group) ---------- */
+const ACT = {
+  closeSheet: () => closeSheet(),
+  dismissScan,
+};
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-go],[data-act],[data-back]');
+  if (!t) return;
+  if (t.dataset.go !== undefined) { e.preventDefault(); go(t.dataset.go); }
+  else if (t.dataset.back !== undefined) { e.preventDefault(); back(); }
+  else if (ACT[t.dataset.act]) { e.preventDefault(); ACT[t.dataset.act](t.dataset.arg, t, e); }
+});
+addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (!sheetsEl.hidden) closeSheet(); else if ($('#overlay').firstChild) dismissScan();
+});
+
+/* ---------- Splash and sign in ---------- */
+// Sign-in screens share the clubhouse photo, with a sheet over its lower edge.
+const authTop = (back, ph) => `<div class="auth-ph"${ph ? ` style="--ph:${ph}"` : ''}>${club('tint', true)}${back ? `<button class="ib frost auth-back" data-back aria-label="Back">${ic('back')}</button>` : ''}<span class="auth-wm">ClubOne</span></div>`;
+function scrSplash() {
+  return {
+    cls: 'splash', tone: 'dark', label: 'Kaizen ClubOne',
+    html: `<h1 class="sr">Kaizen ClubOne</h1><button class="splash-hit" data-act="splashGo" aria-label="Open ClubOne">${club('tint splash-ph', true)}<span class="wm" aria-hidden="true">${[...'ClubOne'].map((c, i) => `<span style="--i:${i}">${c}</span>`).join('')}</span><span class="by">Entry, bookings and your wallet for The Clubhouse</span><span class="splash-club">by Kaizen Infotech</span></button>`,
+    after() { later(ACT.splashGo, RM ? 700 : 3000); },
+  };
+}
+const fmtMob = d => d.length > 5 ? `${d.slice(0, 5)} ${d.slice(5, 10)}` : d;
+function scrSignin() {
+  const fromSplash = !!cur && cur.classList.contains('splash');   // from the splash, the photo stays and only the sheet rises
+  return {
+    cls: 'auth', tone: 'dark', label: 'Sign in', enter: fromSplash ? 'fade' : undefined,
+    html: `${authTop()}<div class="auth-sheet"><h1 class="title">Sign in</h1>
+<p class="lede">Use the mobile number registered with the club. We will send a 6-digit OTP by SMS.</p>
+<label class="field"><span>Mobile number</span><span class="phone"><span class="cc">+91</span><input class="input num" id="mob" inputmode="numeric" autocomplete="tel-national" maxlength="11" value="${fmtMob(S.mob || '9876543210')}" aria-describedby="moberr"></span></label>
+<p class="ferr" id="moberr" hidden></p>
+<div class="dock"><button class="btn pri" data-act="sendOtp">Send OTP</button><p class="legal">By continuing, you agree to the club terms.</p></div></div>`,
+    after(el) {
+      const i = $('#mob', el);
+      if (fromSplash && !RM) $('.auth-sheet', el).animate([{ transform: 'translateY(55%)' }, { transform: 'none' }], { duration: SP.sheet.d, delay: 80, easing: SP.sheet.e, fill: 'backwards' });
+      i.addEventListener('input', () => { i.value = fmtMob(i.value.replace(/\D/g, '').slice(0, 10)); i.classList.remove('bad'); $('#moberr', el).hidden = true; });
+      i.addEventListener('keydown', e => { if (e.key === 'Enter') ACT.sendOtp(); });
+    },
+  };
+}
+/* a digit springs into its box */
+const otpPop = (inp, delay = 0) => { inp.classList.add('on'); if (!RM) inp.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.14)' }, { transform: 'scale(1)' }], { duration: 300, delay, easing: ES }); };
+function scrOtp() {
+  const m = S.mob || '9876543210';
+  return {
+    cls: 'auth', tone: 'dark', label: 'Enter the OTP',
+    html: `${authTop(true)}<div class="auth-sheet"><h1 class="title">Enter the OTP</h1>
+<p class="lede">Sent to +91 ${fmtMob(m)}. <button class="link" data-back>Change number</button></p>
+<div class="otp" id="otp" role="group" aria-label="6-digit OTP">${[0, 1, 2, 3, 4, 5].map(i => `<input inputmode="numeric" maxlength="1" autocomplete="${i ? 'off' : 'one-time-code'}" aria-label="Digit ${i + 1}">`).join('')}</div>
+<p class="ferr" id="otperr" hidden></p>
+<p class="resend" id="resend">Resend OTP in <span class="num">00:45</span></p>
+<button class="smsbar" id="smsbar" data-act="fillOtp" hidden>${ic('msg')}<span><span>From Messages</span><small>Tap to fill the code</small></span><b class="num">482915</b></button>
+<div class="dock"><button class="btn pri" id="verify" data-act="verifyOtp" disabled>Verify</button></div></div>`,
+    after(el) {
+      const box = $$('#otp input', el), btn = $('#verify', el);
+      const sync = () => { const v = box.map(i => i.value).join(''); btn.disabled = v.length < 6; box.forEach(b => b.classList.toggle('on', !!b.value)); return v; };
+      const fill = (d, from) => { [...d].slice(0, 6 - from).forEach((ch, k) => { box[from + k].value = ch; otpPop(box[from + k], k * 45); }); box[Math.min(5, from + d.length)].focus(); };
+      if (!RM) box.forEach((b, i) => b.animate([{ opacity: 0, transform: 'translateY(12px) scale(.9)' }, { opacity: 1, transform: 'none' }], { duration: 380, delay: 140 + i * 45, easing: ES, fill: 'backwards' }));
+      box.forEach((inp, i) => {
+        inp.addEventListener('input', () => {
+          const d = inp.value.replace(/\D/g, '');
+          $('#otp', el).classList.remove('bad'); $('#otperr', el).hidden = true;
+          if (d.length > 1) fill(d, i); else { inp.value = d; if (d) otpPop(inp); if (d && i < 5) box[i + 1].focus(); }
+          if (sync().length === 6) ACT.verifyOtp();
+        });
+        inp.addEventListener('keydown', e => {
+          if (e.key === 'Backspace' && !inp.value && i > 0) { e.preventDefault(); box[i - 1].value = ''; box[i - 1].focus(); sync(); }
+          else if (e.key === 'ArrowLeft' && i > 0) box[i - 1].focus();
+          else if (e.key === 'ArrowRight' && i < 5) box[i + 1].focus();
+        });
+        inp.addEventListener('paste', e => {
+          const d = ((e.clipboardData && e.clipboardData.getData('text')) || '').replace(/\D/g, '').slice(0, 6);
+          if (!d) return;
+          e.preventDefault(); fill(d, 0);
+          if (sync().length === 6) ACT.verifyOtp();
+        });
+        inp.addEventListener('focus', () => inp.select());
+      });
+      box[0].focus({ preventScroll: true });
+      let left = 45; const rt = $('#resend', el);
+      every(() => {
+        if (left <= 0) return;
+        left--;
+        rt.innerHTML = left > 0 ? `Resend OTP in <span class="num">00:${String(left).padStart(2, '0')}</span>` : '<button class="link" data-act="resendOtp">Resend OTP</button>';
+      }, 1000);
+      later(() => { const sb = $('#smsbar', el); sb.hidden = false; if (!RM) sb.animate([{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'none' }], { duration: 320, easing: EO }); }, 1300);
+    },
+  };
+}
+function scrLock() {
+  return {
+    cls: 'auth', tone: 'dark', label: 'Lock ClubOne',
+    html: `${authTop(false, '34%')}<div class="auth-sheet"><h1 class="title">Lock ClubOne on this phone</h1>
+<p class="lede">Keep your entry QR and wallet private. You unlock the app the same way you unlock your phone.</p>
+<div class="stack">
+<button class="btn pri" data-act="setLock" data-arg="Fingerprint">${ic('finger')}Use fingerprint</button>
+<button class="btn sec" data-act="setLock" data-arg="Face unlock">${ic('face')}Use face unlock</button>
+<button class="btn sec" data-act="setLock" data-arg="Phone PIN">${ic('lock')}Use phone PIN</button>
+<button class="btn txt" data-act="setLock" data-arg="">Skip for now</button>
+</div></div>`,
+    after(el) { stagger($$('.stack > *', el), 160); },
+  };
+}
+Object.assign(ACT, {
+  splashGo() { if (curPath === 'splash' || !location.hash || location.hash === '#/splash') go(S.signed ? 'home' : 'signin', true); },
+  sendOtp() {
+    const i = $('#mob'), err = $('#moberr');
+    if (!i) return;
+    const d = i.value.replace(/\D/g, '');
+    const fail = msg => { err.innerHTML = ic('alert') + msg; err.hidden = false; i.classList.add('bad'); i.focus(); };
+    if (!/^[6-9]\d{9}$/.test(d)) return fail('Enter your 10-digit mobile number.');
+    if (d === '9000011111') return fail('This number is not registered with the club. Ask the club office to add it.');
+    S.mob = d; S.otpTries = 5;
+    go('otp');
+  },
+  verifyOtp() {
+    const box = $$('#otp input'), btn = $('#verify');
+    if (!btn || btn.dataset.busy) return;
+    const v = box.map(i => i.value).join('');
+    if (v.length < 6) return;
+    if (v === '111111' || v === '000000') {
+      S.otpTries = (S.otpTries || 5) - 1;
+      const g = $('#otp'); g.classList.remove('bad'); void g.offsetWidth; g.classList.add('bad');
+      const er = $('#otperr'); er.hidden = false; er.innerHTML = `${ic('alert')}That OTP is not correct. ${S.otpTries} attempts left.`;
+      box.forEach(i => { i.value = ''; i.classList.remove('on'); }); box[0].focus(); btn.disabled = true;
+      return;
+    }
+    btn.dataset.busy = '1'; btn.disabled = true; btn.innerHTML = 'Verifying';
+    const g = $('#otp');
+    g.insertAdjacentHTML('beforeend', '<div class="otp-pill" role="status"><span class="spin" aria-hidden="true"></span>Verifying</div>');
+    const pill = $('.otp-pill', g);
+    if (RM) { box.forEach(b => { b.style.opacity = 0; }); later(() => { S.signed = true; go('lock', true); }, 700); return; }
+    /* layout coordinates (offsetLeft), so the fly-in is right inside the scaled desktop phone frame too */
+    box.forEach((b, i) => {
+      const dx = g.offsetWidth / 2 - (b.offsetLeft + b.offsetWidth / 2);
+      b.animate([{ transform: 'none', opacity: 1 }, { transform: `translateX(${dx}px) scale(.45)`, opacity: 0 }], { duration: 420, delay: Math.abs(i - 2.5) * 35, easing: 'cubic-bezier(.6,0,.3,1)', fill: 'forwards' });
+    });
+    pill.animate([{ opacity: 0, transform: 'translate(-50%,-50%) scale(.6)' }, { opacity: 1, transform: 'translate(-50%,-50%) scale(1)' }], { duration: 340, delay: 300, easing: ES, fill: 'backwards' });
+    later(() => {
+      const w = pill.offsetWidth;
+      pill.innerHTML = '<svg viewBox="0 0 30 30" aria-hidden="true"><path d="M8 15.5l4.5 4.5L22 10.5" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" pathLength="1" style="stroke-dasharray:1;stroke-dashoffset:1"/></svg>';
+      pill.classList.add('ok'); pill.setAttribute('aria-label', 'Verified');
+      pill.animate([{ width: w + 'px', backgroundColor: '#0066cc' }, { width: '58px', backgroundColor: '#087A55' }], { duration: 400, easing: 'cubic-bezier(.3,.7,.2,1)' });
+      $('path', pill).animate([{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: 340, delay: 280, easing: EO, fill: 'forwards' });
+      btn.innerHTML = `${ic('check')}Verified`;
+      buzz(20);
+    }, 1150);
+    later(() => { S.signed = true; go('lock', true); }, 2000);
+  },
+  fillOtp() {
+    const box = $$('#otp input');
+    $('#smsbar').hidden = true;
+    [...'482915'].forEach((ch, i) => later(() => { box[i].value = ch; box[i].classList.add('on'); otpPop(box[i]); if (i === 5) { $('#verify').disabled = false; ACT.verifyOtp(); } }, RM ? 0 : i * 90));
+  },
+  resendOtp() { rerender(); toast(`A new OTP was sent to +91 ${fmtMob(S.mob || '9876543210')}`); },
+  setLock(arg) { S.lock = arg || ''; go('home', true); if (arg) later(() => toast(`App lock is on: ${arg}`), 400); },
+});
+
+/* ---------- Home ---------- */
+function passHTML() {
+  const st = S.expired ? `<span class="chip bad">${ic('xc')}Expired</span>`
+    : S.visit === 'outside' ? `<span class="chip ok">${ic('check')}Active</span>`
+      : `<span class="chip ok"><i class="dot live"></i>Inside since ${S.since}</span>`;
+  return `<section class="pass" id="pass" aria-label="Membership pass">
+<div class="pass-top"><span class="brand">ClubOne<small>The Clubhouse</small></span>${st}</div>
+<div class="pass-mid">${av('Rahul Sharma', ' xl')}<div><span class="pass-name">Rahul Sharma</span><span class="pass-meta"><span>Member no.<b class="num">KC1234</b></span><span>${S.expired ? 'Expired on' : 'Valid till'}<b class="num">${fmtLong(S.expired ? EXPIRED_ON : S.till)}</b></span></span></div></div>
+${S.expired ? '<button class="btn pri sm" data-act="askRenew">Renew membership</button>' : `<button class="btn pri sm" data-act="openQr">${ic('qr')}Show entry QR</button>`}
+</section>`;
+}
+function admitPanel() {
+  const b = bk(S.admit);
+  if (!b) return '';
+  const a = amOf(b.am);
+  return `<section class="admit" aria-live="polite"><span class="chip ok"><i class="dot live"></i>Admitted</span><b class="ad-h">${a.name}, ${ppl(b.people.length)}</b><span class="ad-s">Slot ends at <b class="num">${hm(b.end)}</b>. Scan the same QR at the door to leave.</span><button class="btn sec" data-go="booking/${b.id}">Show booking QR</button></section>`;
+}
+const RAIL = ['pool', 'tennis', 'badminton', 'gym', 'squash', 'kids', 'tt', 'studio'];
+const railCard = a => `<li><a class="rcard" href="#/amenity/${a.id}" data-zoom="${a.id}">${amPic(a)}<span class="rc-t"><b>${a.name}</b>${liveHTML(a)}<span class="rc-n">${nextFree(a)}</span></span></a></li>`;
+function scrHome() {
+  const up = upcoming().slice(0, 2), unread = S.notes.filter(n => n.unread).length;
+  return {
+    tabs: true, tab: 'home', label: 'Home', tone: 'dark',
+    html: `${TFC}<header class="hero home">${club('tint', true)}<div class="hh-txt"><h1 class="title"><span>Good evening</span>Rahul</h1></div><button class="ib frost hh-bell" data-go="notifications" aria-label="Notifications${unread ? `, ${unread} unread` : ''}">${ic('bell')}${unread ? '<span class="dotb"></span>' : ''}</button></header>
+${passHTML()}
+${S.expired ? '' : `<button class="btn pri book-cta" data-act="book">${ic('plus')}Book an amenity</button>`}
+${S.visit === 'admitted' ? admitPanel() : ''}
+${S.expired ? `<div class="note err">${ic('alert')}<span>Your membership ended on ${fmtLong(EXPIRED_ON)}. Renew it to enter the club and book amenities.</span></div>` : ''}
+<h2 class="sec">Today at the club<button data-act="book" aria-label="See all amenities">See all</button></h2>
+<ul class="rail" aria-label="Amenities">${RAIL.map(id => railCard(amOf(id))).join('')}</ul>
+<h2 class="sec">Upcoming<button data-go="bookings" aria-label="See all bookings">See all</button></h2>
+${up.length ? `<div class="tickets">${up.map(ticketHTML).join('')}</div>` : '<p class="cap">No upcoming bookings. Book a court, the pool or the gym and your QR code appears here.</p>'}
+<section class="wcard"><div><span class="cap">Wallet balance</span><span class="num wbal">${rs(S.wallet)}</span></div><button class="btn sec sm" data-go="addmoney">Add money</button></section>`,
+    after(el, re) {
+      heroScroll(el);
+      if (re || RM) return;
+      if (S.hi) { stagger($$('.rail li', el)); return; }
+      /* the first look at home: the photo settles, the greeting sharpens, the pass lands, then the rest follows */
+      S.hi = true;
+      $('.hero .pic img', el).animate([{ transform: 'scale(1.14)' }, { transform: 'none' }], { duration: 1800, easing: 'cubic-bezier(.2,.7,.2,1)' });
+      $('.hh-txt', el).animate([{ opacity: 0, transform: 'translateY(16px)', filter: 'blur(8px)' }, { opacity: 1, transform: 'none', filter: 'blur(0)' }], { duration: 800, delay: 150, easing: SP.soft.e, fill: 'backwards' });
+      $('#pass', el).animate([{ opacity: 0, transform: 'perspective(900px) translateY(90px) rotateX(28deg) scale(.94)' }, { opacity: 1, transform: 'perspective(900px) translateY(0) rotateX(0deg) scale(1)' }], { duration: SP.pill.d + 250, delay: 260, easing: SP.pill.e, fill: 'backwards' });
+      stagger([...$$('.book-cta, .admit, .note, h2.sec', el), ...$$('.rail li', el).slice(0, 2)], 520);
+      if (unread) $('.hh-bell svg', el).animate([0, 18, -14, 10, -6, 3, 0].map(d => ({ transform: `rotate(${d}deg)` })), { duration: 1000, delay: 1500, easing: 'ease-in-out' });
+    },
+  };
+}
+Object.assign(ACT, {
+  openQr() { const p = $('#pass'); S.flip = p ? p.getBoundingClientRect() : null; go('qr'); },
+  openQrPlain() { S.flip = null; go('qr'); },
+  book() {
+    if (S.expired) {
+      openSheet(`<div class="bigic bad">${ic('lock')}</div><h2 class="center">Booking is paused</h2><p class="sub center">Your membership ended on ${fmtLong(EXPIRED_ON)}. Renew it to book amenities and enter the club. Your wallet balance stays safe.</p><button class="btn pri" data-act="askRenew">Renew membership</button><button class="btn txt" data-act="closeSheet">Not now</button>`);
+      return;
+    }
+    go('amenities');
+  },
+});
+
+/* ---------- Entry QR ---------- */
+function scrQr() {
+  if (S.expired) {
+    return {
+      html: `${bar('Entry QR', 'close')}<div class="empty" style="margin-top:16px">${club('')}<h2>Entry code unavailable</h2><p>Your membership ended on ${fmtLong(EXPIRED_ON)}. Renew it to get your entry code back.</p><button class="btn pri" data-act="askRenew">Renew membership</button></div>`,
+    };
+  }
+  return {
+    cls: 'qrscreen', enter: S.flip ? 'fade' : undefined, label: 'Entry QR',
+    html: `${bar('Entry QR', 'close')}
+<div class="qrcard" id="qrcard"><div class="qc-top">${av('Rahul Sharma', ' lg')}<span class="grow"><b>Rahul Sharma</b><small>KC1234, Resident member</small></span></div>
+<div class="qc-code">${qrSVG('CLUBONE:M:KC1234:' + sig('KC1234'), 'Entry QR code for Rahul Sharma')}</div>
+<p class="qc-valid">Valid till <b>${fmtLong(S.till)}</b></p></div>
+<p class="qr-help">${ic('sun')}<span>Brightness is raised for scanning. Hold your phone 10 to 15 cm from the scanner at the club entry and exit.</span></p>
+<div class="bloom" aria-hidden="true"></div>`,
+    after(el, re) {
+      const r = S.flip; S.flip = null;
+      if (RM || re) return;
+      flipFrom($('#qrcard', el), r);
+      $('.bloom', el).animate([{ opacity: 0 }, { opacity: .85, offset: .35 }, { opacity: 0 }], { duration: 400, easing: 'ease-out' });
+      $('.qc-code svg', el).animate([{ clipPath: 'circle(0% at 50% 50%)', transform: 'scale(.9)' }, { clipPath: 'circle(72% at 50% 50%)', transform: 'none' }], { duration: 800, delay: 200, easing: SP.soft.e, fill: 'backwards' });
+      stagger([$('.qc-valid', el), $('.qr-help', el)], 420);
+    },
+  };
+}
+
+/* ---------- Amenities ---------- */
+const bookingClosed = () => S.expired;
+const fromPrice = a => a.per ? `${rs(a.m)} per booking` : a.m === 0 ? 'Free for members' : `From ${rs(a.m)} for members`;
+function amRow(a) {
+  return `<a class="acard" href="#/amenity/${a.id}" data-zoom="${a.id}">${amPic(a)}<span class="ac-t"><b>${a.name}</b><span class="ac-s">${a.short}</span><span class="ac-r"><span>${fromPrice(a)}</span>${liveHTML(a)}</span></span></a>`;
+}
+function scrAmenities() {
+  if (bookingClosed()) {
+    return {
+      tabs: true, tab: 'amenities', label: 'Book',
+      html: `${TF}<h1 class="title">Book an amenity</h1><div class="empty" style="margin-top:8px">${club('', true)}
+<h2>Booking is paused</h2>
+<p>Your membership ended on ${fmtLong(EXPIRED_ON)}. Renew it to book amenities.</p>
+<button class="btn pri" data-act="askRenew">Renew membership</button></div>`,
+    };
+  }
+  const list = AM.filter(a => S.filter === 'all' || a.cat === S.filter);
+  return {
+    tabs: true, tab: 'amenities', label: 'Book',
+    html: `${TF}<h1 class="title">Book an amenity</h1>
+<p class="lede">Pick an amenity, then a time. Your QR code comes with the booking.</p>
+<div class="filters pills" role="group" aria-label="Filter amenities">${FILTERS.map(([k, l]) => `<button class="fchip" data-act="filter" data-arg="${k}" aria-pressed="${S.filter === k}">${l}</button>`).join('')}</div>
+<div class="acards">${list.map(amRow).join('')}</div>`,
+    after(el, re) { if (!re) stagger($$('.acard', el)); },
+  };
+}
+function scrAmenity({ id }) {
+  const a = amOf(id), closed = bookingClosed(), z = ZOOM && ZOOM.id === a.id ? ZOOM : null;
+  ZOOM = null;
+  const fact = (l, v, w) => `<div class="fact${w ? ' w' : ''}"><span>${l}</span><b class="num">${v}</b></div>`;
+  const items = [
+    [a.per ? 'Booking' : 'Capacity per slot', a.per ? 'Whole hall' : `${a.cap} people`],
+    [a.per ? 'Price per booking' : 'Member price', a.m ? rs(a.m) : 'Free'],
+  ];
+  if (!a.per) items.push(['Guest price', a.g != null ? rs(a.g) : 'No guests']);
+  if (a.c) items.push(['Guest coach', rs(a.c)]);
+  items.unshift(['Slot length', a.len === 1 ? '1 hour' : `${a.len} hours`]);
+  const facts = fact('Open', `${hm(a.open)} to ${hm(a.close)}`, true) + items.map(([l, v], i) => fact(l, v, items.length % 2 === 1 && i === items.length - 1)).join('');
+  return {
+    tone: 'dark', label: a.name, enter: z ? 'fade' : undefined,
+    html: `${TFC}<div class="hero">${amPic(a, '', true)}<div class="hbar"><button class="ib frost" data-back aria-label="Back">${ic('back')}</button></div></div>
+<div class="sheetc"><h1 class="title">${a.name}</h1>${liveHTML(a)}
+<p class="lede">${a.desc}</p>
+<div class="facts">${facts}</div>
+${a.fl ? `<p class="flnote">${ic('bulb')}<span>From ${hm(a.fl.from)}, flood-light rates apply: ${rs(a.fl.m)} member, ${rs(a.fl.g)} guest, ${rs(a.fl.c)} guest coach.</span></p>` : ''}
+<h2 class="sec">Rules</h2>
+<ul class="rules">${a.rules.map(r => `<li>${r}</li>`).join('')}${a.minAge && !a.rules.some(r => /aged/.test(r)) ? `<li>Members aged ${a.minAge} and over</li>` : ''}<li>Your QR opens the door from 15 minutes before your slot</li></ul>
+${closed ? `<div class="note">${ic('info')}<span>Renew your membership to book.</span></div>` : ''}</div>
+<div class="dock split"><span class="dk-t"><b class="num">${a.m ? rs(a.m) : 'Free'}</b><small>${a.per ? 'per booking' : 'per member'}</small></span><button class="btn pri" data-act="startBooking" data-arg="${a.id}" ${closed ? 'disabled' : ''}>Choose a slot</button></div>`,
+    after(el, re) {
+      heroScroll(el);
+      if (re) return;
+      zoomInto(z, $('.hero .pic', el));
+      if (RM) return;
+      /* while the photo grows into place, the details slide up over its lower edge */
+      $('.sheetc', el).animate([{ transform: 'translateY(64px)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: SP.soft.d, delay: z ? 160 : 60, easing: SP.soft.e, fill: 'backwards' });
+      stagger($$('.fact', el), z ? 300 : 200);
+      $('.dock', el).animate([{ transform: 'translateY(100%)' }, { transform: 'none' }], { duration: SP.sheet.d, delay: 280, easing: SP.sheet.e, fill: 'backwards' });
+    },
+  };
+}
+Object.assign(ACT, {
+  filter(k) { S.filter = k; rerender(); },
+  startBooking(id) { S.draft = newDraft(id); go('slots/' + id); },
+});
+
+/* ---------- Select date and slot ---------- */
+function slotBtn(a, s, d) {
+  const full = s.left === 0, low = !full && a.cap > 1 && s.left <= Math.max(3, Math.round(a.cap * .15)), k = full ? 'full' : low ? 'low' : '';
+  const fillTo = full ? 1 : a.cap === 1 ? 0 : (a.cap - s.left) / a.cap;
+  return `<button class="slot" data-act="pickSlot" data-arg="${s.h}" aria-pressed="${d.slot === s.h}" ${full ? 'disabled' : ''}><span class="tm num">${span(s)}</span><span class="sl ${k}">${full ? 'Full' : a.cap === 1 ? 'Available' : `${s.left} left`}</span><span class="meter" aria-hidden="true"><i class="${k}" style="transform:scaleX(${fillTo.toFixed(3)})"></i></span>${s.price.fl ? `<span class="fl">${ic('bulb')}Flood-light rate, ${rs(s.price.m)} per member</span>` : ''}</button>`;
+}
+function scrSlots({ id }) {
+  const a = amOf(id);
+  if (!S.draft || S.draft.am !== a.id) S.draft = newDraft(a.id);
+  const d = S.draft, slots = slotsFor(a, d.date), dates = [0, 1, 2, 3, 4].map(i => addDays(TODAY, i));
+  if (d.slot != null && !slots.some(s => s.h === d.slot && s.left > 0)) d.slot = null;
+  return {
+    label: 'Select date and slot',
+    html: `${bar('Select date and slot')}<div class="progress" role="img" aria-label="Step 1 of 3"><i class="on"></i><i></i><i></i></div>
+<div class="sum">${amPic(a)}<span><b>${a.name}</b><small>${priceLine(a)}</small></span></div>
+<div class="dates pills" role="group" aria-label="Date">${dates.map((x, i) => { const dd = D(x); return `<button class="date" data-act="pickDate" data-arg="${x}" aria-pressed="${x === d.date}" aria-label="${dayWord(x)}, ${fmtDay(x)}"><small>${i ? WD[dd.getUTCDay()] : 'Today'}</small><b class="num">${dd.getUTCDate()}</b></button>`; }).join('')}</div>
+<div class="slots">${slots.length ? slots.map(s => slotBtn(a, s, d)).join('') : `<p class="note">${ic('info')}<span>No more slots today. The ${a.name.toLowerCase()} closes at ${hm(a.close)}.</span></p>`}</div>
+<div class="dock"><button class="btn pri" id="next1" data-act="slotNext" ${d.slot == null ? 'disabled' : ''}>${a.per ? 'Next: review charges' : "Next: who's coming"}</button></div>`,
+    after(el, re) {
+      if (RM) return;
+      if (re) { stagger($$('.slot', el), 0); return; }   // a new date deals its slots in
+      $$('.meter i', el).forEach((m, i) => m.animate([{ transform: 'scaleX(0)' }, { transform: m.style.transform }], { duration: 700, delay: 160 + i * 50, easing: SP.soft.e, fill: 'backwards' }));
+    },
+  };
+}
+Object.assign(ACT, {
+  pickSlot(h) {
+    S.draft.slot = +h;
+    $$('.slot').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.arg === +h)));
+    pop($(`.slot[data-arg="${h}"]`), .96);
+    const n = $('#next1');
+    if (n.disabled) { n.disabled = false; pop(n, .9); }
+    buzz(8);
+  },
+  pickDate(x) { S.draft.date = x; S.draft.slot = null; rerender(); },
+  slotNext() { if (S.draft.slot == null) return; go(amOf(S.draft.am).per ? 'review' : 'people'); },
+});
+
+/* ---------- Who's coming ---------- */
+const esc = s => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+function guestRow(p, i, pr) {
+  return `<div class="row"><span class="av g">${initials(p.n)}</span><span class="grow"><b>${p.n}</b><small>${typeLabel(p.t)}, ${p.mob}</small></span><span class="num price">${rs(priceOf(p, pr))}</span><button class="ib" data-act="removeGuest" data-arg="${i}" aria-label="Remove ${p.n}">${ic('minus')}</button></div>`;
+}
+function scrPeople() {
+  const d = ensureDraft(), a = amOf(d.am);
+  if (a.per) { later(() => go('review', true), 0); return { html: '' }; }
+  const pr = priceAt(a, d.slot), guests = d.people.map((p, i) => [p, i]).filter(([p]) => isGuest(p));
+  const has = n => d.people.some(p => p.n === n);
+  const famRow = (f, i) => {
+    const young = a.minAge && f.age < a.minAge;
+    return `<div class="row">${av(f.n)}<span class="grow"><b>${f.n}</b><small>${young ? `Not eligible: minimum age ${a.minAge}` : `${f.rel}, ${typeLabel(f.t).toLowerCase()}`}</small></span>${young ? '' : `<span class="num price">${rs(pr.m)}</span><button class="tog" data-act="toggleFam" data-arg="${i}" aria-pressed="${has(f.n)}" aria-label="${has(f.n) ? 'Remove' : 'Add'} ${f.n}">${has(f.n) ? ic('check') + 'Added' : 'Add'}</button>`}</div>`;
+  };
+  const total = d.people.reduce((s, p) => s + priceOf(p, pr), 0);
+  return {
+    label: "Who's coming",
+    html: `${bar("Who's coming?")}<div class="progress" role="img" aria-label="Step 2 of 3"><i class="on"></i><i class="on"></i><i></i></div>
+<div class="sum">${amPic(a)}<span><b>${a.name}</b><small>${dayWord(d.date)}, ${span({ h: d.slot, end: d.slot + a.len })}</small></span></div>
+<h2 class="sec">Members</h2>
+<div class="list"><div class="row">${av('Rahul Sharma')}<span class="grow"><b>Rahul Sharma</b><small>You, member</small></span><span class="num price">${rs(pr.m)}</span></div>${FAM.map(famRow).join('')}</div>
+<h2 class="sec">Guests<span class="cap">${guests.length} of 2</span></h2>
+${a.g == null ? `<p class="note" style="margin-top:0">${ic('info')}<span>Guests are not allowed at the ${a.name.toLowerCase()}.</span></p>`
+      : `${guests.length ? `<div class="list">${guests.map(([p, i]) => guestRow(p, i, pr)).join('')}</div>` : ''}
+${guests.length < 2 ? `<button class="btn sec" style="margin-top:10px" data-act="askGuest">${ic('userplus')}Add guest</button>` : '<p class="cap" style="margin-top:8px">Guest limit reached: 2 per booking.</p>'}
+<p class="fine" style="text-align:left">Each guest gets one pass for the club entry and this amenity, shared from your phone.</p>`}
+<div class="dock"><div class="tl big" style="margin-bottom:12px"><span>Total for ${ppl(d.people.length)}</span><span class="num" data-roll="total" data-v="${total}">${rs(total)}</span></div><button class="btn pri" data-go="review">Next: review charges</button></div>`,
+  };
+}
+Object.assign(ACT, {
+  toggleFam(i) {
+    const f = FAM[+i], d = S.draft, k = d.people.findIndex(p => p.n === f.n);
+    if (k >= 0) d.people.splice(k, 1);
+    else { const gi = d.people.findIndex(isGuest), entry = { n: f.n, t: f.t, pay: 'wallet' }; if (gi < 0) d.people.push(entry); else d.people.splice(gi, 0, entry); }
+    rerender();
+    const t = $(`.tog[data-arg="${i}"]`);
+    pop(t, .86); buzz(8);
+    draw(t && $('path', t), 80, 320);   // "Added" draws its tick
+  },
+  removeGuest(i) { const p = S.draft.people.splice(+i, 1)[0]; rerender(); if (p) toast(`${p.n} removed from this booking`); },
+  askGuest() {
+    const a = amOf(S.draft.am), pr = priceAt(a, S.draft.slot), firstGuest = !S.draft.people.some(isGuest);
+    openSheet(`<h2>Add a guest</h2><p class="sub">Guests enter only with a member, as part of this booking. Each guest gets one pass for the club entry and the ${a.name.toLowerCase()}.</p>
+<label class="field"><span>Guest name</span><input class="input" id="gname" autocomplete="off" value="${firstGuest ? 'Amit Shah' : ''}"></label>
+<label class="field"><span>Guest mobile number</span><span class="phone"><span class="cc">+91</span><input class="input num" id="gmob" inputmode="numeric" autocomplete="off" maxlength="11" value="${firstGuest ? '98200 12345' : ''}"></span></label>
+${a.c ? `<label class="checkl"><input type="checkbox" id="gcoach"><span>This guest is a coach<small>Guest coach rate ${rs(pr.c)} instead of ${rs(pr.g)}</small></span></label>` : ''}
+<p class="ferr" id="gerr" hidden></p>
+<p class="note" style="margin:0 0 16px">${ic('info')}<span>The guest charge for this slot is ${rs(pr.g)}. On the next step you choose who pays: your wallet, or the guest at reception.</span></p>
+<button class="btn pri" data-act="saveGuest">Add guest to booking</button>`, sh => {
+      const m = $('#gmob', sh);
+      m.addEventListener('input', () => { m.value = fmtMob(m.value.replace(/\D/g, '').slice(0, 10)); });
+    });
+  },
+  saveGuest() {
+    const name = $('#gname').value.trim(), m = $('#gmob').value.replace(/\D/g, ''), coach = !!($('#gcoach') && $('#gcoach').checked), err = $('#gerr');
+    const fail = (msg, el) => { err.hidden = false; err.innerHTML = ic('alert') + msg; el.classList.add('bad'); el.focus(); };
+    if (name.length < 2) return fail('Enter the guest’s name.', $('#gname'));
+    if (!/^[6-9]\d{9}$/.test(m)) return fail('Enter the guest’s 10-digit mobile number.', $('#gmob'));
+    S.draft.people.push({ n: esc(name), t: coach ? 'coach' : 'guest', pay: 'wallet', mob: '+91 ' + fmtMob(m) });
+    closeSheet(); rerender(); toast(`${esc(name)} added as a ${coach ? 'guest coach' : 'guest'}`);
+  },
+});
+
+/* ---------- Review and pay ---------- */
+function lineHTML(l) {
+  return `<div class="line">${av(l.n, isGuest(l) ? ' g' : '')}<span class="ln-t"><b>${l.n}</b><small>${l.me ? 'You, member' : typeLabel(l.t)}</small><small>From your wallet</small></span><span class="num ln-a">${rs(l.price)}</span></div>`;
+}
+function scrReview() {
+  const d = ensureDraft(), a = amOf(d.am), pr = priceAt(a, d.slot);
+  const lines = (a.per ? [d.people[0]] : d.people).map((p, i) => ({ ...p, i, price: a.per ? a.m : priceOf(p, pr) }));
+  const wal = lines.reduce((s, l) => s + l.price, 0), short = wal - S.wallet;
+  return {
+    label: 'Review and pay',
+    html: `${bar('Review and pay')}<div class="progress" role="img" aria-label="Step 3 of 3"><i class="on"></i><i class="on"></i><i class="on"></i></div>
+<div class="sum">${amPic(a)}<span><b>${a.name}</b><small>${dayWord(d.date)}, ${span({ h: d.slot, end: d.slot + a.len })}${a.per ? ', whole hall' : `, ${ppl(lines.length)}`}</small></span></div>
+<div class="list">${lines.map(lineHTML).join('')}</div>
+<div class="totals">
+<div class="tl big"><span>Pay from wallet</span><span class="num">${rs(wal)}</span></div>
+<div class="tl"><span>Wallet balance</span><span class="num">${rs(S.wallet)}</span></div>
+${short > 0 ? '' : `<div class="tl"><span>Balance after payment</span><span class="num">${rs(S.wallet - wal)}</span></div>`}
+</div>
+${short > 0 ? `<div class="note err">${ic('alert')}<span>Your wallet is ${rs(short)} short. Add money to continue.</span></div>`
+      : `<div class="note">${ic('info')}<span>Cancel up to 2 hours before the ${a.per ? 'booking' : 'slot'} and the full amount returns to your wallet. No seat is held until the payment goes through.</span></div>`}
+<div class="dock">${short > 0
+      ? `<button class="btn pri" data-act="addFromReview">${ic('plus')}Add money</button>`
+      : `<button class="btn pri" data-act="payNow">${wal ? `<span>Pay ${rs(wal)} from wallet</span>` : 'Confirm booking'}</button>`}</div>`,
+  };
+}
+Object.assign(ACT, {
+  addFromReview() { S.returnTo = 'review'; go('addmoney'); },
+  payNow() { go('paying'); },
+  refill(x) { closeSheet(true); const d = ensureDraft(); if (x === 'slot') { d.slot = null; go('slots/' + d.am, true); } else go('people', true); },
+});
+
+/* ---------- Paying, then the booking prints ---------- */
+function scrPaying() {
+  ensureDraft();
+  return {
+    label: 'Confirming your booking',
+    html: `${TF}<div class="paying"><span class="hg">${ic('hour')}</span><h1 class="title">Confirming your booking</h1><p class="lede">Keep the app open. If you leave, the booking carries on and appears in My bookings. The same request is never charged twice.</p></div>`,
+    after() { later(finalizeBooking, 1700); },
+  };
+}
+function finalizeBooking() {
+  const d = ensureDraft(), a = amOf(d.am);
+  if (S.fillSlot) {
+    S.fillSlot = false;
+    S.full.push(`${a.id}|${d.date}|${d.slot}`);
+    renderDemo();
+    cur.innerHTML = `<div class="paying"><div class="bigic bad">${ic('alert')}</div><h1 class="title">Not enough seats left</h1><p class="lede" style="margin-bottom:24px">Another member took the last seats at ${hm(d.slot)}. Nothing was charged. Pick another slot or change who's coming.</p><div class="stack" style="width:100%"><button class="btn pri" data-act="refill" data-arg="slot">Choose another slot</button><button class="btn sec" data-act="refill" data-arg="people">Edit who's coming</button></div></div>`;
+    if (!RM) $('.bigic', cur).animate([{ transform: 'scale(.6)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 420, easing: ES });
+    buzz([40, 60, 40]);
+    return;
+  }
+  const b = createBooking();
+  go('confirmed/' + b.id, true);
+}
+function createBooking() {
+  const d = ensureDraft(), a = amOf(d.am), pr = priceAt(a, d.slot);
+  const people = (a.per ? [d.people[0]] : d.people).map(p => ({ ...p, p: a.per ? a.m : priceOf(p, pr) }));
+  const wal = people.reduce((s, p) => s + p.p, 0);
+  const id = `CB-${d.date.slice(2).replace(/-/g, '')}-${String(142 + S.bookings.length * 7).padStart(4, '0')}`;
+  const b = { id, am: a.id, date: d.date, h: d.slot, end: d.slot + a.len, st: 'confirmed', paid: wal, people, app: true };
+  S.wallet -= wal;
+  S.bookings.unshift(b);
+  if (wal) S.txns.unshift({ id: 'TX-' + (9300 + S.txns.length), k: 'debit', t: `${a.name} booking`, d: STAMP, a: wal, ref: id, m: 'Wallet' });
+  S.notes.unshift({ t: 'Booking confirmed', b: `${a.name}, ${dayWord(b.date).toLowerCase()}, ${span(b)}. Your QR code is ready.`, d: 'Today, ' + CLOCK, ic: 'check', unread: true, ref: id });
+  people.filter(isGuest).forEach(g => S.notes.unshift({ t: 'Guest pass issued', b: `Share the pass with ${g.n} from the booking.`, d: 'Today, ' + CLOCK, ic: 'userplus', unread: true, ref: id }));
+  S.draft = null;
+  syncBookings();
+  return b;
+}
+/* hand bookings made here to the admin portal (same browser): it reads this key, also live in another tab */
+function syncBookings() {
+  const mine = S.bookings.filter(b => b.app).map(b => ({ ref: b.id, no: 'KC1234', who: 'Rahul Sharma', am: amOf(b.am).name, slot: span(b), day: dayWord(b.date), people: b.people.length, guests: b.people.filter(isGuest).map(g => g.n), amt: b.paid, payer: 'Wallet', status: b.st === 'cancelled' ? 'Cancelled' : 'Confirmed' }));
+  try { localStorage.setItem('clubone.appBookings', JSON.stringify(mine)); } catch (e) { /* storage blocked: the admin just won't see it */ }
+}
+function guestCard(b, g, i, when) {
+  const a = amOf(b.am), gone = b.st === 'cancelled', done = b.st === 'used';
+  const chip = gone ? `<span class="chip bad">${ic('xc')}Revoked</span>` : done ? `<span class="chip mute">${ic('check')}Visit completed</span>` : `<span class="chip ok">${ic('check')}Pass issued</span>`;
+  return `<section class="gpass"><div class="gp-top"><span class="av g">${initials(g.n)}</span><span class="grow"><b>${g.n}</b><small>${typeLabel(g.t)} pass for the club entry and the ${a.name.toLowerCase()}</small>${when ? `<small>${dayWord(b.date)}, ${span(b)}</small>` : ''}</span>${chip}</div>${gone || done ? ''
+    : `<button class="btn sec" data-act="shareGuest" data-arg="${b.id}:${i}">${ic('share')}Share guest pass</button>`}</section>`;
+}
+/* the tick lands with a ring of light and a small burst of colour that falls away */
+function burst(fx) {
+  if (!fx || RM) return;
+  const C = ['#0066cc', '#087A55', '#34c759', '#5ac8fa', '#ffcc00'];
+  fx.innerHTML = '<i class="ripple"></i>' + C.concat(C, C, C).map(c => `<i style="background:${c}"></i>`).join('');
+  const [ring, ...bits] = fx.children;
+  ring.animate([{ transform: 'scale(.9)', opacity: .8 }, { transform: 'scale(3.6)', opacity: 0 }], { duration: 1000, easing: 'cubic-bezier(.2,.7,.3,1)', fill: 'forwards' });
+  bits.forEach((p, i) => {
+    const t = i / bits.length * Math.PI * 2 + Math.random() * .4, r = 80 + Math.random() * 70, x = Math.cos(t) * r, y = Math.sin(t) * r * .75 - 16, s = Math.random() * 360;
+    p.animate([
+      { transform: 'translate(0,0) rotate(0deg) scale(.3)', opacity: 1, easing: 'cubic-bezier(.1,.8,.3,1)' },
+      { transform: `translate(${x}px,${y}px) rotate(${s}deg) scale(1)`, opacity: 1, offset: .42, easing: 'cubic-bezier(.5,0,.9,.6)' },
+      { transform: `translate(${x * 1.15}px,${y + 70}px) rotate(${s + 160}deg) scale(.8)`, opacity: 0 },
+    ], { duration: 1200 + Math.random() * 400, fill: 'forwards' });
+  });
+}
+function scrConfirmed({ id }) {
+  const b = bk(id) || S.bookings[0], a = amOf(b.am), guests = b.people.map((p, i) => [p, i]).filter(([p]) => isGuest(p));
+  const chk = `<svg class="check" viewBox="0 0 56 56" aria-hidden="true"><circle cx="28" cy="28" r="27" fill="#087A55"/><path d="M16 29l8 8 16-17" fill="none" stroke="#fff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" style="stroke-dasharray:1;stroke-dashoffset:${RM ? 0 : 1}"/></svg>`;
+  return {
+    enter: 'fade', label: 'Booking confirmed',
+    html: `${TF}<div class="cf-head"><div class="cf-fx" aria-hidden="true"></div>${chk}<h1 class="title">Booking confirmed</h1><p class="lede">Show this QR at the ${a.name.toLowerCase()} door from ${hm(b.h - .25)}.</p></div>
+<div class="printer"><div class="slotbar" aria-hidden="true"></div><div class="paper"><div class="tk-big" id="tkbig">${amPic(a, 'tk-band', true)}
+<div class="tb-top"><span class="grow"><b>${a.name}</b><small>${dayWord(b.date)}, ${span(b)}</small></span></div>
+<div class="perf" aria-hidden="true"></div>
+<div class="qrwrap" id="qrwrap">${qrSVG('CLUBONE:B:' + b.id + ':' + sig(b.id), 'Booking QR code')}<span class="scanline" aria-hidden="true"></span></div>
+<div class="tb-meta"><span>Booking<b class="num">${b.id}</b></span><span>${a.per ? 'Booking' : 'People'}<b class="num">${a.per ? 'Whole hall' : b.people.length}</b></span><span>Paid<b class="num">${rs(b.paid)}</b></span></div>
+</div></div></div>
+${guests.map(([g, i]) => guestCard(b, g, i)).join('')}
+<div class="dock"><div class="stack"><button class="btn pri" data-go="home">Done</button><button class="btn txt" data-go="booking/${b.id}">View booking details</button></div></div>`,
+    after(el, re) {
+      if (RM || re) { const p = $('.check path', el); if (p) p.style.strokeDashoffset = 0; return; }
+      const tk = $('#tkbig', el), svg = $('#qrwrap svg', el), line = $('.scanline', el), c = $('.check', el), path = $('.check path', el);
+      /* the ticket feeds out of the slot, its code prints line by line, then the tick lands */
+      tk.animate([{ transform: 'translateY(-101%)' }, { transform: 'translateY(0)' }], { duration: 760, delay: 120, easing: 'cubic-bezier(.3,.6,.2,1)', fill: 'backwards' });
+      svg.animate([{ clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0 0)' }], { duration: 520, delay: 760, easing: 'linear', fill: 'backwards' });
+      line.animate([{ top: '0%', opacity: 1 }, { top: '100%', opacity: 1, offset: .9 }, { top: '100%', opacity: 0 }], { duration: 520, delay: 760, easing: 'linear' });
+      c.animate([{ transform: 'scale(.3)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: SP.bouncy.d, delay: 1260, easing: SP.bouncy.e, fill: 'backwards' });
+      path.animate([{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: 360, delay: 1380, easing: EO, fill: 'forwards' });
+      later(() => { burst($('.cf-fx', el)); buzz(25); }, 1320);
+      stagger([...$$('.gpass', el), $('.dock', el)], 1300);
+    },
+  };
+}
+/* share targets drawn as a phone's share sheet shows them (simplified app icons) */
+const SHARE_APPS = {
+  WhatsApp: '<svg viewBox="0 0 56 56" aria-hidden="true"><rect width="56" height="56" rx="13" fill="#25D366"/><path d="M28 14a14 14 0 0 0-12.1 21L14 42l7.2-1.9A14 14 0 1 0 28 14z" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><path d="M23.2 21.8c.5-.5 1.2-.4 1.6.1l1.5 2.2c.3.5.3 1.1-.1 1.5l-.8.8c.8 1.7 2.2 3.1 3.9 3.9l.8-.8c.4-.4 1-.5 1.5-.1l2.2 1.5c.6.4.6 1.1.1 1.6l-.9.9c-.9.9-2.2 1.1-3.3.6a12.3 12.3 0 0 1-6.9-6.9c-.5-1.1-.3-2.4.6-3.3z" fill="#fff"/></svg>',
+  Messages: '<svg viewBox="0 0 56 56" aria-hidden="true"><rect width="56" height="56" rx="13" fill="#34C759"/><path d="M28 15.5c-7.9 0-14.3 5.3-14.3 11.9 0 3.8 2.1 7.2 5.4 9.3-.2 1.9-.9 3.6-2.3 5 2.9 0 5.4-.9 7.3-2.6 1.2.3 2.5.4 3.9.4 7.9 0 14.3-5.3 14.3-12.1S35.9 15.5 28 15.5z" fill="#fff"/></svg>',
+  Gmail: '<svg viewBox="0 0 56 56" aria-hidden="true"><rect x=".5" y=".5" width="55" height="55" rx="12.5" fill="#fff" stroke="#e0e0e0"/><path d="M15 21.5V37a2 2 0 0 0 2 2h4V27z" fill="#4285F4"/><path d="M35 39h4a2 2 0 0 0 2-2V21.5L35 27z" fill="#34A853"/><path d="M35 27v-8.6l2.6-1.9A2.4 2.4 0 0 1 41 18.4v3.1z" fill="#FBBC04"/><path d="M21 27v-8.6l7 5.2 7-5.2V27l-7 5.2z" fill="#EA4335"/><path d="M15 21.5v-3.1a2.4 2.4 0 0 1 3.4-1.9l2.6 1.9V27z" fill="#C5221F"/></svg>',
+  'Copy link': `<svg viewBox="0 0 56 56" aria-hidden="true"><rect width="56" height="56" rx="13" fill="#8e8e93"/><g transform="translate(16 16)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round">${P.link}</g></svg>`,
+  More: '<svg viewBox="0 0 56 56" aria-hidden="true"><rect width="56" height="56" rx="13" fill="#e5e5ea"/><circle cx="19" cy="28" r="2.6" fill="#1d1d1f"/><circle cx="28" cy="28" r="2.6" fill="#1d1d1f"/><circle cx="37" cy="28" r="2.6" fill="#1d1d1f"/></svg>',
+};
+const gpOf = arg => { const [bid, i] = arg.split(':'), b = bk(bid), g = b && b.people[+i]; return g ? { b, g, i: +i, a: amOf(b.am), first: g.n.split(' ')[0] } : null; };
+const gpQR = (x, n) => qrSVG(`CLUBONE:G:${x.b.id}:${x.i}:${n}:${sig(x.b.id + x.i + n)}`, `Guest pass QR code for ${x.g.n}`);
+const shotNote = first => `<p class="shotnote">${ic('noshot')}<span>Screenshots don’t work on passes. The code changes every 30 seconds, so ${first} shows the live pass at the gate.</span></p>`;
+Object.assign(ACT, {
+  shareGuest(arg) {
+    const x = gpOf(arg); if (!x) return;
+    openSheet(`<h2>Share guest pass</h2><p class="sub">${x.g.n} opens the pass on their phone and shows it at the club entry and at the ${x.a.name.toLowerCase()}. Sharing again is free.</p>
+<div class="qrwrap ring" style="width:164px">${gpQR(x, 0)}</div>${shotNote(x.first)}
+<div class="share-apps">${Object.entries(SHARE_APPS).map(([n, svg]) => `<button class="sapp" data-act="shareTo" data-arg="${arg}|${n}">${svg}<span>${n}</span></button>`).join('')}</div>`);
+  },
+  shareTo(v) {
+    const [arg, app] = v.split('|'), x = gpOf(arg); if (!x) return;
+    if (app === 'Copy link') { closeSheet(); toast('Pass link copied. Paste it in any chat.'); return; }
+    if (app === 'More') { closeSheet(); toast('Your phone’s own share sheet opens here'); return; }
+    const when = `${dayWord(x.b.date).toLowerCase()}, ${span(x.b)}`, via = app === 'Gmail' ? 'by email' : `on ${app}`;
+    const card = `<span class="lp">${amPic(x.a, '', true)}<b>Guest pass for ${x.g.n}</b><small>${x.a.name}, ${when}. The Clubhouse</small></span>`;
+    const msg = `Hi ${x.first}, here is your guest pass for the ${x.a.name.toLowerCase()}, ${when}. Open the link at the club entry. Rahul`;
+    const ticks = '<svg viewBox="0 0 16 11" aria-label="Read"><path d="M1 6l3 3 6-7M6 9l1 1 6-7" fill="none" stroke="#53bdeb" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    const body = app === 'Gmail'
+      ? `<div class="mail"><div class="from">${av('Rahul Sharma')}<span><b>Rahul Sharma via ClubOne</b><small>to ${x.g.n}</small></span></div><h3>Your guest pass for The Clubhouse</h3>${card}<p style="margin-top:10px">${msg}</p></div>`
+      : `<div class="chat${app === 'Messages' ? ' sms' : ''}"><div class="chat-h"><span class="av g">${initials(x.g.n)}</span><span><b>${x.g.n}</b><small>${x.g.mob || ''}</small></span></div><div class="chat-b"><div class="bub">${card}<p>${msg}</p><span class="meta">${CLOCK}${app === 'WhatsApp' ? ticks : ''}</span></div></div></div>`;
+    sheetBody(`<h2>Sent ${via}</h2><p class="sub">This is what ${x.first} receives.</p>${body}<button class="btn pri" data-act="guestView" data-arg="${arg}">See what ${x.first} sees</button><button class="btn txt" data-act="closeSheet">Done</button>`);
+    toast(`Guest pass sent ${via}`);
+  },
+  guestView(arg) {
+    const x = gpOf(arg); if (!x) return;
+    sheetBody(`<h2>${x.first}’s pass</h2><p class="sub">The link opens this page in ${x.first}’s browser. No app needed.</p>
+<div class="gview"><div class="gv-url">${ic('lock')}Guest pass link from ClubOne</div><div class="gv-page">
+<span class="brand">ClubOne<small>The Clubhouse</small></span><h3>Guest pass</h3><b>${x.g.n}</b><small style="display:block;color:var(--ink2)">Guest of Rahul Sharma</small>
+<div class="qrwrap ring" id="gv-qr">${gpQR(x, 0)}</div><span class="gv-count" id="gv-count" aria-live="off">New code in 30 s</span>
+<div class="gv-facts"><span>Amenity<b>${x.a.name}</b></span><span>When<b>${dayWord(x.b.date)}, ${span(x.b)}</b></span><span>Entry from<b>${hm(x.b.h - .25)}</b></span><span>Pass<b>One visit</b></span></div>
+${shotNote(x.first)}
+<button class="btn sec" style="margin-top:14px" data-act="tryShot">${ic('noshot')}Try a screenshot</button></div></div>
+<button class="btn txt" data-act="closeSheet">Done</button>`);
+    let left = 30, n = 0;
+    const t = setInterval(() => {  // the live code: a screenshot is stale within 30 seconds
+      const c = $('#gv-count'); if (!c) return clearInterval(t);
+      if (--left === 0) { left = 30; $('#gv-qr').innerHTML = gpQR(x, ++n); }
+      c.textContent = `New code in ${left} s`;
+    }, 1000);
+  },
+  tryShot() { scanResult(false, 'Screenshot not allowed', 'Passes can’t be captured. Keep the pass open and show it at the gate.', 'shot'); },
+});
+/* a real screenshot key while a pass is on screen shows the same warning (handy while presenting) */
+addEventListener('keyup', e => { if (e.key === 'PrintScreen' && $('.qrwrap svg')) ACT.tryShot(); });
+
+/* ---------- My bookings and booking details ---------- */
+function scrBookings() {
+  const key = b => b.date + String(b.h).padStart(2, '0');
+  const up = upcoming(), hist = S.bookings.filter(b => b.st !== 'confirmed' && b.st !== 'inuse').sort((x, y) => key(y).localeCompare(key(x)));
+  const list = S.bkTab === 'up' ? up : hist;
+  const tab = (v, l) => `<button role="tab" data-act="bkTab" data-arg="${v}" aria-selected="${S.bkTab === v}" aria-pressed="${S.bkTab === v}">${l}</button>`;
+  return {
+    tabs: true, tab: 'bookings', label: 'My bookings',
+    html: `${TF}<h1 class="title">My bookings</h1>
+<div class="seg wide pills" role="tablist" aria-label="Bookings">${tab('up', 'Upcoming')}${tab('hist', 'History')}</div>
+${list.length ? `<div class="tickets">${list.map(ticketHTML).join('')}</div>`
+      : S.bkTab === 'up' ? `<div class="empty">${amPic(amOf('badminton'))}<h2>No upcoming bookings</h2><p>Book a court, the pool or the gym. Your QR code appears here.</p><button class="btn pri" data-act="book">Book amenity</button></div>`
+        : '<p class="cap">Past bookings appear here.</p>'}`,
+    after(el, re) { stagger($$('.tickets > *, .empty', el), re ? 0 : 80); },
+  };
+}
+function personRow(p) {
+  const how = 'paid from wallet';
+  return `<div class="row">${av(p.n, isGuest(p) ? ' g' : '')}<span class="grow"><b>${p.n}</b><small>${p.me ? 'You' : typeLabel(p.t)}, ${how}</small></span><span class="num price">${rs(p.p || 0)}</span></div>`;
+}
+const histLine = b => b.st === 'used' ? `Used on ${fmtDay(b.date)}. Thanks for visiting.` : b.st === 'cancelled' ? 'Cancelled. The full amount went back to your wallet.' : 'Expired. The slot ended without a scan.';
+function refundSteps(b) {
+  const k = ['initiated', 'processing', 'completed'].indexOf(b.refund), all = b.refund === 'completed';
+  const steps = [['Initiated', 'Cancellation received'], ['Processing', 'Crediting your wallet'], ['Completed', 'The money is in your wallet']];
+  return `<section class="steps" aria-live="polite"><h3>Refund of ${rs(b.paid)} to your wallet</h3>${steps.map(([t, s], i) => {
+    const done = all || i < k, now = !all && i === k;
+    return `<div class="step${done ? ' done' : now ? ' now' : ''}"><i>${done ? ic('check') : ''}</i><span><b>${t}</b><small>${s}</small></span></div>`;
+  }).join('')}</section>`;
+}
+function scrBooking({ id }) {
+  const b = bk(id) || S.bookings[0], a = amOf(b.am), live = b.st === 'confirmed' || b.st === 'inuse';
+  const canCancel = b.st === 'confirmed' && hoursUntil(b) >= 2;
+  return {
+    label: 'Booking details',
+    html: `${bar('Booking details')}
+<div class="tk-big solo"><div class="tb-top">${amPic(a)}<span class="grow"><b>${a.name}</b><small>${dayWord(b.date)}, ${span(b)}</small></span>${statusChip(b)}</div>
+<div class="perf" aria-hidden="true"></div>
+${live ? `<div class="qrwrap">${qrSVG('CLUBONE:B:' + b.id + ':' + sig(b.id), 'Booking QR code')}</div><p class="fine">${b.st === 'inuse' ? 'You are admitted. Scan the same QR at the door to leave.' : `Scan at the ${a.name.toLowerCase()} door from ${hm(b.h - .25)}.`}</p>` : `<p class="fine" style="margin:0">${histLine(b)}</p>`}
+<div class="tb-meta"><span>Booking<b class="num">${b.id}</b></span><span>${a.per ? 'Booking' : 'People'}<b class="num">${a.per ? 'Whole hall' : b.people.length}</b></span><span>Paid<b class="num">${rs(b.paid)}</b></span></div></div>
+<h2 class="sec">${a.per ? 'Booked by' : "Who's coming"}</h2>
+<div class="list">${b.people.map(personRow).join('')}</div>
+${b.people.some(isGuest) && live ? `<button class="btn sec" style="margin-top:12px" data-go="guests">${ic('userplus')}Guest passes</button>` : ''}
+${b.refund ? refundSteps(b) : ''}
+${b.st === 'confirmed' ? (canCancel
+      ? `<button class="btn sec" style="margin-top:24px" data-act="askCancel" data-arg="${b.id}">Cancel booking</button><p class="fine">Free cancellation until ${dayWord(b.date)}, ${hm(b.h - 2)}.</p>`
+      : `<div class="note warn">${ic('clock')}<span>Cancellation closed at ${hm(b.h - 2)}. Bookings can be cancelled up to 2 hours before the slot.</span></div>`) : ''}`,
+  };
+}
+Object.assign(ACT, {
+  bkTab(k) { S.bkTab = k; rerender(); },
+  askCancel(id) {
+    const b = bk(id), a = amOf(b.am);
+    openSheet(`<h2>Cancel this booking?</h2><p class="sub">${a.name}, ${dayWord(b.date)}, ${span(b)}.</p><div class="totals" style="margin:0 0 24px"><div class="tl big"><span>Refund to your wallet</span><span class="num">${rs(b.paid)}</span></div><div class="tl"><span>Guest passes</span><span>${b.people.some(isGuest) ? 'Revoked' : 'None'}</span></div></div><div class="stack"><button class="btn pri" data-act="doCancel" data-arg="${id}">Cancel booking</button><button class="btn txt" data-act="closeSheet">Keep booking</button></div>`);
+  },
+  doCancel(id) {
+    const b = bk(id), a = amOf(b.am);
+    b.st = 'cancelled'; b.refund = b.paid ? 'initiated' : null;
+    if (b.app) syncBookings();
+    closeSheet(); rerender(); toast(b.paid ? 'Booking cancelled. Your refund has started.' : 'Booking cancelled');
+    if (!b.paid) return;
+    setTimeout(() => { b.refund = 'processing'; if (curPath === 'booking/' + id) rerender(); }, 1300);
+    setTimeout(() => {
+      b.refund = 'completed'; S.wallet += b.paid;
+      S.txns.unshift({ id: 'TX-' + (9400 + S.txns.length), k: 'refund', t: `Refund: ${a.name.toLowerCase()} booking cancelled`, d: STAMP, a: b.paid, ref: b.id, m: 'Wallet' });
+      S.notes.unshift({ t: 'Refund completed', b: `₹${inr(b.paid)} for your cancelled ${a.name.toLowerCase()} booking is back in your wallet.`, d: 'Today, ' + CLOCK, ic: 'refund', unread: true, ref: b.id });
+      if (curPath === 'booking/' + id) rerender();
+      toast(`₹${inr(b.paid)} refunded to your wallet`);
+    }, 3000);
+  },
+});
+
+/* ---------- Wallet ---------- */
+function txRow(t) {
+  return `<button class="row" data-act="receipt" data-arg="${t.id}"><span class="txi ${t.k}">${ic(t.k === 'topup' ? 'down' : t.k === 'refund' ? 'refund' : 'up')}</span><span class="grow"><b>${t.t}</b><small>${t.d}, ${t.m}</small></span><span class="num tx-a ${t.k}">${t.k === 'debit' ? '−' : '+'}${rs(t.a)}</span></button>`;
+}
+function scrWallet() {
+  const k = S.wTab, list = S.txns.filter(t => k === 'all' || t.k === k), roll = S.roll;
+  const tabs = [['all', 'All'], ['topup', 'Top-ups'], ['debit', 'Debits'], ['refund', 'Refunds']];
+  return {
+    tabs: true, tab: 'wallet', label: 'Wallet',
+    html: `${TF}<h1 class="title">Wallet</h1>
+<section class="balance" aria-label="Wallet balance"><span class="cap">Balance</span><span class="bal" id="bal">${odoHTML(roll ? roll.from : S.wallet)}</span><p class="sub">Pays for bookings, guest charges and membership fees. The balance never goes below zero.</p><button class="btn pri sm" data-go="addmoney">Add money</button></section>
+<div class="seg wide pills" role="tablist" aria-label="Transactions">${tabs.map(([v, l]) => `<button role="tab" data-act="wTab" data-arg="${v}" aria-selected="${k === v}" aria-pressed="${k === v}">${l}</button>`).join('')}</div>
+<div class="list">${list.length ? list.map(txRow).join('') : '<p class="row cap">Nothing here yet.</p>'}</div>`,
+    after(el, re) {
+      stagger($$('.list > *', el), re ? 0 : 160);
+      if (!roll) return;
+      S.roll = null;
+      later(() => rollOdo($('#bal', el), roll.from, roll.to), RM ? 0 : 300);
+    },
+  };
+}
+function scrAddMoney() {
+  const v = S.topAmt;
+  return {
+    label: 'Add money',
+    html: `${bar('Add money')}<p class="cap" style="text-align:center;margin-top:6px">Wallet balance ${rs(S.wallet)}</p>
+<label class="amt"><span class="cur">₹</span><input id="amt" class="num" inputmode="numeric" autocomplete="off" value="${v ? inr(v) : ''}" aria-label="Amount to add, in rupees"></label>
+<p class="ferr" id="amterr" hidden style="justify-content:center"></p>
+<div class="chips" role="group" aria-label="Quick amounts">${[500, 1000, 2000, 5000].map(x => `<button class="fchip" data-act="amtChip" data-arg="${x}" aria-pressed="${x === v}">${rs(x)}</button>`).join('')}</div>
+<p class="fine" style="margin-top:22px">Pay by UPI, card or net banking through Cashfree. The money reaches your wallet once your bank confirms.</p>
+<div class="dock"><button class="btn pri" id="addbtn" data-act="topup">Add <span data-roll="add" data-v="${v || 0}">${rs(v || 0)}</span></button></div>`,
+    after(el) {
+      const i = $('#amt', el);
+      i.addEventListener('input', () => {
+        const n = +i.value.replace(/\D/g, '').slice(0, 6) || 0;
+        i.value = n ? inr(n) : ''; S.topAmt = n;
+        $('#addbtn', el).innerHTML = `Add <span data-roll="add" data-v="${n}">${rs(n)}</span>`;
+        $$('.fchip', el).forEach(c => c.setAttribute('aria-pressed', String(+c.dataset.arg === n)));
+        $('#amterr', el).hidden = true;
+      });
+      i.addEventListener('keydown', e => { if (e.key === 'Enter') ACT.topup(); });
+    },
+  };
+}
+function cfMethods(n) {
+  const m = S.cfm;
+  return `<div class="cfh"><span class="cfi">${ic('shield')}</span><span class="grow"><b>Cashfree checkout</b><small>Paying The Clubhouse, secured by Cashfree</small></span><b class="num">${rs(n)}</b></div>
+<p class="cfs">UPI</p><div class="upis">${['Google Pay', 'PhonePe', 'Paytm', 'BHIM'].map(x => `<button class="upi" data-act="cfPick" data-arg="${x}" aria-pressed="${m === x}"><i>${x[0]}</i>${x}</button>`).join('')}</div>
+<p class="cfs">Other ways to pay</p>
+<button class="row cfm" data-act="cfPick" data-arg="Card" aria-pressed="${m === 'Card'}">${ic('card')}<span class="grow"><b>Debit or credit card</b></span></button>
+<button class="row cfm" data-act="cfPick" data-arg="Net banking" aria-pressed="${m === 'Net banking'}">${ic('bank')}<span class="grow"><b>Net banking</b></span></button>
+<button class="btn pri" style="margin-top:8px" data-act="cfPay">Pay ${rs(n)}</button>`;
+}
+function topupDone(n, method, open) {
+  const from = S.wallet;
+  S.wallet += n;
+  S.txns.unshift({ id: 'TX-' + (9500 + S.txns.length), k: 'topup', t: 'Wallet top-up', d: STAMP, a: n, ref: 'CF-ORD-' + (78100 + S.txns.length), m: ['Card', 'Net banking'].includes(method) ? method : 'UPI' });
+  S.notes.unshift({ t: 'Wallet top-up received', b: `₹${inr(n)} was added to your wallet.`, d: 'Today, ' + CLOCK, ic: 'wallet', unread: true });
+  const msg = `₹${inr(n)} added to your wallet`;
+  if (!open) { toast(msg); rerender(); return; }
+  closeSheet();
+  if (S.returnTo) { S.returnTo = null; back(); } else { S.roll = { from, to: S.wallet }; go('wallet'); }
+  toast(msg);
+}
+Object.assign(ACT, {
+  wTab(k) { S.wTab = k; rerender(); },
+  receipt(id) {
+    const t = S.txns.find(x => x.id === id);
+    if (!t) return;
+    const rows = [['Date', t.d], ['Paid by', t.m], ['Reference', t.ref], ['Status', t.k === 'refund' ? 'Completed' : 'Paid'], ['Receipt no.', 'RC-' + t.id.slice(3)]];
+    openSheet(`<div class="bigic${t.k === 'debit' ? '' : ' ok'}">${ic('receipt')}</div><h2 class="center num" style="font-size:36px">${t.k === 'debit' ? '−' : '+'}${rs(t.a)}</h2><p class="sub center">${t.t}</p><div class="list kv">${rows.map(([l, v]) => `<div class="row"><span>${l}</span><b>${v}</b></div>`).join('')}</div><button class="btn sec" style="margin-top:16px" data-act="closeSheet">Done</button>`);
+  },
+  amtChip(x) { S.topAmt = +x; rerender(); pop($('.chips [aria-pressed=true]')); buzz(8); },
+  topup() {
+    const n = S.topAmt;
+    if (!(n >= 100 && n <= 50000)) { const e = $('#amterr'); e.hidden = false; e.innerHTML = `${ic('alert')}Add between ₹100 and ₹50,000.`; return; }
+    openSheet(cfMethods(n));
+  },
+  cfPick(x) { S.cfm = x; sheetBody(cfMethods(S.topAmt)); },
+  cfRetry() { sheetBody(cfMethods(S.topAmt)); },
+  cfPay() {
+    const n = S.topAmt, method = S.cfm;
+    sheetBody(`<div class="cfstate"><span class="hg">${ic('hour')}</span><h2>Waiting for your bank</h2><p>Approve the payment in ${['Card', 'Net banking'].includes(method) ? 'your bank’s page' : method}. If money leaves your account, it reaches your wallet even if you close this screen.</p></div>`);
+    setTimeout(() => {
+      const open = !sheetsEl.hidden && !!$('.cfstate', sheetsEl);
+      if (S.failTop) {
+        S.failTop = false; renderDemo();
+        if (open) sheetBody(`<div class="cfstate"><div class="bigic bad">${ic('xc')}</div><h2>Payment failed</h2><p>Nothing was added to your wallet. Your bank declined the payment.</p><div class="stack"><button class="btn pri" data-act="cfRetry">Try again</button><button class="btn txt" data-act="closeSheet">Close</button></div></div>`);
+        return;
+      }
+      topupDone(n, method, open);
+    }, 1800);
+  },
+});
+
+/* ---------- Notifications, More, Profile ---------- */
+function scrNotes() {
+  S.notes.forEach(n => { n.id = n.id || 'n' + (++noteSeq); });
+  const html = `${bar('Notifications')}<div class="list">${S.notes.map(n => `<button class="row nt" data-go="notification/${n.id}">${noteIcon(n)}<span class="grow"><b>${n.t}</b><small>${n.b}</small><small>${n.d}</small></span>${n.unread ? '<span class="ud"><span class="sr">Unread</span></span>' : ''}${ic('chev')}</button>`).join('')}</div>`;
+  S.notes.forEach(n => { n.unread = false; });
+  return { label: 'Notifications', html, after(el) { stagger($$('.list > *', el), 80); } };
+}
+/* One notification in full: what happened, when, the reference, and a way straight to the thing it is about */
+let noteSeq = 0;
+const noteTone = n => n.ic === 'check' || n.ic === 'wallet' ? 'topup' : n.ic === 'refund' ? 'refund' : '';
+const noteIcon = (n, cls = '') => `<span class="txi ${noteTone(n)}${cls}">${ic(n.ic)}</span>`;
+function noteAction(n) {
+  if (n.ic === 'userplus') return ['guests', 'Open guest passes'];
+  if (n.ref && bk(n.ref)) return ['booking/' + n.ref, 'View booking'];
+  if (n.ic === 'wallet' || n.ic === 'refund') return ['wallet', 'Open wallet'];
+  if (/Membership/.test(n.t)) return ['profile', 'View membership'];
+  return null;
+}
+function scrNote({ id }) {
+  const n = S.notes.find(x => x.id === id) || S.notes[0], go2 = noteAction(n), b = n.ref && bk(n.ref);
+  const kind = { check: 'Booking', userplus: 'Guest pass', wallet: 'Wallet', refund: 'Refund', door: 'Club entry', exit: 'Club exit' }[n.ic] || 'Update';
+  const rows = [['Received', n.d], ['Type', kind], n.ref ? ['Reference', n.ref] : null, b ? ['Amenity', `${amOf(b.am).name}, ${dayWord(b.date)}, ${span(b)}`] : null].filter(Boolean);
+  n.unread = false;
+  return {
+    label: n.t,
+    html: `${bar('Notification')}<div class="nd-head">${noteIcon(n, ' nd-ic')}<h1 class="title">${n.t}</h1><p class="lede">${n.b}</p></div>
+<div class="list kv">${rows.map(([l, v]) => `<div class="row"><span>${l}</span><b class="num">${v}</b></div>`).join('')}</div>
+${go2 ? `<div class="dock"><button class="btn pri" data-go="${go2[0]}">${go2[1]}</button></div>` : ''}`,
+    after(el) { if (!RM) { pop($('.nd-ic', el), .6); stagger($$('.list .row', el), 160); } },
+  };
+}
+function scrMore() {
+  const row = (to, i, t, s) => `<button class="row" data-go="${to}">${ic(i)}<span class="grow"><b>${t}</b>${s ? `<small>${s}</small>` : ''}</span>${ic('chev')}</button>`;
+  return {
+    tabs: true, tab: 'more', label: 'More',
+    html: `${TF}<h1 class="title">More</h1>
+<button class="me" data-go="profile">${av('Rahul Sharma', ' lg')}<span class="grow"><b>Rahul Sharma</b><small>KC1234, Resident member</small></span>${ic('chev')}</button>
+<div class="list">${row('profile', 'user', 'Profile and membership', S.expired ? 'Expired, renew now' : `Valid till ${fmtLong(S.till)}`)}${row('guests', 'userplus', 'Guest passes')}${row('notifications', 'bell', 'Notifications')}${row('help', 'help', 'Help and support')}${row('demo', 'sliders', 'Demo controls', 'Show an expired membership')}</div>
+<div class="list" style="margin-top:14px"><button class="row" data-act="askSignout">${ic('logout')}<span class="grow"><b>Sign out</b></span></button></div>
+<p class="ver">Kaizen ClubOne 1.0. Prototype with sample data.</p>`,
+    after(el) { stagger($$('.me, .list', el), 60); },
+  };
+}
+function scrProfile() {
+  const kv = [['Member no.', 'KC1234'], ['Membership', 'Resident'], [S.expired ? 'Expired on' : 'Valid till', fmtLong(S.expired ? EXPIRED_ON : S.till)], ['Flat', '1402, Tower B'], ['Mobile', '+91 98765 43210'], ['App lock', S.lock || 'Off']];
+  return {
+    label: 'Profile and membership',
+    html: `${bar('Profile and membership')}${passHTML()}
+<div class="list kv" style="margin-top:16px">${kv.map(([l, v]) => `<div class="row"><span>${l}</span><b>${v}</b></div>`).join('')}</div>
+<button class="btn pri" style="margin-top:14px" data-act="askRenew">${ic('cal')}Renew membership</button>
+<h2 class="sec">Family and dependants</h2>
+<div class="list">${FAM.map(f => `<div class="row">${av(f.n)}<span class="grow"><b>${f.n}</b><small>${f.rel}, ${f.no}${f.t === 'dependant' ? `, age ${f.age}` : ''}</small></span><span class="chip ${f.t === 'dependant' ? 'info' : 'ok'}">${ic(f.t === 'dependant' ? 'user' : 'check')}${f.t === 'dependant' ? 'Dependant' : 'Active'}</span></div>`).join('')}</div>
+<button class="btn sec" style="margin-top:12px" data-act="askDependant">${ic('plus')}Add a dependant</button>
+<p class="fine">The club office raises the ${rs(750)} dependant fee; you pay it here from your wallet.</p>`,
+  };
+}
+function scrGuests() {
+  const passes = S.bookings.flatMap(b => b.people.map((p, i) => ({ b, p, i })).filter(x => isGuest(x.p)));
+  return {
+    label: 'Guest passes',
+    html: `${bar('Guest passes')}<p class="lede">Guests enter only with a member, as part of an amenity booking. Each pass works at the club entry and the booked amenity during the visit.</p>
+${passes.length ? passes.map(({ b, p, i }) => guestCard(b, p, i, true)).join('') : `<div class="empty">${amPic(amOf('pool'))}<h2>No guest passes yet</h2><p>Add a guest while you book an amenity. The pass is created once the guest charge is paid.</p></div>`}`,
+  };
+}
+const FAQ = [
+  ['How do I cancel a booking?', 'Open the booking in My bookings and tap Cancel booking. You can cancel up to 2 hours before the slot, and the full amount returns to your wallet.'],
+  ['Where is my refund?', 'Refunds go to your wallet. Open Wallet, then Refunds, to see each refund and its status.'],
+  ['My guest cannot enter', 'The pass opens from 15 minutes before the slot. Your guest shows the live pass page, not a screenshot: the code changes every 30 seconds. Reception can also resend the pass.'],
+  ['I forgot to scan out', 'The club closes open visits at closing time. Your next entry works as normal.'],
+  ['I lost my phone', 'Call the club office to block the old phone. Sign in on the new phone with your registered number; your bookings and QR codes come back.'],
+];
+function scrHelp() {
+  return {
+    label: 'Help and support',
+    html: `${bar('Help and support')}<figure class="visit">${pic('lobby.jpg', '#6b5a48', '', true, 1600, 1067)}<figcaption>The club office at reception is open 6:00 AM to 10:00 PM. Staff there can book for you, take payments and resend guest passes.</figcaption></figure><div class="list"><button class="row" data-act="callClub">${ic('phone')}<span class="grow"><b>Call the club office</b><small>Open 6:00 AM to 10:00 PM</small></span>${ic('chev')}</button><button class="row" data-act="reportProblem">${ic('msg')}<span class="grow"><b>Report a problem</b><small>Add a booking reference or a screenshot</small></span>${ic('chev')}</button></div>
+<h2 class="sec">Frequently asked</h2><div class="list">${FAQ.map(([q, a]) => `<details class="faq"><summary>${q}${ic('chev')}</summary><p>${a}</p></details>`).join('')}</div>`,
+  };
+}
+Object.assign(ACT, {
+  askRenew() {
+    const base = S.expired ? EXPIRED_ON : S.till;
+    if (S.fee == null) S.fee = 3;
+    openSheet(`<h2>Renew membership</h2><p class="sub">${S.expired ? `Expired on ${fmtLong(EXPIRED_ON)}. The renewal starts now.` : `Valid till ${fmtLong(S.till)}. The renewal starts the day after.`}</p>
+<div class="opts" role="radiogroup" aria-label="Renewal period" id="opts">${FEES.map((f, i) => `<button class="opt" role="radio" aria-checked="${i === S.fee}" data-act="pickFee" data-arg="${i}"><span><b>${f.l}</b><small>Valid till ${fmtLong(addMonths(base, f.m))}</small></span><b class="num">${rs(f.a)}</b></button>`).join('')}</div>
+<p class="ferr" id="renerr" hidden></p>
+<button class="btn pri" id="renbtn" data-act="payRenew"><span>Pay ${rs(FEES[S.fee].a)} from wallet</span></button>`);
+  },
+  pickFee(i) {
+    S.fee = +i;
+    $$('#opts .opt').forEach((o, k) => o.setAttribute('aria-checked', String(k === S.fee)));
+    $('#renbtn').innerHTML = `<span>Pay ${rs(FEES[S.fee].a)} from wallet</span>`;
+    $('#renerr').hidden = true;
+  },
+  payRenew() {
+    const f = FEES[S.fee];
+    if (f.a > S.wallet) { const e = $('#renerr'); e.hidden = false; e.innerHTML = `${ic('alert')}Your wallet is ₹${inr(f.a - S.wallet)} short. Add money first.`; return; }
+    const base = S.expired ? EXPIRED_ON : S.till;
+    S.wallet -= f.a; S.till = addMonths(base, f.m); S.expired = false;
+    S.txns.unshift({ id: 'TX-' + (9600 + S.txns.length), k: 'debit', t: `Membership renewal, ${f.l}`, d: STAMP, a: f.a, ref: 'MF-' + (5100 + S.txns.length), m: 'Wallet' });
+    S.notes.unshift({ t: 'Membership renewed', b: `Your membership is valid till ${fmtLong(S.till)}.`, d: 'Today, ' + CLOCK, ic: 'check', unread: true });
+    closeSheet(); renderDemo(); rerender();
+    toast(`Membership renewed till ${fmtLong(S.till)}`);
+  },
+  askDependant() {
+    openSheet(`<div class="bigic">${ic('userplus')}</div><h2 class="center">Add a dependant</h2><p class="sub center">The club office adds dependants after checking their documents. Once added, the ${rs(750)} dependant fee appears here and you pay it from your wallet.</p><button class="btn pri" data-act="callClub">${ic('phone')}Contact the club office</button><button class="btn txt" data-act="closeSheet">Close</button>`);
+  },
+  callClub() {
+    openSheet(`<div class="bigic">${ic('phone')}</div><h2 class="center">The club office</h2><p class="sub center">Reception is open 6:00 AM to 10:00 PM. This number is sample data.</p><p class="center num" style="font-size:30px;margin-bottom:18px">+91 22 4000 1234</p><button class="btn pri" data-act="calling">${ic('phone')}Call the club office</button><button class="btn txt" data-act="closeSheet">Close</button>`);
+  },
+  calling() { closeSheet(); toast('Calling the club office'); },
+  reportProblem() {
+    openSheet(`<h2>Report a problem</h2><p class="sub">The club office replies by SMS, usually within a day.</p><label class="field"><span>What went wrong?</span><textarea class="input" id="rp" placeholder="For example: the pool door did not open for booking CB-261028-0142"></textarea></label><p class="ferr" id="rperr" hidden></p><button class="btn pri" data-act="sendReport">Send report</button>`);
+  },
+  sendReport() {
+    if ($('#rp').value.trim().length < 5) { const e = $('#rperr'); e.hidden = false; e.innerHTML = `${ic('alert')}Describe the problem in a few words.`; return; }
+    closeSheet(); toast('Report sent. The club office will reply by SMS.');
+  },
+  askSignout() {
+    openSheet('<h2>Sign out of ClubOne?</h2><p class="sub">Your bookings, QR codes and wallet stay safe. Sign in again with your mobile number and an OTP.</p><button class="btn pri" data-act="doSignout">Sign out</button><button class="btn txt" data-act="closeSheet">Stay signed in</button>');
+  },
+  doSignout() { S.signed = false; closeSheet(true); go('signin', true); },
+});
+
+/* ---------- Demo controls: simulate the scanner stations ---------- */
+const TOGGLES = [['expired', 'Membership expired']];
+const demoInner = () => TOGGLES.map(([k, l]) => `<button class="dtog" data-act="toggle" data-arg="${k}" aria-pressed="${!!S[k]}"><span>${l}</span><span class="sw" aria-hidden="true"></span></button>`).join('');
+function renderDemo() {
+  $('#demo').innerHTML = `<h2>Demo controls</h2><p>Kaizen ClubOne member app for The Clubhouse. Sample data only. Turn this on to show what a member with an expired membership sees.</p>${demoInner()}`;
+  if (curPath === 'demo') rerender();
+}
+function scrDemo() {
+  return { label: 'Demo controls', html: `${bar('Demo controls')}<div class="demo-in"><p>Turn this on to show what a member with an expired membership sees.</p>${demoInner()}</div>` };
+}
+function afterScan() { renderDemo(); if (curPath !== 'demo') rerender(); }
+Object.assign(ACT, {
+  scanEntry() {
+    if (S.expired) { scanResult(false, 'Entry denied', `Membership expired on ${fmtLong(EXPIRED_ON)}. Renew it in the app or at the club office.`); return; }
+    if (S.visit !== 'outside') { scanResult(false, 'Entry denied: already inside', 'Scan out at the club exit first.'); return; }
+    S.visit = 'inside'; S.since = CLOCK;
+    S.notes.unshift({ t: 'Entry recorded', b: `You entered the club at ${CLOCK}. You can book amenities now.`, d: 'Today, ' + CLOCK, ic: 'door', unread: true });
+    scanResult(true, 'Welcome, Rahul', `Entry recorded at ${CLOCK}. You can book amenities now.`);
+    afterScan();
+  },
+  scanAmenity() {
+    if (S.visit === 'admitted') { ACT.scanOut(); return; }
+    if (S.visit === 'outside') { scanResult(false, 'Denied: not inside', 'Scan in at the club entry first.'); return; }
+    const today = upcoming().filter(b => b.date === TODAY && b.st === 'confirmed');
+    const open = today.find(b => NOW >= b.h - .25 && NOW < b.end);
+    if (!open) {
+      const used = S.bookings.find(b => b.date === TODAY && b.st === 'used' && NOW < b.end), next = today[0];
+      if (used) scanResult(false, 'Denied: already used', `This ${amOf(used.am).name.toLowerCase()} QR was used today. Book again in the app or at reception.`);
+      else if (next) scanResult(false, 'Denied: too early', `Your ${amOf(next.am).name.toLowerCase()} slot starts at ${hm(next.h)}. The door opens 15 minutes before.`);
+      else scanResult(false, 'Denied: no booking', 'There is no booking for this amenity now. Book in the app or at reception.');
+      return;
+    }
+    const a = amOf(open.am);
+    open.st = 'inuse'; S.visit = 'admitted'; S.admit = open.id;
+    S.notes.unshift({ t: `Admitted at ${a.name.toLowerCase()}`, b: `Slot ends at ${hm(open.end)}. Scan the same QR to leave.`, d: 'Today, ' + CLOCK, ic: 'check', unread: true });
+    scanResult(true, 'Admitted', `${a.name}, ${ppl(open.people.length)}. Slot ends at ${hm(open.end)}.`);
+    afterScan();
+  },
+  scanOut() {
+    if (S.visit !== 'admitted') { scanResult(false, 'Denied: not admitted', 'Scan your booking QR at the amenity door to enter first.'); return; }
+    const b = bk(S.admit), a = amOf(b.am);
+    b.st = 'used'; S.visit = 'inside'; S.admit = null;
+    scanResult(true, 'Amenity exit recorded', `${a.name}, left at ${CLOCK}. No extra-time charge.`);
+    afterScan();
+  },
+  leaveClub() {
+    if (S.visit === 'outside') { scanResult(false, 'Denied: not inside', 'There is no open visit to close.'); return; }
+    if (S.visit === 'admitted') { const b = bk(S.admit); if (b) b.st = 'used'; S.admit = null; }
+    S.visit = 'outside';
+    S.notes.unshift({ t: 'Visit closed', b: `You left the club at ${CLOCK}.`, d: 'Today, ' + CLOCK, ic: 'exit', unread: true });
+    scanResult(true, 'Exit recorded', 'Your visit is closed. Have a good evening.');
+    afterScan();
+  },
+  toggle(k) {
+    S[k] = !S[k];
+    afterScan();
+    toast(`${TOGGLES.find(t => t[0] === k)[1]}: ${S[k] ? 'on' : 'off'}`);
+  },
+  resetDemo() {
+    S = fresh(); S.signed = true;
+    closeSheet(true); $('#overlay').innerHTML = '';
+    renderDemo(); go('home'); toast('Demo reset');
+  },
+});
+
+/* ---------- Routes and start ---------- */
+R = [
+  ['splash', scrSplash], ['signin', scrSignin], ['otp', scrOtp], ['lock', scrLock],
+  ['home', scrHome], ['qr', scrQr], ['amenities', scrAmenities], ['amenity/:id', scrAmenity], ['slots/:id', scrSlots],
+  ['people', scrPeople], ['review', scrReview], ['paying', scrPaying], ['confirmed/:id', scrConfirmed],
+  ['bookings', scrBookings], ['booking/:id', scrBooking], ['wallet', scrWallet], ['addmoney', scrAddMoney],
+  ['notifications', scrNotes], ['notification/:id', scrNote], ['more', scrMore], ['profile', scrProfile], ['guests', scrGuests], ['help', scrHelp], ['demo', scrDemo],
+];
+function fit() {
+  SCALE = innerWidth >= 600 ? Math.min(1, (innerHeight - 40) / 868) : 1;
+  document.documentElement.style.setProperty('--s', SCALE.toFixed(4));
+}
+tabbar.innerHTML = '<i class="tab-pill" aria-hidden="true"></i>' + [['home', 'home', 'Home'], ['amenities', 'cal', 'Book'], ['bookings', 'ticket', 'Bookings'], ['wallet', 'wallet', 'Wallet'], ['more', 'more', 'More']].map(([r, i, l]) => `<a class="tab" href="#/${r}" data-tab="${r}">${ic(i)}<span>${l}</span></a>`).join('');
+$('#sbicons').innerHTML = SB;
+fit();
+addEventListener('resize', fit);
+renderDemo();
+addEventListener('hashchange', route);
+route();
+</script>
+</body>
+</html>
