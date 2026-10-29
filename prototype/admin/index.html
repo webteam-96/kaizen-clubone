@@ -1976,14 +1976,14 @@ VIEWS.amenities = sub => {
   if (sub === 'rates') return head + ratesHTML();
   if (sub === 'blocks') return head + `<section class="panel"><div class="tscroll"><table class="t"><thead><tr><th>Amenity</th><th>Date and slots</th><th>Reason</th><th>Bookings affected</th><th>By</th></tr></thead><tbody>${BLOCKS.map(b => `<tr><td><b>${esc(b.am)}</b></td><td>${esc(b.when)}</td><td>${esc(b.why)}</td><td>${esc(b.affected)}</td><td>${esc(b.by)}</td></tr>`).join('')}</tbody></table></div></section>`;
   return head + `<section class="panel"><div class="tscroll"><table class="t"><thead><tr><th>Amenity</th><th>Status</th><th>Hours</th><th>Slot</th><th>Capacity</th><th>Guests</th><th>Member price</th><th>Guest price</th></tr></thead><tbody>
-  ${AMEN.map(a => `<tr class="click" data-act="edit-amenity" data-id="${a.id}"><td><div class="who"><span class="thumb">${amImg(a)}</span><div><b>${esc(a.name)}</b><small>${esc(a.loc)}</small></div></div></td><td>${a.offline ? chip('Offline', 'Station offline') : chip('Active')}</td><td class="nowrap">${esc(a.hours)}</td><td class="nowrap">${a.unit ? 'Full day' : a.slot + ' min'}</td><td class="nowrap">${a.id === 'banquet' ? '1 a day' : a.cap}</td><td>${a.guests ? 'Allowed' : '<span class="muted">Not allowed</span>'}</td><td class="nowrap">${a.member === 0 ? 'Free' : inr(a.member) + (a.unit ? ' <small class="muted">' + a.unit + '</small>' : '')}</td><td class="nowrap">${a.guest == null ? '<span class="muted">Not offered</span>' : inr(a.guest)}</td></tr>`).join('')}</tbody></table></div></section>`;
+  ${AMEN.map(a => `<tr class="click" data-act="edit-amenity" data-id="${a.id}"><td><div class="who"><span class="thumb">${amImg(a)}</span><div><b>${esc(a.name)}</b><small>${esc(a.loc)}</small></div></div></td><td>${a.offline ? chip('Offline', 'Station offline') : chip('Active')}</td><td class="nowrap">${esc(a.hours)}</td><td class="nowrap">${a.unit ? 'Full day' : a.slot + ' min'}</td><td class="nowrap">${a.id === 'banquet' ? '1 a day' : a.cap}</td><td>${a.guests ? 'Allowed' : '<span class="muted">Not allowed</span>'}</td><td class="nowrap">${a.member === 0 ? 'Free' : inr(a.member) + (a.unit ? ' <small class="muted">' + a.unit + '</small>' : '')}</td><td class="nowrap">${a.guest == null ? '<span class="muted">-</span>' : inr(a.guest)}</td></tr>`).join('')}</tbody></table></div></section>`;
 };
 const BLOCKS = [
   {am:'Squash, court 2',when:'Thu 29 Oct, 7:00 to 9:00 AM',why:'Floor polishing',affected:'2 cancelled, refunded',by:'Meera Iyer'},
   {am:'Swimming pool',when:'Mon 2 Nov, 6:00 to 8:00 AM',why:'Filter maintenance',affected:'None yet',by:'Arjun Menon'},
 ];
 function ratesHTML() {
-  const ed = canEditAm(), cell = (v, k, i) => ed ? `<input class="input num" style="width:124px" inputmode="numeric" data-rate="${i}" data-k="${k}" value="${v == null ? '' : v}" aria-label="${k} price" placeholder="Not offered">` : (v == null ? '<span class="muted">Not offered</span>' : inr(v));
+  const ed = canEditAm(), cell = (v, k, i) => ed ? `<input class="input num" style="width:124px" inputmode="numeric" data-rate="${i}" data-k="${k}" value="${v == null ? '' : v}" aria-label="${k} price" placeholder="-">` : (v == null ? '<span class="muted">-</span>' : inr(v));
   return `<section class="panel"><div class="panel-h"><div><h2>Rate card</h2><p>From the club’s current rate screen. Prices are per person per slot unless marked.</p></div>
   ${ed ? `<div class="actions"><label class="field" style="flex-direction:row;align-items:center;gap:8px">Effective from<input class="input" type="date" id="rate-from" value="2026-11-01" style="width:auto"></label></div>` : ''}</div>
   <div class="tscroll"><table class="t"><thead><tr><th>Amenity</th><th>Member</th><th>Guest</th><th>Guest coach</th><th>Free for members</th></tr></thead><tbody>
@@ -2023,7 +2023,7 @@ ACT['edit-amenity'] = b => {
     <p class="muted cap" id="slot-out"></p>
     <h3>Prices</h3>
     <div class="f3"><label class="field">Member<input class="input" inputmode="numeric" name="pm" value="${a.member ?? ''}" ${dis}></label>
-    <label class="field">Guest<input class="input" inputmode="numeric" name="pg" value="${a.guest ?? ''}" placeholder="Not offered" ${dis}></label>
+    <label class="field">Guest<input class="input" inputmode="numeric" name="pg" value="${a.guest ?? ''}" placeholder="-" ${dis}></label>
     <label class="field">Effective from<input class="input" type="date" name="eff" value="2026-11-01" ${dis}></label></div>
     <div class="note">${ic('info')}<div>Confirmed bookings keep the price they were bought at.</div></div>
   </div>
