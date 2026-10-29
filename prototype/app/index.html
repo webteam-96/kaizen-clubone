@@ -403,6 +403,10 @@ button.row:active{transform:none;background:#ececf0;transition:background-color 
 .cfm{border:2px solid #ececf0;border-radius:16px;background:var(--pearl);margin-bottom:8px;transition:border-color .25s,background-color .25s}
 .upi[aria-pressed=true],.cfm[aria-pressed=true]{border-color:var(--blue);background:#f2f7fd}
 .cfstate{text-align:center;padding:16px 0 8px}
+.pd-card{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pd-card .pd-wide{grid-column:1/-1}
+.cfdet{margin-top:16px}
+
 .cfstate .hg{margin:0 auto 16px}
 .cfstate p{color:var(--ink2);margin:0 auto 24px;max-width:30ch}
 .bigic{display:grid;place-items:center;width:72px;height:72px;border-radius:50%;margin:0 auto 16px;background:var(--page);color:var(--ink)}
@@ -784,6 +788,30 @@ function qrSVG(text, label = 'QR code') {
   return `<svg class="qr" viewBox="-2 -2 ${n + 4} ${n + 4}" shape-rendering="crispEdges" role="img" aria-label="${label}"><rect x="-2" y="-2" width="${n + 4}" height="${n + 4}" fill="#fff"/><path d="${d}" fill="#1d1d1f"/></svg>`;
 }
 const sig = s => hash(s + ':clubone').toString(36);
+const BANKS = ['State Bank of India', 'HDFC Bank', 'ICICI Bank', 'Axis Bank', 'Kotak Mahindra Bank', 'Bank of Baroda', 'Punjab National Bank', 'Other bank'];
+const cardFields = () => `<div class="pd-card"><label class="field pd-wide"><span>Card number</span><input class="input num" name="cardno" inputmode="numeric" autocomplete="cc-number" placeholder="1234 5678 9012 3456"></label><label class="field pd-wide"><span>Name on card</span><input class="input" name="cardname" autocomplete="cc-name"></label><label class="field"><span>Expiry</span><input class="input num" name="cardexp" inputmode="numeric" autocomplete="cc-exp" placeholder="MM/YY"></label><label class="field"><span>CVV</span><input class="input num" name="cardcvv" inputmode="numeric" type="password" autocomplete="cc-csc" placeholder="3 digits"></label></div>`;
+const bankField = () => `<label class="field"><span>Your bank</span><select class="input" name="bank"><option value="">Choose a bank</option>${BANKS.map(b => `<option>${b}</option>`).join('')}</select></label>`;
+/* returns [field name, message] for the first thing missing, or null; card expiry must be Oct 2026 or later */
+function payCheck(root, mode) {
+  const v = n => ((root.querySelector(`[name=${n}]`) || {}).value || '').trim();
+  if (mode === 'Card') {
+    if (v('cardno').replace(/\D/g, '').length !== 16) return ['cardno', 'Enter the 16-digit card number.'];
+    if (v('cardname').length < 2) return ['cardname', 'Enter the name on the card.'];
+    const [mm, yy] = v('cardexp').split('/').map(Number);
+    if (!(mm >= 1 && mm <= 12 && (yy > 26 || (yy === 26 && mm >= 10)))) return ['cardexp', 'Enter a valid expiry date, MM/YY.'];
+    if (!/^\d{3,4}$/.test(v('cardcvv'))) return ['cardcvv', 'Enter the 3-digit CVV from the back of the card.'];
+  }
+  if (mode === 'Net banking' && !v('bank')) return ['bank', 'Choose the bank.'];
+  return null;
+}
+document.addEventListener('input', e => {
+  const t = e.target, d = t.value.replace(/\D/g, '');
+  if (['cardno', 'cardname', 'cardexp', 'cardcvv', 'bank'].includes(t.name)) { t.classList.remove('err', 'bad'); const fe = document.getElementById('cferr'); if (fe) fe.hidden = true; }
+  if (t.name === 'cardno') t.value = d.slice(0, 16).replace(/(\d{4})(?=\d)/g, '$1 ');
+  else if (t.name === 'cardexp') t.value = d.length > 2 ? d.slice(0, 2) + '/' + d.slice(2, 4) : d;
+  else if (t.name === 'cardcvv') t.value = d.slice(0, 4);
+});
+
 
 /* ---------- Club data (rate card from the club's current system; everything else illustrative) ---------- */
 const AM = [
@@ -1963,7 +1991,13 @@ function cfMethods(n) {
 <p class="cfs">Other ways to pay</p>
 <button class="row cfm" data-act="cfPick" data-arg="Card" aria-pressed="${m === 'Card'}">${CARD_IC}<span class="grow"><b>Debit or credit card</b>${CARD_MARKS}</span></button>
 <button class="row cfm" data-act="cfPick" data-arg="Net banking" aria-pressed="${m === 'Net banking'}">${BANK_IC}<span class="grow"><b>Net banking</b><small>SBI, HDFC, ICICI, Axis and 50+ banks</small></span></button>
+<div class="cfdet" id="cfdet">${cfDetail(m, n)}</div><p class="ferr" id="cferr" hidden></p>
 <button class="btn pri" style="margin-top:8px" data-act="cfPay">Pay ${rs(n)}</button>`;
+}
+function cfDetail(m, n) {
+  if (m === 'Card') return cardFields();
+  if (m === 'Net banking') return bankField();
+  return `<p class="fine" style="margin:0">Tap Pay to open ${m} and approve ${rs(n)}.</p>`;
 }
 function topupDone(n, method, open) {
   const from = S.wallet;
@@ -1993,7 +2027,8 @@ Object.assign(ACT, {
   cfPick(x) { S.cfm = x; sheetBody(cfMethods(S.topAmt)); },
   cfRetry() { sheetBody(cfMethods(S.topAmt)); },
   cfPay() {
-    const n = S.topAmt, method = S.cfm;
+    const n = S.topAmt, method = S.cfm, bad = payCheck($('#cfdet'), method), err = $('#cferr');
+    if (bad) { const el = $(`#cfdet [name=${bad[0]}]`); el.classList.add('bad'); el.focus(); err.hidden = false; err.innerHTML = ic('alert') + bad[1]; return; }
     sheetBody(`<div class="cfstate"><span class="hg">${ic('hour')}</span><h2>Waiting for your bank</h2><p>Approve the payment in ${['Card', 'Net banking'].includes(method) ? 'your bank’s page' : method}. If money leaves your account, it reaches your wallet even if you close this screen.</p></div>`);
     setTimeout(() => {
       const open = !sheetsEl.hidden && !!$('.cfstate', sheetsEl);

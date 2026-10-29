@@ -293,6 +293,30 @@ input[type="checkbox"]:not(.switch){accent-color:var(--blue)}
 .note.good .ic{color:var(--admit-ink)}
 .pill-opts{display:flex;flex-wrap:wrap;gap:8px}
 .pill-opts .opt{padding:9px 14px;font-weight:600;transition:background-color .2s,color .2s,border-color .2s}
+.pmw{margin-top:8px}
+.pd-card{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pd-card .pd-wide{grid-column:1/-1}
+.pd-qr{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:16px;padding:14px;border-radius:16px;background:#f5f5f7}
+.pd-qr svg{width:148px;height:148px;flex:none;border-radius:8px}
+.pd-qr span{flex:1 1 180px;min-width:0;overflow-wrap:anywhere}
+.pd-qr b{display:block;font-weight:600}
+.pd-qr small{display:block;font-size:13px;line-height:1.38;margin-top:4px}
+@media (max-width:420px){.pd-qr{flex-direction:column;text-align:center}}
+.pd-qr small{color:var(--ink-80)}
+#pm-detail:not(:empty){margin-top:4px}
+
+.pm-h{font-size:13px;font-weight:600;color:var(--ink-80);margin:14px 0 8px}
+.pm-row{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;margin-bottom:8px;border-radius:16px;border:2px solid #ececf0;background:#fff;text-align:left;font:inherit;color:var(--ink);cursor:pointer;transition:border-color .25s,background-color .25s}
+.pm-row b{display:block;font-weight:600}
+.pm-row small{display:block;font-size:12px;color:var(--ink-80);font-weight:400}
+.pm-row .pmk{width:36px;height:36px;flex:none;border-radius:10px}
+.pm-row .marks{display:flex;gap:4px;margin-top:4px}
+.pm-row .marks svg{width:30px;height:19px}
+.pm-upis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.pm-upi{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:84px;padding:8px 4px;border-radius:16px;border:2px solid #ececf0;background:#fff;font:500 12px/1.2 var(--text);color:var(--ink-80);cursor:pointer;transition:border-color .25s,background-color .25s}
+.pm-upi svg{width:34px;height:34px;border-radius:9px;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.pm-row[aria-pressed="true"],.pm-upi[aria-pressed="true"]{border-color:var(--blue);background:#f2f7fd}
+.pm-row:focus-visible,.pm-upi:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 .pill-opts .opt[aria-pressed="true"]{background:var(--blue);border:1px solid var(--blue);color:#fff;padding:9px 14px}   /* a day that is open reads as on */
 .opt{border:1px solid var(--chip);background:#fff;border-radius:999px;padding:9px 18px;min-height:44px;text-align:left;display:flex;flex-direction:column;justify-content:center;line-height:1.25;font-size:14px;letter-spacing:-.224px;color:var(--ink)}
 .opt b{font-weight:600}
@@ -780,6 +804,7 @@ input[type="checkbox"]:not(.switch){accent-color:var(--blue)}
 </div>
 <div id="toasts" class="toasts" aria-live="polite"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script>
 /* ---------- sample data (illustrative only) ---------- */
 const CLUB = 'The Clubhouse';
@@ -1057,6 +1082,8 @@ const I = {
   phone:'<path d="M6.6 3.5h2.3l1.4 4-1.8 1.3a11.2 11.2 0 0 0 6.7 6.7l1.3-1.8 4 1.4v2.3a2 2 0 0 1-2.1 2A16.5 16.5 0 0 1 4.6 5.6a2 2 0 0 1 2-2.1z"/>',
   cash:'<rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 9.5v5M18 9.5v5"/>',
   upi:'<rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M9.5 12l2 2 3.5-3.5"/>',
+  card:'<rect x="2.5" y="5.5" width="19" height="13" rx="2"/><path d="M2.5 10h19M6 15h4"/>',
+  bank:'<path d="M3 9.5L12 4l9 5.5zM5.5 11v6M10 11v6M14 11v6M18.5 11v6M3 20h18"/>',
   swap:'<path d="M7 7h12l-3-3M17 17H5l3 3"/>',
   chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
   refresh:'<path d="M20 11a8 8 0 0 0-14.6-4.5L4 8M4 4v4h4M4 13a8 8 0 0 0 14.6 4.5L20 16M20 20v-4h-4"/>',
@@ -2130,23 +2157,97 @@ ACT.collect = b => {
     return;
   }
   openModal(`<form data-form="collect" data-id="${q.id}">${modalHead(`Collect ${inr(q.amt)}`, `${esc(q.why)}. ${q.guest ? `Guest ${esc(q.guest)} of ${esc(q.who)}.` : esc(q.who) + '.'}`)}
-  <div class="modal-b form"><div class="seg" role="group" aria-label="Payment mode"><button type="button" data-act="pay-mode" data-v="Cash" aria-pressed="true">${ic('cash')}Cash</button><button type="button" data-act="pay-mode" data-v="UPI" aria-pressed="false">${ic('upi')}UPI</button></div><input type="hidden" name="mode" value="Cash">
+  <div class="modal-b form"><div class="field">Paid by${payPicker('pay-mode', 'Cash')}</div><input type="hidden" name="mode" value="Cash">
   <div id="mode-cash" class="f2"><label class="field">Amount received<input class="input num" name="got" inputmode="numeric" value="${q.amt}" data-input="change-due"><span class="errmsg" hidden>Enter the amount received.</span></label><div class="field">Change to return<div class="num" id="change-due" style="font:600 21px/44px var(--display)">${inr(0)}</div></div></div>
-  <label class="field" id="mode-upi" hidden>UPI transaction ID<input class="input num" name="txn" inputmode="numeric" maxlength="12" placeholder="12 digits from the payer’s app"><span class="errmsg" hidden>Enter the 12-digit UPI transaction ID.</span></label></div>
+  <div id="pm-detail"></div></div>
   <div class="modal-f"><button type="button" class="btn" data-act="close-modal">Cancel</button><button class="btn btn-primary" type="submit" id="collect-go">Record cash payment</button></div></form>`, 'Collect payment');
 };
+/* desk payment options, laid out like the member app's Cashfree checkout */
+const hash = s => { let x = 2166136261; for (let i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = Math.imul(x, 16777619); } return x >>> 0; };
+/* ---------- QR codes (real codes via qrcode-generator; deterministic stand-in offline) ---------- */
+function fakeQR(text, n) {
+  let x = hash(text) || 1;
+  const rnd = () => (x = (Math.imul(x, 1664525) + 1013904223) >>> 0) / 4294967296;
+  const g = Array.from({ length: n }, () => Array.from({ length: n }, () => rnd() > .5));
+  const finder = (r0, c0) => {
+    for (let r = -1; r <= 7; r++) for (let c = -1; c <= 7; c++) {
+      const R = r0 + r, C = c0 + c;
+      if (R < 0 || C < 0 || R >= n || C >= n) continue;
+      g[R][C] = r >= 0 && r <= 6 && c >= 0 && c <= 6 && (r === 0 || r === 6 || c === 0 || c === 6 || (r >= 2 && r <= 4 && c >= 2 && c <= 4));
+    }
+  };
+  finder(0, 0); finder(0, n - 7); finder(n - 7, 0);
+  return (r, c) => g[r][c];
+}
+function qrSVG(text, label = 'QR code') {
+  let n = 0, dark;
+  try { if (window.qrcode) { const q = qrcode(0, 'M'); q.addData(text); q.make(); n = q.getModuleCount(); dark = (r, c) => q.isDark(r, c); } } catch (e) { n = 0; }
+  if (!n) { n = 29; dark = fakeQR(text, n); }
+  let d = '';
+  for (let r = 0; r < n; r++) {
+    let c = 0;
+    while (c < n) {
+      if (dark(r, c)) { const s = c; while (c < n && dark(r, c)) c++; d += `M${s} ${r}h${c - s}v1h${s - c}z`; } else c++;
+    }
+  }
+  return `<svg class="qr" viewBox="-2 -2 ${n + 4} ${n + 4}" shape-rendering="crispEdges" role="img" aria-label="${label}"><rect x="-2" y="-2" width="${n + 4}" height="${n + 4}" fill="#fff"/><path d="${d}" fill="#1d1d1f"/></svg>`;
+}
+
+const BANKS = ['State Bank of India', 'HDFC Bank', 'ICICI Bank', 'Axis Bank', 'Kotak Mahindra Bank', 'Bank of Baroda', 'Punjab National Bank', 'Other bank'];
+const UPI_ID = 'theclubhouse@cashfree';
+const upiQR = n => qrSVG(`upi://pay?pa=${UPI_ID}&pn=The%20Clubhouse&am=${n}&cu=INR`, 'UPI QR code to pay ₹' + n);
+const cardFields = () => `<div class="pd-card"><label class="field pd-wide"><span>Card number</span><input class="input num" name="cardno" inputmode="numeric" autocomplete="cc-number" placeholder="1234 5678 9012 3456"></label><label class="field pd-wide"><span>Name on card</span><input class="input" name="cardname" autocomplete="cc-name"></label><label class="field"><span>Expiry</span><input class="input num" name="cardexp" inputmode="numeric" autocomplete="cc-exp" placeholder="MM/YY"></label><label class="field"><span>CVV</span><input class="input num" name="cardcvv" inputmode="numeric" type="password" autocomplete="cc-csc" placeholder="3 digits"></label></div>`;
+const bankField = () => `<label class="field"><span>Your bank</span><select class="input" name="bank"><option value="">Choose a bank</option>${BANKS.map(b => `<option>${b}</option>`).join('')}</select></label>`;
+/* returns [field name, message] for the first thing missing, or null; card expiry must be Oct 2026 or later */
+function payCheck(root, mode) {
+  const v = n => ((root.querySelector(`[name=${n}]`) || {}).value || '').trim();
+  if (mode === 'Card') {
+    if (v('cardno').replace(/\D/g, '').length !== 16) return ['cardno', 'Enter the 16-digit card number.'];
+    if (v('cardname').length < 2) return ['cardname', 'Enter the name on the card.'];
+    const [mm, yy] = v('cardexp').split('/').map(Number);
+    if (!(mm >= 1 && mm <= 12 && (yy > 26 || (yy === 26 && mm >= 10)))) return ['cardexp', 'Enter a valid expiry date, MM/YY.'];
+    if (!/^\d{3,4}$/.test(v('cardcvv'))) return ['cardcvv', 'Enter the 3-digit CVV from the back of the card.'];
+  }
+  if (mode === 'Net banking' && !v('bank')) return ['bank', 'Choose the bank.'];
+  return null;
+}
+document.addEventListener('input', e => {
+  const t = e.target, d = t.value.replace(/\D/g, '');
+  if (['cardno', 'cardname', 'cardexp', 'cardcvv', 'bank'].includes(t.name)) { t.classList.remove('err', 'bad'); const fe = document.getElementById('cferr'); if (fe) fe.hidden = true; }
+  if (t.name === 'cardno') t.value = d.slice(0, 16).replace(/(\d{4})(?=\d)/g, '$1 ');
+  else if (t.name === 'cardexp') t.value = d.length > 2 ? d.slice(0, 2) + '/' + d.slice(2, 4) : d;
+  else if (t.name === 'cardcvv') t.value = d.slice(0, 4);
+});
+const CARD_MARKS = '<span class="marks" aria-label="Visa, Mastercard, RuPay"><svg viewBox="0 0 38 24" aria-hidden="true"><rect width="38" height="24" rx="4" fill="#fff" stroke="#e0e0e0"/><text x="19" y="16" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="800" font-style="italic" fill="#1A1F71">VISA</text></svg><svg viewBox="0 0 38 24" aria-hidden="true"><rect width="38" height="24" rx="4" fill="#fff" stroke="#e0e0e0"/><circle cx="15.5" cy="12" r="6.5" fill="#EB001B"/><circle cx="22.5" cy="12" r="6.5" fill="#F79E1B" fill-opacity=".9"/></svg><svg viewBox="0 0 38 24" aria-hidden="true"><rect width="38" height="24" rx="4" fill="#fff" stroke="#e0e0e0"/><text x="17" y="15.5" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="8.5" font-weight="800" font-style="italic" fill="#1B3F8F">RuPay</text><path d="M30 7l3 5-3 5z" fill="#F47920"/><path d="M28 7l3 5-3 5z" fill="#0B8A44"/></svg></span>';
+const CARD_IC = '<svg class="pmk" viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="10" fill="#1d1d1f"/><rect x="9" y="13" width="22" height="15" rx="2.5" fill="none" stroke="#fff" stroke-width="1.8"/><path d="M9 18h22" stroke="#fff" stroke-width="2.6"/><path d="M12.5 24h5" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>';
+const BANK_IC = '<svg class="pmk" viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="10" fill="#0B3B8C"/><path d="M10 17l10-6 10 6z" fill="#fff"/><path d="M12.5 19v7M17.5 19v7M22.5 19v7M27.5 19v7" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/><path d="M10 29h20" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg>';
+const CASH_IC = '<svg class="pmk" viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="10" fill="#087A55"/><rect x="8" y="13" width="24" height="14" rx="2" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="20" cy="20" r="3.2" fill="none" stroke="#fff" stroke-width="1.8"/></svg>';
+const UPI_IC = '<svg class="pmk" viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="10" fill="#fff" stroke="#e0e0e0"/><path d="M15 11l8 9-8 9z" fill="#F47920"/><path d="M20 11l8 9-8 9z" fill="#0B8A44"/></svg>';
+const modeLabel = v => v === 'Card' ? 'Debit or credit card' : v;
+/* what the desk sees after choosing: amount and change for cash, a QR for UPI, card details, or the bank */
+const payDetail = (mode, n) => mode === 'UPI' ? `<div class="pd-qr">${upiQR(n)}<span><b>Ask the member to scan this code</b><small>Any UPI app works: Google Pay, PhonePe, Paytm or BHIM. The amount, ₹${num(n)}, is filled in.</small><small>UPI ID ${UPI_ID}</small></span></div>`
+  : mode === 'Card' ? cardFields() : mode === 'Net banking' ? bankField() : '';
+const paidAs = (f, mode) => { const v = n => (f.querySelector(`[name=${n}]`) || {}).value || ''; return mode === 'Card' ? `Card ending ${v('cardno').replace(/\D/g, '').slice(-4)}` : mode === 'Net banking' ? `Net banking, ${v('bank')}` : mode; };
+function payBad(f, mode) { const bad = payCheck(f, mode); if (!bad) return false; const el = f.querySelector(`[name=${bad[0]}]`); el.classList.add('err'); el.focus(); toast(bad[1], true); return true; }
+const payPicker = (act, cur) => `<div class="pmw" role="group" aria-label="Payment mode">
+<button type="button" class="pm-row" data-act="${act}" data-v="Cash" aria-pressed="${cur === 'Cash'}">${CASH_IC}<span><b>Cash</b><small>Count it and give change</small></span></button>
+<button type="button" class="pm-row" data-act="${act}" data-v="UPI" aria-pressed="${cur === 'UPI'}">${UPI_IC}<span><b>UPI</b><small>Show a QR code to scan with any UPI app</small></span></button>
+<button type="button" class="pm-row" data-act="${act}" data-v="Card" aria-pressed="${cur === 'Card'}">${CARD_IC}<span><b>Debit or credit card</b>${CARD_MARKS}</span></button>
+<button type="button" class="pm-row" data-act="${act}" data-v="Net banking" aria-pressed="${cur === 'Net banking'}">${BANK_IC}<span><b>Net banking</b><small>SBI, HDFC, ICICI, Axis and 50+ banks</small></span></button></div>`;
 ACT['pay-mode'] = b => {
   const f = b.closest('form'); $$('[data-act="pay-mode"]', f).forEach(x => x.setAttribute('aria-pressed', x === b)); f.elements.mode.value = b.dataset.v;
-  const upi = b.dataset.v === 'UPI'; $('#mode-cash').hidden = upi; $('#mode-upi').hidden = !upi; $('#collect-go').textContent = upi ? 'Record UPI payment' : 'Record cash payment';
-  (upi ? f.elements.txn : f.elements.got).focus();
+  const v = b.dataset.v, cash = v === 'Cash', q = QUEUE.find(x => x.id === f.dataset.id);
+  $('#mode-cash').hidden = !cash; $('#pm-detail').innerHTML = payDetail(v, q.amt);
+  $('#collect-go').textContent = `Record ${cash ? 'cash' : v === 'UPI' ? 'UPI' : v === 'Card' ? 'card' : 'net banking'} payment`;
+  if (cash) f.elements.got.focus();
 };
 INPUT['change-due'] = el => { const q = QUEUE.find(x => x.id === el.closest('form').dataset.id); const d = (+el.value || 0) - q.amt; $('#change-due').innerHTML = d >= 0 ? inr(d) : `<span style="color:var(--deny-ink);font-size:17px">${inr(-d)} short</span>`; };
 FORM.collect = f => {
-  const q = QUEUE.find(x => x.id === f.dataset.id), upi = f.elements.mode.value === 'UPI';
-  if (upi) { const v = f.elements.txn.value.replace(/\D/g, ''); const bad = v.length !== 12; f.elements.txn.classList.toggle('err', bad); f.elements.txn.closest('.field').querySelector('.errmsg').hidden = !bad; if (bad) { f.elements.txn.focus(); return; } }
-  else if ((+f.elements.got.value || 0) < q.amt) { f.elements.got.classList.add('err'); const m = f.elements.got.closest('.field').querySelector('.errmsg'); m.textContent = `Received amount is less than ${'₹' + num(q.amt)}.`; m.hidden = false; return; }
+  const q = QUEUE.find(x => x.id === f.dataset.id), mode = f.elements.mode.value;
+  if (payBad(f, mode)) return;
+  if (mode === 'Cash' && (+f.elements.got.value || 0) < q.amt) { f.elements.got.classList.add('err'); const m = f.elements.got.closest('.field').querySelector('.errmsg'); m.textContent = `Received amount is less than ${'₹' + num(q.amt)}.`; m.hidden = false; return; }
   const rc = 'R-' + (1043 + PAYMENTS.length - 5);
-  const p = {rcpt: rc, at: hm(now()), who: q.guest || q.who, what: q.why.split(',')[0] + ', ' + q.why.split(',')[1].trim(), mode: upi ? 'UPI' : 'Cash', ref: upi ? f.elements.txn.value : '', amt: q.amt, by: me(), status: 'Paid'};
+  const p = {rcpt: rc, at: hm(now()), who: q.guest || q.who, what: q.why.split(',')[0] + ', ' + q.why.split(',')[1].trim(), mode: paidAs(f, mode), ref: '', amt: q.amt, by: me(), status: 'Paid'};
   PAYMENTS.unshift(p); S.collected += q.amt;
   QUEUE.splice(QUEUE.indexOf(q), 1);
   AUDIT.unshift([p.at, me(), 'Payment recorded', `${rc}, ₹${num(q.amt)} by ${p.mode}, ${q.why}`, '']);
@@ -2154,14 +2255,14 @@ FORM.collect = f => {
   const rl = $('#rcpt-list'); if (rl) rl.insertAdjacentHTML('afterbegin', rcptLi(p));
   const cnt = $('#cnt-queue'); if (cnt) cnt.textContent = QUEUE.length;
   openModal(`<div class="modal-b" style="text-align:center;padding-top:24px"><div class="ok-burst">${ic('check')}</div><h2>Paid. Receipt ${rc}</h2><p class="muted" style="margin-top:6px">${q.guest ? `Guest pass activated. ${esc(q.guest)} can scan in now.` : 'The outstanding charge is cleared.'}</p></div>
-  <div class="modal-b"><div class="receipt"><div class="row"><span>Receipt</span><b>${rc}</b></div><div class="row"><span>${esc(q.why)}</span><b>${inr(q.amt)}</b></div><div class="row"><span>Mode</span><span>${p.mode}${upi ? ', txn ' + esc(p.ref) : ''}</span></div><div class="row"><span>Recorded by</span><span>${esc(me())}, ${p.at}</span></div></div></div>
+  <div class="modal-b"><div class="receipt"><div class="row"><span>Receipt</span><b>${rc}</b></div><div class="row"><span>${esc(q.why)}</span><b>${inr(q.amt)}</b></div><div class="row"><span>Mode</span><span>${p.mode}</span></div><div class="row"><span>Recorded by</span><span>${esc(me())}, ${p.at}</span></div></div></div>
   <div class="modal-f"><button class="btn" data-act="send-rcpt">${ic('upi')}Send receipt to member</button><button class="btn btn-primary" data-act="close-modal" data-autofocus>Done</button></div>`, 'Payment recorded');
 };
 ACT['send-rcpt'] = () => toast('Receipt sent to the member by push and SMS.');
 ACT['q-clear'] = b => { const i = QUEUE.findIndex(x => x.id === b.dataset.id); if (i > -1) QUEUE.splice(i, 1); closeModal(); if ($('#q-body')) $('#q-body').innerHTML = qRows(); const cnt = $('#cnt-queue'); if (cnt) cnt.textContent = QUEUE.length; toast('Removed from the queue. The original receipt stays in the payment history.'); };
 
 /* walk-in booking */
-const W = {no: 'KC1234', am: 'badminton', slot: null, people: 1, guests: [], mode: 'Wallet'};
+const W = {no: 'KC1234', am: 'badminton', slot: null, people: 1, guests: [], mode: 'Cash'};
 const WSLOTS = [['6:00 PM', 0], ['7:00 PM', 3], ['8:00 PM', 6], ['9:00 PM', 9]];
 function walkinCharges() {
   const a = AMEN.find(x => x.id === W.am), g = W.guests.length, mCount = Math.max(1, W.people - g);
@@ -2186,7 +2287,7 @@ function walkinHTML() {
     <div class="row" style="border-top:2px solid var(--ink);padding-top:10px;margin-top:4px"><b>Total</b><b class="num" style="font:600 34px/1.2 var(--display);letter-spacing:-.374px">${inr(total)}</b></div>
     <p class="muted cap" style="margin:6px 0 14px">Each charge has one payer, so nothing is charged twice. ${esc(m.name)}’s wallet: ${inr(m.wallet ?? 0)}.</p>
     ${lines.some(l => l[2] === 'wallet') ? `<label class="row" style="justify-content:flex-start;gap:10px;font-size:14px;margin-bottom:12px"><input type="checkbox" name="consent" style="width:20px;height:20px">The member agrees to the wallet deduction</label>` : ''}
-    ${lines.some(l => l[2] === 'desk') ? `<div class="field" style="margin-bottom:12px">Desk payment<div class="seg" role="group" aria-label="Desk payment mode"><button type="button" data-act="w-mode" data-v="Cash" aria-pressed="${W.mode !== 'UPI'}">Cash</button><button type="button" data-act="w-mode" data-v="UPI" aria-pressed="${W.mode === 'UPI'}">UPI</button></div>${W.mode === 'UPI' ? '<input class="input num" name="txn" inputmode="numeric" maxlength="12" placeholder="UPI transaction ID, 12 digits" style="margin-top:8px">' : ''}</div>` : ''}
+    ${lines.some(l => l[2] === 'desk') ? `<div class="field" style="margin-bottom:12px">Desk payment${payPicker('w-mode', W.mode)}<div style="margin-top:4px">${payDetail(W.mode, lines.filter(l => l[2] === 'desk').reduce((t, l) => t + l[1], 0))}</div></div>` : ''}
     <button class="btn btn-primary" type="submit" style="width:100%;min-height:48px">Confirm booking${total ? ' and take ' + inr(total) : ''}</button>
   </div></section></form>`;
 }
@@ -2205,13 +2306,13 @@ FORM.walkin = f => {
   const lines = walkinCharges(), wallet = lines.filter(l => l[2] === 'wallet').reduce((s, l) => s + l[1], 0), desk = lines.filter(l => l[2] === 'desk').reduce((s, l) => s + l[1], 0), m = memberBy(W.no);
   if (wallet && f.elements.consent && !f.elements.consent.checked) { toast('Tick the consent box before deducting from the wallet.', true); return; }
   if (wallet > (m.wallet ?? 0)) { toast(`Wallet balance is ${inr(m.wallet ?? 0)}, short by ${inr(wallet - (m.wallet ?? 0))}. Take the amount at the desk instead.`, true); return; }
-  if (desk && W.mode === 'UPI' && (f.elements.txn ? f.elements.txn.value.replace(/\D/g, '').length !== 12 : true)) { toast('Enter the 12-digit UPI transaction ID.', true); return; }
+  if (desk && payBad(f, W.mode)) return;
   m.wallet = (m.wallet ?? 0) - wallet; S.collected += desk;
   const ref = 'CB-261028-0' + (164 + BOOKINGS.length - 15), a = AMEN.find(x => x.id === W.am);
   BOOKINGS.unshift({ref, no: m.no, who: m.name, am: a.name, slot: W.slot.replace(' PM', '') + ' to ' + (parseInt(W.slot) + 1) + ':00 PM', day: 'Today', people: W.people, guests: W.guests.map(g => g.name), amt: wallet + desk, payer: desk && wallet ? 'Wallet and reception' : desk ? 'Reception' : 'Wallet', status: 'Confirmed'});
   AUDIT.unshift([hm(now()), me(), 'Walk-in booking', `${ref}, ${a.name} ${W.slot}`, '']);
   openModal(`<div class="modal-b" style="text-align:center;padding-top:24px"><div class="ok-burst">${ic('check')}</div><h2>Booked. ${ref}</h2><p class="muted" style="margin:6px auto 0;max-width:40ch">${esc(a.name)} at ${W.slot} for ${W.people}. The QR code is in ${esc(m.name)}’s app under My Bookings${W.guests.length ? `, with ${W.guests.length} guest pass${W.guests.length > 1 ? 'es' : ''} to share` : ''}.</p></div>
-  <div class="modal-b"><div class="receipt">${wallet ? `<div class="row"><span>From wallet</span><b>${inr(wallet)}</b></div>` : ''}${desk ? `<div class="row"><span>At the desk, ${W.mode}</span><b>${inr(desk)}</b></div>` : ''}<div class="row"><span>Recorded by</span><span>${esc(me())}, ${hm(now())}</span></div></div></div>
+  <div class="modal-b"><div class="receipt">${wallet ? `<div class="row"><span>From wallet</span><b>${inr(wallet)}</b></div>` : ''}${desk ? `<div class="row"><span>At the desk, ${paidAs(f, W.mode)}</span><b>${inr(desk)}</b></div>` : ''}<div class="row"><span>Recorded by</span><span>${esc(me())}, ${hm(now())}</span></div></div></div>
   <div class="modal-f"><button class="btn btn-primary" data-act="close-modal" data-autofocus>Done</button></div>`, 'Booking confirmed');
   Object.assign(W, {slot: null, people: 1, guests: []}); wRefresh();
 };
