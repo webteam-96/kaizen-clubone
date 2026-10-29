@@ -812,7 +812,7 @@ function liveHTML(a) {
 const nextFree = a => { const s = slotsFor(a, TODAY).find(x => x.left > 0); return s ? `Next free ${hm(s.h)}` : 'No slots left today'; };
 const FILTERS = [['all', 'All'], ['sports', 'Sports'], ['fitness', 'Fitness'], ['pool', 'Pool'], ['halls', 'Halls']];
 const ME = { n: 'Rahul Sharma', t: 'member', me: true, pay: 'wallet' };
-const FAM = [{ n: 'Priya Sharma', t: 'member', rel: 'Spouse', no: 'KC1235', age: 38 }, { n: 'Aarav Sharma', t: 'member', rel: 'Child', no: 'KC1234-F2', age: 12 }];
+const FAM = [{ n: 'Priya Sharma', t: 'member', rel: 'Spouse', no: 'KC1235', age: 38, mob: '9820317919' }, { n: 'Aarav Sharma', t: 'member', rel: 'Child', no: 'KC1234-F2', age: 12 }];
 const FEES = [{ l: '3 months', m: 3, a: 200 }, { l: '6 months', m: 6, a: 300 }, { l: '9 months', m: 9, a: 400 }, { l: '1 year', m: 12, a: 600 }];
 const EXPIRED_ON = '2026-10-27';
 const amOf = id => AM.find(a => a.id === id) || AM[0];
@@ -2038,7 +2038,7 @@ ${go2 ? `<div class="dock"><button class="btn pri" data-go="${go2[0]}">${go2[1]}
     after(el) { if (!RM) { pop($('.nd-ic', el), .6); stagger($$('.list .row', el), 160); } },
   };
 }
-document.addEventListener('input', e => { if (e.target.id === 'fmob') e.target.value = fmtMob(e.target.value.replace(/\D/g, '').slice(0, 10)); });
+document.addEventListener('input', e => { if (e.target.id === 'fmob' || e.target.id === 'ecm') e.target.value = fmtMob(e.target.value.replace(/\D/g, '').slice(0, 10)); });
 /* Family members: added straight away as active; the member can edit or remove them here */
 const RELS = ['Spouse', 'Parent', 'Child', 'Sibling', 'Other'];
 let famSeq = 3;
@@ -2055,7 +2055,7 @@ function famRead() {
   if (mob && !/^[6-9]\d{9}$/.test(mob)) return fail('Enter a 10-digit mobile number, or leave it empty.', $('#fmob'));
   return { n: esc(n), rel: $('#frel').value, age, mob };
 }
-const famRow = (f, i) => `<button class="row" data-act="famEdit" data-arg="${i}">${av(f.n)}<span class="grow"><b>${f.n}</b><small>${f.rel}, ${f.no}, age ${f.age}</small></span><span class="chip ok">${ic('check')}Active</span>${ic('chev')}</button>`;
+const famRow = (f, i) => `<button class="row" data-act="famEdit" data-arg="${i}">${av(f.n)}<span class="grow"><b>${f.n}</b><small>${f.rel}, ${f.no}${f.age ? ', age ' + f.age : ''}${EC && EC.n === f.n ? ', emergency contact' : ''}</small></span><span class="chip ok">${ic('check')}Active</span>${ic('chev')}</button>`;
 Object.assign(ACT, {
   famAdd() {
     openSheet(`<h2>Add a family member</h2><p class="sub">They are active as soon as you add them, with their own entry code. Bookings for them come from your wallet.</p>${famForm()}<button class="btn pri" data-act="famSave">Add family member</button>`);
@@ -2071,6 +2071,7 @@ Object.assign(ACT, {
   },
   famUpdate(i) {
     const f = FAM[+i], v = famRead(); if (!f || !v) return;
+    if (EC && EC.n === f.n) { EC = { n: v.n, rel: v.rel, mob: v.mob || EC.mob }; syncEC(); }
     Object.assign(f, v);
     closeSheet(); rerender(); toast(`${v.n}’s details updated`);
   },
@@ -2080,7 +2081,52 @@ Object.assign(ACT, {
   },
   famDel(i) {
     const f = FAM.splice(+i, 1)[0]; if (!f) return;
-    closeSheet(); rerender(); toast(`${f.n} removed from your family`);
+    const wasEc = EC && EC.n === f.n; if (wasEc) { EC = null; syncEC(); }
+    closeSheet(); rerender(); toast(`${f.n} removed from your family${wasEc ? '. Add a new emergency contact' : ''}`);
+  },
+});
+/* Emergency contact: always someone in the family. The member adds, changes or removes it; the club sees it in the admin */
+let EC = { n: 'Priya Sharma', rel: 'Spouse', mob: '9820317919' };
+function syncEC() { try { localStorage.setItem('clubone.ec', JSON.stringify(EC && { name: EC.n, rel: EC.rel, mobile: '+91 ' + fmtMob(EC.mob) })); } catch (e) { /* storage blocked: the admin keeps its copy */ } }
+Object.assign(ACT, {
+  ecOpen() {
+    const opt = (i, b, sm, on) => `<button class="opt" role="radio" aria-checked="${on}" data-act="ecPick" data-arg="${i}"><span><b>${b}</b><small>${sm}</small></span></button>`;
+    openSheet(`<h2>${EC ? 'Emergency contact' : 'Add an emergency contact'}</h2><p class="sub">Who the club calls if something happens to you in the club. Choose someone from your family, or add someone new.</p>
+<div class="opts" role="radiogroup" aria-label="Emergency contact" id="ecw">${FAM.map((f, i) => opt(i, f.n, f.rel + (f.mob ? ', ' + fmtMob(f.mob) : ', no mobile yet'), !!EC && EC.n === f.n)).join('')}${opt('new', 'Someone else', 'They join your family too', false)}</div>
+<div id="ecnew" hidden><label class="field"><span>Full name</span><input class="input" id="ecn" autocomplete="off"></label><label class="field"><span>Relationship</span><select class="input" id="ecr">${RELS.map(r => `<option>${r}</option>`).join('')}</select></label></div>
+<label class="field" id="ecmw"${EC ? '' : ' hidden'}><span>Their mobile number</span><input class="input num" id="ecm" inputmode="numeric" value="${EC ? fmtMob(EC.mob) : ''}"></label>
+<p class="ferr" id="ecerr" hidden></p>
+<button class="btn pri" data-act="ecSave">${EC ? 'Save changes' : 'Add emergency contact'}</button>${EC ? '<button class="btn txt" style="color:var(--bad)" data-act="ecAskDel">Remove emergency contact</button>' : ''}`);
+  },
+  ecPick(i) {
+    $$('#ecw .opt').forEach(o => o.setAttribute('aria-checked', String(o.dataset.arg === String(i))));
+    const f = FAM[+i];
+    $('#ecnew').hidden = i !== 'new'; $('#ecmw').hidden = false; $('#ecerr').hidden = true;
+    $('#ecm').value = f && f.mob ? fmtMob(f.mob) : '';
+    (i === 'new' ? $('#ecn') : $('#ecm')).focus();
+  },
+  ecSave() {
+    const sel = $('#ecw .opt[aria-checked=true]'), err = $('#ecerr'), mob = $('#ecm').value.replace(/\D/g, '');
+    const fail = (msg, el) => { err.hidden = false; err.innerHTML = ic('alert') + msg; if (el) { el.classList.add('bad'); el.focus(); } };
+    if (!sel) return fail('Choose who the club should call.');
+    const k = sel.dataset.arg;
+    if (k === 'new' && $('#ecn').value.trim().length < 2) return fail('Enter their name.', $('#ecn'));
+    if (!/^[6-9]\d{9}$/.test(mob)) return fail('Enter a 10-digit mobile number, starting with 6, 7, 8 or 9.', $('#ecm'));
+    if (mob === '9876543210') return fail('Use a different number from your own.', $('#ecm'));
+    let f;
+    if (k === 'new') { f = { n: esc($('#ecn').value.trim()), rel: $('#ecr').value, mob, t: 'member', no: `KC1234-F${famSeq++}` }; FAM.push(f); }
+    else { f = FAM[+k]; f.mob = mob; }
+    const was = EC && EC.n;
+    EC = { n: f.n, rel: f.rel, mob }; syncEC();
+    closeSheet(); rerender();
+    toast(k === 'new' ? `${f.n} added to your family and set as emergency contact` : was === f.n ? 'Emergency contact updated' : `${f.n} is now your emergency contact`);
+  },
+  ecAskDel() {
+    sheetBody(`<div class="bigic bad">${ic('phone')}</div><h2 class="center">Remove ${EC.n} as emergency contact?</h2><p class="sub center">They stay in your family. The club has no one to call for you until you add someone.</p><button class="btn pri" style="background:var(--bad);box-shadow:none" data-act="ecDel">Remove</button><button class="btn txt" data-act="closeSheet">Keep</button>`);
+  },
+  ecDel() {
+    const n = EC.n; EC = null; syncEC();
+    closeSheet(); rerender(); toast(`${n} is no longer your emergency contact`);
   },
 });
 /* Cancellation needs a reason: it goes to the club with the booking */
@@ -2130,7 +2176,10 @@ function scrProfile() {
 <h2 class="sec">Family members</h2>
 ${FAM.length ? `<div class="list">${FAM.map(famRow).join('')}</div>` : '<p class="cap">No family members yet. Add your spouse, children or parents so you can bring them on your bookings.</p>'}
 <button class="btn sec" style="margin-top:12px" data-act="famAdd">${ic('plus')}Add family member</button>
-<p class="fine">Tap a family member to update their details or remove them.</p>`,
+<p class="fine">Tap a family member to update their details or remove them.</p>
+<h2 class="sec">Emergency contact</h2>
+${EC ? `<div class="list"><button class="row" data-act="ecOpen">${av(EC.n)}<span class="grow"><b>${EC.n}</b><small>${EC.rel}, +91 ${fmtMob(EC.mob)}</small></span>${ic('chev')}</button></div><p class="fine">Tap to change who it is, update the number or remove it.</p>`
+  : `<p class="cap">No emergency contact yet. The club calls them if something happens to you at the pool, the gym or anywhere in the club.</p><button class="btn sec" style="margin-top:12px" data-act="ecOpen">${ic('plus')}Add emergency contact</button>`}`,
   };
 }
 function scrGuests() {

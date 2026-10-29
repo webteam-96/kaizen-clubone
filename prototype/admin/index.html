@@ -163,6 +163,8 @@ table.t{width:100%;border-collapse:collapse;font-size:15px;line-height:1.4;lette
 .t tr.click{cursor:pointer}
 .t tr.click:hover{background:var(--parch)}
 .t .r{text-align:right}
+.t .c{text-align:center}
+.t td > .switch{vertical-align:middle}
 .t .nowrap{white-space:nowrap}
 .t tfoot td{font-weight:600;border-top:2px solid var(--ink);border-bottom:0}
 .t tr.gone{animation:gone var(--t4) var(--ease) forwards}
@@ -793,8 +795,8 @@ const AMEN = [
   {id:'steam',name:'Steam',cap:6,in:3,hours:'7:00 AM to 9:00 PM',slot:30,loc:'Level 1',minAge:18,guests:true,status:'Active',member:20,guest:100},
   {id:'snooker',name:'Snooker',pos:'50% 25%',cap:4,in:4,hours:'10:00 AM to 10:00 PM',slot:60,loc:'Games room',minAge:14,guests:true,status:'Active',member:50,guest:120},
   {id:'pooltable',name:'Pool table',cap:4,in:2,hours:'10:00 AM to 10:00 PM',slot:60,loc:'Games room',minAge:14,guests:true,status:'Active',member:50,guest:120},
-  {id:'studio',name:'Studio hall',cap:20,in:14,hours:'6:00 AM to 10:00 PM',slot:60,loc:'Level 3',minAge:0,guests:false,status:'Active',member:400,guest:null,unit:'per booking',note:'Zumba class'},
-  {id:'banquet',name:'Banquet hall',cap:1,in:0,hours:'By booking',slot:240,loc:'Ground floor',minAge:0,guests:false,status:'Active',member:5500,guest:null,unit:'per booking',note:'Private event 7 to 11 PM'},
+  {id:'studio',name:'Studio hall',cap:20,in:14,hours:'6:00 AM to 10:00 PM',slot:60,loc:'Level 3',minAge:0,guests:false,status:'Active',member:400,guest:null,unit:'per day',note:'Zumba class'},
+  {id:'banquet',name:'Banquet hall',cap:1,in:0,hours:'By booking',slot:240,loc:'Ground floor',minAge:0,guests:false,status:'Active',member:5500,guest:null,unit:'per day',note:'Private event 7 to 11 PM'},
 ];
 const RATES = [
   {a:'Badminton',m:20,g:150,c:100},
@@ -809,8 +811,8 @@ const RATES = [
   {a:'Swimming, main pool',m:5,g:150,c:null},
   {a:'Swimming, kids pool',m:5,g:null,c:null},
   {a:'Steam',m:20,g:100,c:null},
-  {a:'Banquet hall',m:5500,g:null,c:null,unit:'per booking'},
-  {a:'Studio hall',m:400,g:null,c:null,unit:'per booking'},
+  {a:'Banquet hall',m:5500,g:null,c:null,unit:'per day'},
+  {a:'Studio hall',m:400,g:null,c:null,unit:'per day'},
 ];
 const FEES = [
   {k:'new',label:'New card',v:600},
@@ -818,7 +820,6 @@ const FEES = [
   {k:'r6',label:'Renewal, 6 months',v:300,months:6},
   {k:'r9',label:'Renewal, 9 months',v:400,months:9},
   {k:'r12',label:'Renewal, 1 year',v:600,months:12},
-  {k:'dep',label:'Dependant',v:750},
 ];
 const EC = {KC1234: {name: 'Priya Sharma', rel: 'Spouse', mobile: '+91 98203 17919'}, KC1235: {name: 'Rahul Sharma', rel: 'Spouse', mobile: '+91 98765 43210'}, KC1236: {name: 'Arun Nair', rel: 'Spouse', mobile: '+91 98207 44120'}, KC1240: {name: 'Lakshmi Iyer', rel: 'Parent', mobile: '+91 98190 23345'}};
 const MEMBERS = [
@@ -875,7 +876,7 @@ const STAFF = [
   {name:'Arjun Menon',role:'Administrator',area:'All areas',on:true},
   {name:'Sneha Patil',role:'Receptionist',area:'Reception desk',on:true},
   {name:'Ramesh Shinde',role:'Receptionist',area:'Reception desk',on:true},
-  {name:'Vikram Desai',role:'Accounts',area:'Finance',on:true},
+  {name:'Vikram Desai',role:'Receptionist',area:'Reception desk',on:true},
   {name:'Ravi Kumar',role:'Gate operator',area:'Main entry',on:true},
   {name:'Varun Khanna',role:'Amenity attendant',area:'Swimming pool',on:true},
   {name:'Lakshmi Nair',role:'Amenity attendant',area:'Gymnasium',on:true},
@@ -914,7 +915,7 @@ const PAYMENTS = [
 ];
 const APPROVALS = [
   {id:'A1',kind:'Override',who:'Sanjay Mehta',no:'KC1251',from:'Ravi Kumar, gate operator at Main entry',at:'6:04 PM',rule:'Denied: membership expired on 26 Oct 2026',why:'Says the renewal was paid at the club office this morning.'},
-  {id:'A2',kind:'Refund above limit',who:'Leela Fernandes',no:'KC1302',from:'Vikram Desai, accounts',at:'11:20 AM',rule:'Manual refund of ₹1,500 is above the ₹1,000 approval limit',why:'Duplicate wallet top-up on 27 Oct, Cashfree ref CF-88231904.',amt:1500},
+  {id:'A2',kind:'Refund above limit',who:'Leela Fernandes',no:'KC1302',from:'Vikram Desai, reception',at:'11:20 AM',rule:'Manual refund of ₹1,500 is above the ₹1,000 approval limit',why:'Duplicate wallet top-up on 27 Oct, Cashfree ref CF-88231904.',amt:1500},
   {id:'A3',kind:'Cash count difference',who:'Sneha Patil',no:'',from:'Sneha Patil, receptionist',at:'27 Oct, 10:05 PM',rule:'Counted ₹6,650 against ₹6,850 recorded, short by ₹200',why:'Evening shift. One cash payment may have been recorded twice.'},
 ];
 const STUCK = [
@@ -942,18 +943,18 @@ const COLLECT = [{by:'Sneha Patil',cash:4200,upi:3650},{by:'Ramesh Shinde',cash:
 const REPORTS = [
   ['Daily entry and exit','Entries, exits, denials and peak hour by station','Manager, Administrator'],
   ['Amenity usage','Bookings, admissions and no-shows by amenity and slot','Manager, Administrator'],
-  ['Revenue','Payments by day, amenity and payment method','Accounts, Manager'],
-  ['Refunds','Refunds with reason, amount and status','Accounts, Manager'],
+  ['Revenue','Payments by day, amenity and payment method','Reception, Manager'],
+  ['Refunds','Refunds with reason, amount and status','Reception, Manager'],
   ['Denials','Each denied scan with reason, station and time','Manager'],
   ['Manual admissions and overrides','Each manual entry and override with operator and approver','Manager'],
   ['Member activity','Visits and bookings per member','Administrator, Manager'],
   ['Station health','Online time and last scan per station','Administrator'],
-  ['Wallet transactions','Each top-up, deduction and refund credit per member','Accounts, Manager'],
-  ['Wallet top-ups','Top-ups by day with gateway reference, member and status','Accounts, Manager'],
-  ['Trial balance','Credits and debits by head for a chosen period','Accounts, Manager'],
-  ['Membership fees','New card, renewal and dependant fees with payment source','Accounts, Administrator'],
+  ['Wallet transactions','Each top-up, deduction and refund credit per member','Reception, Manager'],
+  ['Wallet top-ups','Top-ups by day with gateway reference, member and status','Reception, Manager'],
+  ['Trial balance','Credits and debits by head for a chosen period','Reception, Manager'],
+  ['Membership fees','New card and renewal fees with payment source','Reception, Administrator'],
   ['Bookings','Bookings by amenity, slot and status','Manager, Administrator'],
-  ['Reception collections','Cash and UPI at reception by day and staff, with the cash count','Accounts, Manager'],
+  ['Reception collections','Cash and UPI at reception by day and staff, with the cash count','Reception, Manager'],
   ['Slot changes','Slots changed or allotted by reception, with old and new slot','Manager'],
 ];
 const AUDIT = [
@@ -970,8 +971,7 @@ const AUDIT = [
 ];
 const ROLES = {
   manager:{label:'Club manager',name:'Meera Iyer',sid:'MGR-014',home:'dashboard',hint:'Live floor, approvals, reports',nav:['dashboard','access','members','amenities','bookings','reception','approvals','finance']},
-  reception:{label:'Receptionist',name:'Sneha Patil',sid:'RCP-022',home:'reception',hint:'Payments, walk-ins, slot changes',nav:['reception','members','bookings','access']},
-  accounts:{label:'Accounts',name:'Vikram Desai',sid:'ACC-007',home:'finance',hint:'Collections, refunds, reports',nav:['finance','approvals','bookings','members']},
+  reception:{label:'Receptionist',name:'Sneha Patil',sid:'RCP-022',home:'reception',hint:'Payments, walk-ins, refunds, reports',nav:['reception','members','bookings','access','finance','approvals']},
   admin:{label:'Administrator',name:'Arjun Menon',sid:'ADM-001',home:'dashboard',hint:'Full access, masters, settings',nav:['dashboard','access','members','amenities','bookings','reception','approvals','finance','settings']},
 };
 const NAV = {
@@ -1119,7 +1119,7 @@ function showLogin() {
   renderRolePick();
 }
 function renderRolePick() {
-  const icon = {manager: 'grid', reception: 'receipt', accounts: 'rupee', admin: 'shield'};
+  const icon = {manager: 'grid', reception: 'receipt', admin: 'shield'};
   $('#role-pick').innerHTML = Object.entries(ROLES).map(([k, r]) => `<button type="button" class="role" data-act="pick-role" data-role="${k}" aria-pressed="${k === pickRole}">${ic(icon[k])}<span><b>${r.label}</b><small>${r.hint}</small></span></button>`).join('');
   $('#login-form').elements.sid.value = ROLES[pickRole].sid;
 }
@@ -1589,7 +1589,7 @@ VIEWS.dashboard = () => {
       const {e, changed} = nextEvent();
       const list = $('#feed-list'); if (!list) return;
       list.insertAdjacentHTML('afterbegin', evHTML(e, true));
-      while (list.children.length > 12) list.lastElementChild.remove();
+      while (list.children.length > 8) list.lastElementChild.remove();
       tick($('#k-inside'), S.inside); tick($('#k-checkins'), S.checkins);
       tick($('#k-inam'), AMEN.reduce((s, a) => s + a.in, 0));
       const nl = $('#in-now'); if (nl) nl.textContent = `${S.inside} now`;
@@ -1607,7 +1607,7 @@ VIEWS.dashboard = () => {
   <section class="panel span8" aria-labelledby="am-h"><div class="panel-h"><div><h2 id="am-h">Amenities right now</h2><p>People inside against the capacity of the current slot, busiest first</p></div><div class="am-legend" aria-hidden="true"><span><i></i>Has room</span><span><i class="hi"></i>Almost full</span><span><i class="full"></i>Full</span></div></div>
     <div class="am-grid">${[...AMEN].sort((p, q) => fill(q) - fill(p)).map(amRowHTML).join('')}</div></section>
   <section class="panel span4" aria-labelledby="fd-h"><div class="panel-h"><div><h2 id="fd-h">Live entries</h2><p>Gates and amenity doors</p></div>${pauseBtn()}</div>
-    <ol class="feed-list" id="feed-list">${S.events.slice(0, 12).map(e => evHTML(e)).join('')}</ol></section>
+    <ol class="feed-list" id="feed-list">${S.events.slice(0, 8).map(e => evHTML(e)).join('')}</ol></section>
   <div class="db-h"><h2>Statistics</h2><p>Today so far, compared with last Wednesday</p></div>
   <div class="tiles span12" role="group" aria-label="Statistics, today so far">
     ${kpi('doorin', 'g', 'Check-ins today', `<b id="k-checkins" data-v="${S.checkins}">${num(S.checkins)}</b>`, `<span class="delta up">${ic('up')}+6% vs last Wed</span>`, spark(TREND.checkins, 'Check-ins by this time of day over the last 12 days. Today is the blue dot.'))}
@@ -1804,7 +1804,7 @@ function walletLedger(m, wallet) {
 }
 function memTabBody(m, k) {
   const wallet = m.wallet == null ? memberBy('KC1234').wallet : m.wallet;
-  if (k === 'overview') return `<dl class="kv"><dt>Membership</dt><dd>${m.type}</dd><dt>Valid till</dt><dd>${m.valid} <span class="muted">(${daysLeft(m.valid) >= 0 ? daysLeft(m.valid) + ' days left' : 'ended ' + -daysLeft(m.valid) + ' days ago'})</span></dd><dt>Member since</dt><dd>${m.since}</dd><dt>Mobile</dt><dd class="num">${m.mobile}</dd><dt>Email</dt><dd>${m.name.split(' ')[0].toLowerCase()}@example.com</dd><dt>Flat</dt><dd>${esc(m.flat)}</dd><dt>Emergency contact</dt><dd>${(c => c ? `${esc(c.name)}, ${esc(c.rel.toLowerCase())}, <span class="num">${esc(c.mobile)}</span>` : '<span class="muted">Not on file. Ask the member at the next visit.</span>')(ecOf(m))}${isAdmin() ? ` <button class="link" data-act="ec-pick" data-no="${m.no}">Change</button>` : ''}</dd><dt>Wallet</dt><dd>${m.wallet == null ? `Uses the primary member’s wallet, ${inr(wallet)}` : inr(wallet)}</dd></dl>`;
+  if (k === 'overview') return `<dl class="kv"><dt>Membership</dt><dd>${m.type}</dd><dt>Valid till</dt><dd>${m.valid} <span class="muted">(${daysLeft(m.valid) >= 0 ? daysLeft(m.valid) + ' days left' : 'ended ' + -daysLeft(m.valid) + ' days ago'})</span></dd><dt>Member since</dt><dd>${m.since}</dd><dt>Mobile</dt><dd class="num">${m.mobile}</dd><dt>Email</dt><dd>${m.name.split(' ')[0].toLowerCase()}@example.com</dd><dt>Flat</dt><dd>${esc(m.flat)}</dd><dt>Emergency contact</dt><dd>${(c => c ? `${esc(c.name)}, ${esc(c.rel.toLowerCase())}, <span class="num">${esc(c.mobile)}</span>` : '<span class="muted">Not set. The member adds it in the app.</span>')(ecOf(m))}<br><small class="muted">The member adds, changes or removes it in the app.</small></dd><dt>Wallet</dt><dd>${m.wallet == null ? `Uses the primary member’s wallet, ${inr(wallet)}` : inr(wallet)}</dd></dl>`;
   if (k === 'wallet') {
     const bk = BOOKINGS.filter(b => b.no === m.no);
     return `<div class="row" style="margin-bottom:14px"><div><div class="muted cap">Wallet balance</div><div class="num" style="font:600 40px/1.1 var(--display)">${inr(wallet)}</div></div>${chip('Active', 'Top-ups through Cashfree')}</div>
@@ -1828,7 +1828,9 @@ function memTabBody(m, k) {
 }
 /* family and emergency contact: the emergency contact is always someone in the member's family */
 const RELS = ['Spouse', 'Parent', 'Child', 'Sibling', 'Other'];
-const ecOf = m => m.ec || EC[m.no];
+const APP_EC = 'clubone.ec';   // Rahul's emergency contact as he keeps it in the member app
+const appEC = () => { try { const v = localStorage.getItem(APP_EC); return v == null ? undefined : JSON.parse(v); } catch (e) { return undefined; } };
+const ecOf = m => { const a = m.no === 'KC1234' ? appEC() : undefined; return a !== undefined ? a : m.ec || EC[m.no]; };
 function famOf(m) {
   const key = m.no === 'KC1235' ? 'KC1234' : m.no;
   if (!FAMILY[key]) {
@@ -1861,30 +1863,6 @@ ACT['fam-del'] = b => {
   if (wasEc) { m.ec = null; delete EC[m.no]; }
   AUDIT.unshift([hm(now()), ROLES[S.role].name, 'Family member removed', `${p.name} from ${m.name}, ${m.no}`, '']);
   toast(`${esc(p.name)} removed from the family.${wasEc ? ' Choose a new emergency contact.' : ''}`); refreshMember(m);
-};
-ACT['ec-pick'] = b => {
-  const m = memberBy(b.dataset.no), cur = ecOf(m), fam = famOf(m).filter(p => p.name !== m.name);
-  openModal(`<form data-form="ec-pick" data-no="${m.no}">${modalHead('Emergency contact', 'Choose someone from the family, or add a new person. A new person joins the family too.')}
-  <div class="modal-b form"><div>${fam.map((p, i) => `<label class="opt-row"><input type="radio" name="who" value="${i}" data-input="ec-who"${cur && cur.name === p.name ? ' checked' : ''}><span><b>${esc(p.name)}</b><small>${esc(p.rel)}${p.mobile ? ', ' + esc(p.mobile) : ', no mobile on file'}</small></span></label>`).join('')}<label class="opt-row"><input type="radio" name="who" value="new" data-input="ec-who"${fam.length ? '' : ' checked'}><span><b>Someone else</b><small>Added to the family as well</small></span></label></div>
-  <div class="f3" id="ec-new" style="margin-top:12px"${fam.length ? ' hidden' : ''}><label class="field">${lab('Name')}<input class="input" name="ename" autocomplete="off"><span class="errmsg" hidden>Enter the name.</span></label><label class="field">${lab('Relationship')}${relSelect('erel', 'Spouse')}</label><label class="field">${lab('Mobile number')}<input class="input" name="emobile" inputmode="tel" placeholder="98200 12345"><span class="errmsg" hidden>Enter the mobile number.</span></label></div></div>
-  <div class="modal-f"><button type="button" class="btn" data-act="close-modal">Cancel</button><button class="btn btn-primary" type="submit">Save</button></div></form>`, 'Emergency contact');
-};
-INPUT['ec-who'] = el => { const box = $('#ec-new'); box.hidden = el.value !== 'new'; if (!box.hidden) box.querySelector('input').focus(); };
-FORM['ec-pick'] = f => {
-  const m = memberBy(f.dataset.no), fam = famOf(m).filter(p => p.name !== m.name), v = (f.querySelector('input[name=who]:checked') || {}).value;
-  const ten = x => (x || '').replace(/\D/g, '').slice(-10);
-  let c;
-  if (v === 'new' || v == null) {
-    if (!need(f, ['ename', 'emobile'])) return;
-    if (ten(f.elements.emobile.value) === ten(m.mobile)) { toast('The emergency contact needs a different mobile number from the member.', true); return; }
-    c = famAdd(m, {name: f.elements.ename.value.trim(), rel: f.elements.erel.value, mobile: f.elements.emobile.value.trim()});
-  } else {
-    c = fam[+v];
-    if (!c.mobile) { toast(`${esc(c.name)} has no mobile number on file. Add it, or choose someone else.`, true); return; }
-  }
-  m.ec = {name: c.name, rel: c.rel, mobile: c.mobile};
-  AUDIT.unshift([hm(now()), ROLES[S.role].name, 'Emergency contact changed', `${m.name}, ${m.no}: ${c.name}`, '']);
-  closeModal(); toast(`${esc(c.name)} is now ${esc(m.name)}’s emergency contact.`); refreshMember(m);
 };
 ACT.doc = () => toast('Opening documents is not part of this prototype.');
 function feeModal(m, kinds, title, sub) {
@@ -1970,22 +1948,22 @@ VIEWS.amenities = sub => {
   const head = `<div class="vhead"><div><p>What members see in the app and what attendants can admit comes from here.</p></div><div class="actions">${canEditAm() ? `<button class="btn" data-act="block-slot">${ic('ban')}Block a date or slot</button>` : ''}</div></div>`;
   if (sub === 'rates') return head + ratesHTML();
   if (sub === 'blocks') return head + `<section class="panel"><div class="tscroll"><table class="t"><thead><tr><th>Amenity</th><th>Date and slots</th><th>Reason</th><th>Bookings affected</th><th>By</th></tr></thead><tbody>${BLOCKS.map(b => `<tr><td><b>${esc(b.am)}</b></td><td>${esc(b.when)}</td><td>${esc(b.why)}</td><td>${esc(b.affected)}</td><td>${esc(b.by)}</td></tr>`).join('')}</tbody></table></div></section>`;
-  return head + `<section class="panel"><div class="tscroll"><table class="t"><thead><tr><th>Amenity</th><th>Status</th><th>Hours</th><th class="r">Slot</th><th class="r">Capacity</th><th>Guests</th><th class="r">Member price</th></tr></thead><tbody>
-  ${AMEN.map(a => `<tr class="click" data-act="edit-amenity" data-id="${a.id}"><td><div class="who"><span class="thumb">${amImg(a)}</span><div><b>${esc(a.name)}</b><small>${esc(a.loc)}</small></div></div></td><td>${a.offline ? chip('Offline', 'Station offline') : chip('Active')}</td><td class="nowrap">${esc(a.hours)}</td><td class="r nowrap">${a.slot} min</td><td class="r">${a.id === 'banquet' ? '1 booking a day' : a.cap}</td><td>${a.guests ? 'Allowed' : 'Not allowed'}</td><td class="r nowrap">${a.member === 0 ? 'Free' : inr(a.member) + (a.unit ? ' <small class="muted">' + a.unit + '</small>' : '')}</td></tr>`).join('')}</tbody></table></div></section>`;
+  return head + `<section class="panel"><div class="tscroll"><table class="t"><thead><tr><th>Amenity</th><th>Status</th><th>Hours</th><th>Slot</th><th>Capacity</th><th>Guests</th><th>Member price</th><th>Guest price</th></tr></thead><tbody>
+  ${AMEN.map(a => `<tr class="click" data-act="edit-amenity" data-id="${a.id}"><td><div class="who"><span class="thumb">${amImg(a)}</span><div><b>${esc(a.name)}</b><small>${esc(a.loc)}</small></div></div></td><td>${a.offline ? chip('Offline', 'Station offline') : chip('Active')}</td><td class="nowrap">${esc(a.hours)}</td><td class="nowrap">${a.unit ? 'Full day' : a.slot + ' min'}</td><td class="nowrap">${a.id === 'banquet' ? '1 a day' : a.cap}</td><td>${a.guests ? 'Allowed' : '<span class="muted">Not allowed</span>'}</td><td class="nowrap">${a.member === 0 ? 'Free' : inr(a.member) + (a.unit ? ' <small class="muted">' + a.unit + '</small>' : '')}</td><td class="nowrap">${a.guest == null ? '<span class="muted">Not offered</span>' : inr(a.guest)}</td></tr>`).join('')}</tbody></table></div></section>`;
 };
 const BLOCKS = [
   {am:'Squash, court 2',when:'Thu 29 Oct, 7:00 to 9:00 AM',why:'Floor polishing',affected:'2 cancelled, refunded',by:'Meera Iyer'},
   {am:'Swimming pool',when:'Mon 2 Nov, 6:00 to 8:00 AM',why:'Filter maintenance',affected:'None yet',by:'Arjun Menon'},
 ];
 function ratesHTML() {
-  const ed = canEditAm(), cell = (v, k, i) => ed ? `<input class="input num" style="max-width:96px;text-align:right" inputmode="numeric" data-rate="${i}" data-k="${k}" value="${v == null ? '' : v}" aria-label="${k} price" placeholder="Not offered">` : (v == null ? '<span class="muted">Not offered</span>' : inr(v));
+  const ed = canEditAm(), cell = (v, k, i) => ed ? `<input class="input num" style="width:124px" inputmode="numeric" data-rate="${i}" data-k="${k}" value="${v == null ? '' : v}" aria-label="${k} price" placeholder="Not offered">` : (v == null ? '<span class="muted">Not offered</span>' : inr(v));
   return `<section class="panel"><div class="panel-h"><div><h2>Rate card</h2><p>From the club’s current rate screen. Prices are per person per slot unless marked.</p></div>
   ${ed ? `<div class="actions"><label class="field" style="flex-direction:row;align-items:center;gap:8px">Effective from<input class="input" type="date" id="rate-from" value="2026-11-01" style="width:auto"></label></div>` : ''}</div>
-  <div class="tscroll"><table class="t"><thead><tr><th>Amenity</th><th class="r">Member</th><th class="r">Guest</th><th class="r">Guest coach</th><th>Free for members</th></tr></thead><tbody>
-  ${RATES.map((r, i) => `<tr><td><b>${esc(r.a)}</b>${r.unit ? `<br><small class="muted">${r.unit}</small>` : ''}</td><td class="r">${r.free && !ed ? 'Free' : cell(r.m, 'member', i)}</td><td class="r">${cell(r.g, 'guest', i)}</td><td class="r">${cell(r.c, 'coach', i)}</td><td>${ed ? `<input type="checkbox" class="switch" ${r.free ? 'checked' : ''} aria-label="Free for members, ${esc(r.a)}" data-free="${i}">` : (r.free ? 'Yes' : 'No')}</td></tr>`).join('')}</tbody></table></div>
+  <div class="tscroll"><table class="t"><thead><tr><th>Amenity</th><th>Member</th><th>Guest</th><th>Guest coach</th><th>Free for members</th></tr></thead><tbody>
+  ${RATES.map((r, i) => `<tr><td><b>${esc(r.a)}</b>${r.unit ? `<br><small class="muted">${r.unit}</small>` : ''}</td><td>${r.free && !ed ? 'Free' : cell(r.m, 'member', i)}</td><td>${cell(r.g, 'guest', i)}</td><td>${cell(r.c, 'coach', i)}</td><td>${ed ? `<input type="checkbox" class="switch" ${r.free ? 'checked' : ''} aria-label="Free for members, ${esc(r.a)}" data-free="${i}">` : (r.free ? 'Yes' : 'No')}</td></tr>`).join('')}</tbody></table></div>
   <div class="panel-b"><div class="note">${ic('info')}<div>Confirmed bookings keep the price they were bought at. New prices apply to bookings made from the effective date.</div></div></div></section>
   <section class="panel" style="margin-top:20px"><div class="panel-h"><div><h2>Membership fees</h2><p>Paid from the wallet or through Cashfree in the app.</p></div>${ed ? '<a class="btn btn-sm" href="#/settings/fees">Edit in settings</a>' : ''}</div>
-  <div class="tscroll"><table class="t"><tbody>${FEES.map(f => `<tr><td>${f.label}</td><td class="r num">${inr(f.v)}</td></tr>`).join('')}</tbody></table></div></section>`;
+  <div class="tscroll"><table class="t"><tbody>${FEES.map(f => `<tr><td>${f.label}</td><td class="num">${inr(f.v)}</td></tr>`).join('')}</tbody></table></div></section>`;
 }
 ACT['save-rates'] = () => {
   let changed = 0;
@@ -2079,8 +2057,8 @@ const bkMatch = b => (S.bkF === 'All' || b.status === S.bkF) && (!S.bkQ || `${b.
 function pplCell(b) {
   const g = b.guests.length, extra = Math.max(0, b.people - 1 - Math.min(g, 2));
   const faces = avatar(b.who, 'sm') + b.guests.slice(0, 2).map(n => `<span class="avatar sm guest" aria-hidden="true">${esc(initials(n.replace(/\s*\(.*\)/, '')))}</span>`).join('') + (extra ? `<span class="avatar sm more" aria-hidden="true">+${extra}</span>` : '');
-  const sub = g ? `${g} guest${g > 1 ? 's' : ''}` : b.people > 1 ? 'Members only' : 'Just the member';
-  return `<div class="ppl"><span class="ppl-st">${faces}</span><span><b>${b.people} ${b.people > 1 ? 'people' : 'person'}</b><small>${sub}</small></span></div>`;
+  const mem = b.people - g;
+  return `<div class="ppl"><span class="ppl-st">${faces}</span><span><b>${mem} member${mem > 1 ? 's' : ''}</b>${g ? `<small>+ ${g} guest${g > 1 ? 's' : ''}</small>` : ''}</span></div>`;
 }
 function bkRows() {
   const rows = BOOKINGS.filter(bkMatch);
@@ -2320,7 +2298,7 @@ const revList = () => PAYMENTS.slice(0, 6).map(p => `<li><div class="grow"><b>${
 const APPROVE_MSG = {
   Override: a => `Override approved for ${esc(a.who)}. One admission is allowed; the gate operator sees it on the station screen.`,
   'Refund above limit': a => `Refund of ${inr(a.amt)} approved. Cashfree processes it and the status shows under Refunds.`,
-  'Cash count difference': () => 'Difference noted. Accounts follows up with the bank statement.',
+  'Cash count difference': () => 'Difference noted. The manager follows up with the bank statement.',
 };
 ACT.approve = b => {
   const a = APPROVALS.find(x => x.id === b.dataset.id);
@@ -2366,7 +2344,7 @@ function revenueChart() {
 VIEWS.finance = sub => {
   const head = `<div class="vhead"><div><p>Every rupee from the gateway and the reception desk, matched to a wallet top-up, a booking or a membership fee.</p></div></div>`;
   if (sub === 'trial') return head + trialHTML();
-  if (sub === 'refunds') return head + `<section class="panel"><div class="tscroll"><table class="t"><thead><tr><th>Refund</th><th>Member</th><th>Reason</th><th class="r">Amount</th><th>Status</th><th></th></tr></thead><tbody>${REFUNDS.map(r => `<tr><td class="nowrap"><b>${r.id}</b><br><small class="muted">${r.at}</small></td><td>${esc(r.who)}</td><td>${esc(r.why)}</td><td class="r num">${inr(r.amt)}</td><td>${chip(r.status)}</td><td class="r">${r.status === 'Needs club action' ? `<button class="btn btn-sm" data-act="refund-fix" data-id="${r.id}">Refund by another route</button>` : ''}</td></tr>`).join('')}</tbody></table></div><div class="panel-b"><div class="note">${ic('info')}<div>Refunds go back to the member’s wallet. Each one moves through initiated, processing and completed; a failure alerts accounts.</div></div></div></section>`;
+  if (sub === 'refunds') return head + `<section class="panel"><div class="tscroll"><table class="t"><thead><tr><th>Refund</th><th>Member</th><th>Reason</th><th class="r">Amount</th><th>Status</th><th></th></tr></thead><tbody>${REFUNDS.map(r => `<tr><td class="nowrap"><b>${r.id}</b><br><small class="muted">${r.at}</small></td><td>${esc(r.who)}</td><td>${esc(r.why)}</td><td class="r num">${inr(r.amt)}</td><td>${chip(r.status)}</td><td class="r">${r.status === 'Needs club action' ? `<button class="btn btn-sm" data-act="refund-fix" data-id="${r.id}">Refund by another route</button>` : ''}</td></tr>`).join('')}</tbody></table></div><div class="panel-b"><div class="note">${ic('info')}<div>Refunds go back to the member’s wallet. Each one moves through initiated, processing and completed; a failure alerts the reception desk.</div></div></div></section>`;
   if (sub === 'reports') return head + `<section class="panel"><div class="tscroll"><table class="t"><thead><tr><th>Report</th><th>What it shows</th><th>Seen by</th><th></th></tr></thead><tbody>${REPORTS.map(([n, d, w]) => `<tr><td><b>${n}</b></td><td>${d}</td><td class="muted">${w}</td><td class="r"><button class="btn btn-sm" data-act="export" data-r="${esc(n)}">${ic('download')}Export</button></td></tr>`).join('')}</tbody></table></div><div class="panel-b"><p class="muted cap">Every report filters by date range and exports to Excel and PDF.</p></div></section>`;
   const cash = COLLECT.reduce((s, c) => s + c.cash, 0), upi = COLLECT.reduce((s, c) => s + c.upi, 0), gw = S.collected - cash - upi;
   return head + `<div class="panel kpis"><div class="stat"><b>${inr(S.collected)}</b><span>Collected today</span></div><div class="stat"><b>${inr(gw)}</b><span>App top-ups through Cashfree</span></div><div class="stat"><b>${inr(cash)}</b><span>Cash at reception</span></div><div class="stat"><b>${inr(upi)}</b><span>UPI at reception</span></div></div>
@@ -2462,7 +2440,7 @@ FORM.pair = f => {
   $('#pair-go').outerHTML = '<button type="button" class="btn btn-primary" data-act="close-modal">Done</button>';
   STATIONS.push({name: f.elements.name.value.trim(), type: f.elements.type.value, loc: 'Not paired yet', on: false, last: 'never', dev: 'Waiting for pairing'});
 };
-ACT['add-staff'] = () => openModal(`<form data-form="staff">${modalHead('Add a staff account', 'The account only sees the screens of its role. Attendants only see their amenity.')}<div class="modal-b form"><div class="f2"><label class="field">Name<input class="input" name="name"><span class="errmsg" hidden>Enter a name.</span></label><label class="field">Mobile number<input class="input" name="mobile" inputmode="tel"><span class="errmsg" hidden>Enter a mobile number.</span></label><label class="field">Role<select class="input" name="role"><option>Receptionist</option><option>Gate operator</option><option>Amenity attendant</option><option>Accounts</option><option>Club manager</option></select></label><label class="field"><span class="lab">Amenity<span class="lab-n">Attendants only</span></span><select class="input" name="area">${AMEN.map(a => `<option>${esc(a.name)}</option>`).join('')}</select></label></div></div><div class="modal-f"><button type="button" class="btn" data-act="close-modal">Cancel</button><button class="btn btn-primary" type="submit">Send first sign-in link</button></div></form>`, 'Add staff');
+ACT['add-staff'] = () => openModal(`<form data-form="staff">${modalHead('Add a staff account', 'The account only sees the screens of its role. Attendants only see their amenity.')}<div class="modal-b form"><div class="f2"><label class="field">Name<input class="input" name="name"><span class="errmsg" hidden>Enter a name.</span></label><label class="field">Mobile number<input class="input" name="mobile" inputmode="tel"><span class="errmsg" hidden>Enter a mobile number.</span></label><label class="field">Role<select class="input" name="role"><option>Receptionist</option><option>Gate operator</option><option>Amenity attendant</option><option>Club manager</option></select></label><label class="field"><span class="lab">Amenity<span class="lab-n">Attendants only</span></span><select class="input" name="area">${AMEN.map(a => `<option>${esc(a.name)}</option>`).join('')}</select></label></div></div><div class="modal-f"><button type="button" class="btn" data-act="close-modal">Cancel</button><button class="btn btn-primary" type="submit">Send first sign-in link</button></div></form>`, 'Add staff');
 FORM.staff = f => {
   if (!need(f, ['name', 'mobile'])) return;
   STAFF.push({name: f.elements.name.value.trim(), role: f.elements.role.value, area: f.elements.role.value === 'Amenity attendant' ? f.elements.area.value : 'Reception desk', on: true});
@@ -2567,7 +2545,7 @@ function pullAppBookings(live) {
   BOOKINGS.forEach(b => { delete b.fresh; });
 }
 pullAppBookings(false);
-addEventListener('storage', e => { if (e.key === APP_BK) pullAppBookings(true); });
+addEventListener('storage', e => { if (e.key === APP_BK) pullAppBookings(true); if (e.key === APP_EC) { const c = appEC(); toast(c ? `Rahul Sharma set ${esc(c.name)} as emergency contact in the member app.` : 'Rahul Sharma removed the emergency contact in the member app.'); } });
 render();
 </script>
 </body>
