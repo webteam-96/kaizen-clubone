@@ -186,6 +186,17 @@ tr.new td{animation:rowhl var(--t4) ease-out 1s backwards}
 .opt-row b{display:block;font-weight:600}
 .opt-row small{display:block;color:var(--ink-80);font-size:14px}
 .opt-row input{width:18px;height:18px;accent-color:var(--blue);flex:none}
+.ppl{display:flex;align-items:center;gap:10px;white-space:nowrap}
+.ppl-st{display:flex}
+.ppl-st .avatar{width:30px;height:30px;font-size:11px;box-shadow:0 0 0 2px #fff}
+.ppl-st .avatar + .avatar{margin-left:-7px}
+.ppl-st .avatar:nth-child(1){z-index:3}
+.ppl-st .avatar:nth-child(2){z-index:2}
+.ppl-st .avatar:nth-child(3){z-index:1}
+.ppl-st .avatar.guest{background:#e8f0fb;color:var(--blue)}
+.ppl-st .avatar.more{background:var(--ink);color:#fff}
+.ppl b{display:block;font-weight:600;font-size:15px}
+.ppl small{display:block;color:var(--ink-80);font-size:13px}
 .mgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
 .mgrid > .empty{grid-column:1/-1}
 .mcard{position:relative;display:flex;flex-direction:column;gap:18px;width:100%;margin:0;padding:20px 20px 16px;border:0;border-radius:22px;background:#fff;text-align:left;color:var(--ink);box-shadow:0 0 0 1px rgba(0,0,0,.045),0 1px 2px rgba(0,0,0,.04),0 12px 30px -16px rgba(0,0,0,.14);transition:transform .35s var(--ease),box-shadow .35s var(--ease)}
@@ -818,14 +829,14 @@ const MEMBERS = [
   ['KC1243','Vikram Malhotra','Tenant','Active','15 Aug 2027','503','C',3150,0],
   ['KC1247','Neha Kapoor','Resident','Active','31 Mar 2027','1806','E',420,1],
   ['KC1251','Sanjay Mehta','Resident','Expired','26 Oct 2026','204','A',95,0],
-  ['KC1255','Kabir Joshi','Resident','Active','31 Jan 2027','907','F',1900,1],
+  ['KC1255','Karan Joshi','Resident','Active','31 Jan 2027','907','F',1900,1],
   ['KC1258','Meenal Deshpande','Resident','Active','31 May 2027','1203','C',640,0],
   ['KC1262','Rohan Kulkarni','Tenant','Active','30 Nov 2026','1510','D',2210,1],
   ['KC1266','Ishita Bose','Resident','Active','31 Mar 2027','608','B',75,1],
   ['KC1270','Aditya Rao','Resident','Active','31 Mar 2027','2101','E',5400,1],
   ['KC1273','Pooja Shetty','Tenant','Active','31 Jul 2027','1702','A',300,1],
   ['KC1277','Nikhil Bhatia','Resident','Active','28 Feb 2027','404','F',1180,0],
-  ['KC1281','Zoya Siddiqui','Resident','Active','31 Mar 2027','1309','C',990,1],
+  ['KC1281','Diya Sinha','Resident','Active','31 Mar 2027','1309','C',990,1],
   ['KC1284','Harish Pillai','Resident','Active','31 Mar 2027','101','D',2750,0],
   ['KC1288','Kavya Reddy','Tenant','Active','31 Oct 2026','1105','E',150,0],
   ['KC1291','Manish Agarwal','Resident','Suspended','31 Mar 2027','805','B',0,0],
@@ -863,43 +874,43 @@ const STAFF = [
   {name:'Meera Iyer',role:'Club manager',area:'All areas',on:true},
   {name:'Arjun Menon',role:'Administrator',area:'All areas',on:true},
   {name:'Sneha Patil',role:'Receptionist',area:'Reception desk',on:true},
-  {name:'Imran Shaikh',role:'Receptionist',area:'Reception desk',on:true},
+  {name:'Ramesh Shinde',role:'Receptionist',area:'Reception desk',on:true},
   {name:'Vikram Desai',role:'Accounts',area:'Finance',on:true},
   {name:'Ravi Kumar',role:'Gate operator',area:'Main entry',on:true},
-  {name:'Farhan Qureshi',role:'Amenity attendant',area:'Swimming pool',on:true},
+  {name:'Varun Khanna',role:'Amenity attendant',area:'Swimming pool',on:true},
   {name:'Lakshmi Nair',role:'Amenity attendant',area:'Gymnasium',on:true},
   {name:'Joseph D’Souza',role:'Amenity attendant',area:'Tennis courts',on:false},
 ];
 const BOOKINGS = [
   {ref:'CB-261028-0142',no:'KC1234',who:'Rahul Sharma',am:'Swimming pool',slot:'6:00 to 7:00 PM',day:'Today',people:2,guests:['Amit Shah'],amt:155,payer:'Wallet',status:'Admitted'},
   {ref:'CB-261028-0139',no:'KC1240',who:'Ananya Iyer',am:'Badminton, court 2',slot:'6:00 to 7:00 PM',day:'Today',people:2,guests:[],amt:40,payer:'Wallet',status:'Admitted'},
-  {ref:'CB-261028-0137',no:'KC1255',who:'Kabir Joshi',am:'Lawn tennis, court 1',slot:'6:00 to 7:00 PM',day:'Today',people:2,guests:['Coach Sameer (guest coach)'],amt:300,payer:'Wallet and reception',status:'Admitted'},
+  {ref:'CB-261028-0137',no:'KC1255',who:'Karan Joshi',am:'Lawn tennis, court 1',slot:'6:00 to 7:00 PM',day:'Today',people:2,guests:['Coach Sandeep (guest coach)'],amt:300,payer:'Wallet and reception',status:'Admitted'},
   {ref:'CB-261028-0131',no:'KC1270',who:'Aditya Rao',am:'Snooker',slot:'6:00 to 7:00 PM',day:'Today',people:2,guests:[],amt:100,payer:'Wallet',status:'Confirmed'},
   {ref:'CB-261028-0151',no:'KC1247',who:'Neha Kapoor',am:'Swimming pool',slot:'7:00 to 8:00 PM',day:'Today',people:2,guests:['Rohit Verma'],amt:155,payer:'Wallet and reception',status:'Confirmed'},
   {ref:'CB-261028-0155',no:'KC1262',who:'Rohan Kulkarni',am:'Squash, court 1',slot:'7:00 to 7:45 PM',day:'Today',people:2,guests:[],amt:30,payer:'Wallet',status:'Confirmed'},
   {ref:'CB-261028-0158',no:'KC1295',who:'Tanvi Gokhale',am:'Studio hall',slot:'7:00 to 8:00 PM',day:'Today',people:1,guests:[],amt:400,payer:'Wallet',status:'Confirmed'},
-  {ref:'CB-261028-0160',no:'KC1284',who:'Harish Pillai',am:'Banquet hall',slot:'7:00 to 11:00 PM',day:'Today',people:1,guests:[],amt:5500,payer:'Wallet',status:'Confirmed'},
+  {ref:'CB-261028-0160',no:'KC1284',who:'Harish Pillai',am:'Banquet hall',slot:'Full day, 10:00 AM to 10:00 PM',day:'Today',people:1,guests:[],amt:5500,payer:'Wallet',status:'Confirmed'},
   {ref:'CB-261028-0163',no:'KC1299',who:'Siddharth Jain',am:'Badminton, court 1',slot:'8:00 to 9:00 PM',day:'Today',people:1,guests:[],amt:20,payer:'Wallet',status:'Payment pending'},
   {ref:'CB-261028-0120',no:'KC1273',who:'Pooja Shetty',am:'Gymnasium',slot:'5:00 to 6:00 PM',day:'Today',people:1,guests:[],amt:2,payer:'Wallet',status:'Completed'},
   {ref:'CB-261028-0118',no:'KC1313',who:'Yash Thakkar',am:'Table tennis',slot:'5:00 to 6:00 PM',day:'Today',people:2,guests:[],amt:60,payer:'Wallet',status:'Completed'},
-  {ref:'CB-261028-0112',no:'KC1281',who:'Zoya Siddiqui',am:'Swimming pool',slot:'4:00 to 5:00 PM',day:'Today',people:1,guests:[],amt:5,payer:'Wallet',status:'Completed'},
+  {ref:'CB-261028-0112',no:'KC1281',who:'Diya Sinha',am:'Swimming pool',slot:'4:00 to 5:00 PM',day:'Today',people:1,guests:[],amt:5,payer:'Wallet',status:'Completed'},
   {ref:'CB-261028-0104',no:'KC1302',who:'Leela Fernandes',am:'Steam',slot:'3:00 to 3:30 PM',day:'Today',people:1,guests:[],amt:20,payer:'Wallet',status:'Cancelled'},
   {ref:'CB-261028-0097',no:'KC1306',who:'Arvind Nair',am:'Gymnasium',slot:'4:00 to 5:00 PM',day:'Today',people:1,guests:[],amt:2,payer:'Wallet',status:'Completed'},
   {ref:'CB-261029-0012',no:'KC1234',who:'Rahul Sharma',am:'Lawn tennis, court 2',slot:'7:00 to 8:00 AM',day:'Thu 29 Oct',people:1,guests:[],amt:50,payer:'Wallet',status:'Confirmed'},
 ];
 const QUEUE = [
   {id:'Q1',no:'KC1247',who:'Neha Kapoor',guest:'Rohit Verma',why:'Guest charge, swimming pool 7:00 PM',amt:150,since:'5:48 PM'},
-  {id:'Q2',no:'KC1255',who:'Kabir Joshi',guest:'Coach Sameer',why:'Guest coach, lawn tennis flood light 6:00 PM',amt:150,since:'5:55 PM'},
+  {id:'Q2',no:'KC1255',who:'Karan Joshi',guest:'Coach Sandeep',why:'Guest coach, lawn tennis flood light 6:00 PM',amt:150,since:'5:55 PM'},
   {id:'Q3',no:'KC1306',who:'Arvind Nair',guest:null,why:'Extra time, gymnasium, 22 min over',amt:50,since:'5:31 PM',extra:true},
   {id:'Q4',no:'KC1273',who:'Pooja Shetty',guest:'Divya Shetty',why:'Guest charge, swimming pool 5:00 PM',amt:150,since:'4:41 PM',paid:{at:'5:12 PM',rcpt:'R-1042',how:'from the wallet in the app'}},
   {id:'Q5',no:'KC1266',who:'Ishita Bose',guest:null,why:'Extra time, swimming pool, 14 min over',amt:25,since:'5:20 PM',extra:true},
 ];
 const PAYMENTS = [
-  {rcpt:'R-1041',at:'5:58 PM',who:'Kabir Joshi',what:'Guest charge, lawn tennis',mode:'UPI',ref:'431806215579',amt:200,by:'Sneha Patil',status:'Paid'},
-  {rcpt:'R-1040',at:'5:41 PM',who:'Zoya Siddiqui',what:'Guest charge, swimming pool',mode:'Cash',ref:'',amt:150,by:'Sneha Patil',status:'Paid'},
-  {rcpt:'R-1039',at:'5:17 PM',who:'Yash Thakkar',what:'Walk-in booking, table tennis',mode:'Cash',ref:'',amt:60,by:'Imran Shaikh',status:'Paid'},
+  {rcpt:'R-1041',at:'5:58 PM',who:'Karan Joshi',what:'Guest charge, lawn tennis',mode:'UPI',ref:'431806215579',amt:200,by:'Sneha Patil',status:'Paid'},
+  {rcpt:'R-1040',at:'5:41 PM',who:'Diya Sinha',what:'Guest charge, swimming pool',mode:'Cash',ref:'',amt:150,by:'Sneha Patil',status:'Paid'},
+  {rcpt:'R-1039',at:'5:17 PM',who:'Yash Thakkar',what:'Walk-in booking, table tennis',mode:'Cash',ref:'',amt:60,by:'Ramesh Shinde',status:'Paid'},
   {rcpt:'R-1038',at:'4:52 PM',who:'Tanvi Gokhale',what:'Extra time, steam',mode:'UPI',ref:'431806098812',amt:25,by:'Sneha Patil',status:'Paid'},
-  {rcpt:'R-1036',at:'4:20 PM',who:'Nikhil Bhatia',what:'Guest charge, badminton',mode:'Cash',ref:'',amt:150,by:'Imran Shaikh',status:'Paid'},
+  {rcpt:'R-1036',at:'4:20 PM',who:'Nikhil Bhatia',what:'Guest charge, badminton',mode:'Cash',ref:'',amt:150,by:'Ramesh Shinde',status:'Paid'},
 ];
 const APPROVALS = [
   {id:'A1',kind:'Override',who:'Sanjay Mehta',no:'KC1251',from:'Ravi Kumar, gate operator at Main entry',at:'6:04 PM',rule:'Denied: membership expired on 26 Oct 2026',why:'Says the renewal was paid at the club office this morning.'},
@@ -927,7 +938,7 @@ const TRIAL = {
   debit:[['Swimming',112450],['Gymnasium and cardio',41860],['Lawn tennis',138700],['Badminton',96220],['Squash',22930],['Table tennis, pool table and snooker',64310],['Steam',18940],['Banquet and studio halls',174600],['Guest charges',206850],['Extra-time charges',9375],['Membership fees',88200],['Closing wallet balance, 28 Oct',671905]],
 };
 const REVENUE = [['15 Oct',38200],['16 Oct',41900],['17 Oct',52300],['18 Oct',61800],['19 Oct',44700],['20 Oct',39800],['21 Oct',42600],['22 Oct',40100],['23 Oct',46900],['24 Oct',58700],['25 Oct',63400],['26 Oct',47200],['27 Oct',43800],['28 Oct',45420]];
-const COLLECT = [{by:'Sneha Patil',cash:4200,upi:3650},{by:'Imran Shaikh',cash:2150,upi:1900}];
+const COLLECT = [{by:'Sneha Patil',cash:4200,upi:3650},{by:'Ramesh Shinde',cash:2150,upi:1900}];
 const REPORTS = [
   ['Daily entry and exit','Entries, exits, denials and peak hour by station','Manager, Administrator'],
   ['Amenity usage','Bookings, admissions and no-shows by amenity and slot','Manager, Administrator'],
@@ -947,11 +958,11 @@ const REPORTS = [
 ];
 const AUDIT = [
   ['6:04 PM','Ravi Kumar','Override requested','Sanjay Mehta at Main entry','Renewal paid at the office'],
-  ['5:58 PM','Sneha Patil','Payment recorded','R-1041, ₹200 by UPI, guest charge for Kabir Joshi',''],
+  ['5:58 PM','Sneha Patil','Payment recorded','R-1041, ₹200 by UPI, guest charge for Karan Joshi',''],
   ['5:40 PM','Meera Iyer','Slot blocked','Squash court 2, Thu 29 Oct, 7:00 to 9:00 AM','Floor polishing'],
   ['4:12 PM','Arjun Menon','Rate changed','Lawn tennis flood light, guest ₹300 to ₹350, from 1 Nov 2026','Committee decision'],
   ['3:30 PM','Arjun Menon','Member suspended','Manish Agarwal, KC1291','Repeated QR code sharing'],
-  ['1:15 PM','Imran Shaikh','Slot changed','CB-261028-0098, badminton 5:00 PM to 6:00 PM','Member request'],
+  ['1:15 PM','Ramesh Shinde','Slot changed','CB-261028-0098, badminton 5:00 PM to 6:00 PM','Member request'],
   ['11:02 AM','Vikram Desai','Day reconciled','27 Oct: 483 matched, 3 unmatched',''],
   ['9:20 AM','Meera Iyer','Payment reversed','R-1029, ₹100','Recorded against the wrong member'],
   ['8:05 AM','Arjun Menon','Setting changed','Cancellation window 3 hours to 2 hours, from 1 Nov 2026','Committee decision'],
@@ -986,7 +997,7 @@ const RM = matchMedia('(prefers-reduced-motion: reduce)');
 const initials = n => n.replace(/^Coach\s+/,'').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
 /* photos: members with a portrait on file; everyone else keeps initials. A missing file is removed and the colour block shows. */
 const IMG = '../assets/img/';
-const PHOTO = {'Rahul Sharma':'m1','Kabir Joshi':'m2','Vikram Malhotra':'m3','Manish Agarwal':'m4','Priya Sharma':'f1','Ananya Iyer':'f2','Neha Kapoor':'f3','Ishita Bose':'f4'};
+const PHOTO = {'Rahul Sharma':'m1','Karan Joshi':'m2','Vikram Malhotra':'m3','Manish Agarwal':'m4','Priya Sharma':'f1','Ananya Iyer':'f2','Neha Kapoor':'f3','Ishita Bose':'f4'};
 const avatar = (n, cls = '') => `<span class="avatar ${cls}" aria-hidden="true">${esc(initials(n))}${PHOTO[n] ? `<img src="${IMG}people/${PHOTO[n]}.jpg" alt="" width="400" height="400" loading="lazy" decoding="async">` : ''}</span>`;
 const amBy = s => { s = String(s).toLowerCase(); return AMEN.find(a => s.includes(a.name.toLowerCase())); };
 const amImg = (a, lazy = true) => a ? `<img src="${IMG}${a.id}.jpg" alt="" width="1200" height="800" decoding="async"${lazy ? ' loading="lazy"' : ''}${a.pos ? ` style="object-position:${a.pos}"` : ''}>` : '';
@@ -1307,6 +1318,16 @@ document.addEventListener('click', e => {
   if (a.tagName === 'A') e.preventDefault();
   fn(a, e);
 });
+/* mobile numbers: digits only, exactly 10, shown as 98200 12345 and saved as +91 98200 12345 */
+const ten = v => { let d = String(v || '').replace(/\D/g, ''); if (d.length > 10 && d.startsWith('91')) d = d.slice(2); return d.slice(0, 10); };
+const fmtMob = d => d.length > 5 ? `${d.slice(0, 5)} ${d.slice(5)}` : d;
+document.addEventListener('input', e => { const t = e.target; if (t.matches && t.matches('input[inputmode=tel]')) { t.value = fmtMob(ten(t.value.replace(/^\s*\+?91[\s-]+/, ''))); t.classList.remove('err'); } }, true);   // a typed +91 prefix is dropped
+document.addEventListener('submit', e => {
+  const f = e.target.closest('form[data-form]'); if (!f) return;
+  const bad = [...f.querySelectorAll('input[inputmode=tel]')].find(i => i.offsetParent && i.value.trim() && !/^[6-9]\d{9}$/.test(ten(i.value)));
+  if (bad) { e.preventDefault(); e.stopImmediatePropagation(); bad.classList.add('err'); bad.focus(); toast('Enter a 10-digit mobile number, starting with 6, 7, 8 or 9.', true); return; }
+  f.querySelectorAll('input[inputmode=tel]').forEach(i => { if (i.value.trim()) i.value = '+91 ' + fmtMob(ten(i.value)); });
+}, true);
 document.addEventListener('submit', e => { const f = e.target.closest('form[data-form]'); if (!f) return; e.preventDefault(); FORM[f.dataset.form] && FORM[f.dataset.form](f, e); });
 document.addEventListener('input', e => { const h = e.target.dataset && e.target.dataset.input; if (h && INPUT[h]) INPUT[h](e.target, e); });
 function trap(e, root) {
@@ -1799,7 +1820,7 @@ function memTabBody(m, k) {
     ${m.inside ? '<li class="ok"><b>Inside the clubhouse</b><small>Entry scan at Main entry, 5:42 PM today</small></li>' : ''}
     <li class="ok"><b>Visit, Mon 26 Oct</b><small>In 5:48 PM, out 7:21 PM. Badminton 6:00 to 7:00 PM, admitted 5:58 PM.</small></li>
     <li class="ok"><b>Visit, Sat 24 Oct</b><small>In 6:52 AM, out 8:30 AM. Lawn tennis 7:00 to 8:00 AM.</small></li>
-    <li class="bad"><b>Denied, Thu 22 Oct</b><small>Swimming pool door at 7:04 PM: Slot ended. Booked new slot at reception.</small></li>
+    <li class="bad"><b>Denied, Thu 22 Oct</b><small>Swimming pool door at 7:04 PM: Slot ended.</small></li>
     <li class="ok"><b>Visit, Thu 22 Oct</b><small>In 6:40 PM, out 8:12 PM.</small></li></ol>`;
   return m.type === 'Tenant'
     ? `<dl class="kv"><dt>Arrangement</dt><dd>Leave and licence</dd><dt>Licensee</dt><dd>${esc(m.name)}</dd><dt>Period of lease</dt><dd>1 Sep 2026 to 31 Aug 2027</dd><dt>Agreement</dt><dd><button class="link" data-act="doc">Leave and licence agreement.pdf</button></dd><dt>ID proof</dt><dd><button class="link" data-act="doc">ID proof.jpg</button></dd></dl><div class="note warn" style="margin-top:14px">${ic('clock')}<div>Membership validity follows the lease. Renewals past 31 Aug 2027 need a new agreement.</div></div>`
@@ -1823,7 +1844,7 @@ const refreshMember = m => { const t = $('#mtab'); if (t) t.innerHTML = memTabBo
 ACT['fam-add'] = b => {
   const m = memberBy(b.dataset.no);
   openModal(`<form data-form="fam-add" data-no="${m.no}">${modalHead('Add a family member', `Linked to ${esc(m.name)}. Active as soon as you save.`)}
-  <div class="modal-b form"><div class="f3"><label class="field">${lab('Name')}<input class="input" name="fname" autocomplete="off"><span class="errmsg" hidden>Enter the name.</span></label><label class="field">${lab('Relationship')}${relSelect('frel', 'Child')}</label><label class="field">${lab('Mobile number', 'Optional')}<input class="input" name="fmobile" inputmode="tel" placeholder="+91 98200 12345"></label></div></div>
+  <div class="modal-b form"><div class="f3"><label class="field">${lab('Name')}<input class="input" name="fname" autocomplete="off"><span class="errmsg" hidden>Enter the name.</span></label><label class="field">${lab('Relationship')}${relSelect('frel', 'Child')}</label><label class="field">${lab('Mobile number', 'Optional')}<input class="input" name="fmobile" inputmode="tel" placeholder="98200 12345"></label></div></div>
   <div class="modal-f"><button type="button" class="btn" data-act="close-modal">Cancel</button><button class="btn btn-primary" type="submit">Add family member</button></div></form>`, 'Add family member');
 };
 FORM['fam-add'] = f => {
@@ -1844,10 +1865,11 @@ ACT['fam-del'] = b => {
 ACT['ec-pick'] = b => {
   const m = memberBy(b.dataset.no), cur = ecOf(m), fam = famOf(m).filter(p => p.name !== m.name);
   openModal(`<form data-form="ec-pick" data-no="${m.no}">${modalHead('Emergency contact', 'Choose someone from the family, or add a new person. A new person joins the family too.')}
-  <div class="modal-b form"><div>${fam.map((p, i) => `<label class="opt-row"><input type="radio" name="who" value="${i}"${cur && cur.name === p.name ? ' checked' : ''}><span><b>${esc(p.name)}</b><small>${esc(p.rel)}${p.mobile ? ', ' + esc(p.mobile) : ', no mobile on file'}</small></span></label>`).join('')}<label class="opt-row"><input type="radio" name="who" value="new"${fam.length ? '' : ' checked'}><span><b>Someone else</b><small>Added to the family as well</small></span></label></div>
-  <div class="f3" style="margin-top:12px"><label class="field">${lab('Name')}<input class="input" name="ename" autocomplete="off"><span class="errmsg" hidden>Enter the name.</span></label><label class="field">${lab('Relationship')}${relSelect('erel', 'Spouse')}</label><label class="field">${lab('Mobile number')}<input class="input" name="emobile" inputmode="tel" placeholder="+91 98200 12345"><span class="errmsg" hidden>Enter the mobile number.</span></label></div></div>
+  <div class="modal-b form"><div>${fam.map((p, i) => `<label class="opt-row"><input type="radio" name="who" value="${i}" data-input="ec-who"${cur && cur.name === p.name ? ' checked' : ''}><span><b>${esc(p.name)}</b><small>${esc(p.rel)}${p.mobile ? ', ' + esc(p.mobile) : ', no mobile on file'}</small></span></label>`).join('')}<label class="opt-row"><input type="radio" name="who" value="new" data-input="ec-who"${fam.length ? '' : ' checked'}><span><b>Someone else</b><small>Added to the family as well</small></span></label></div>
+  <div class="f3" id="ec-new" style="margin-top:12px"${fam.length ? ' hidden' : ''}><label class="field">${lab('Name')}<input class="input" name="ename" autocomplete="off"><span class="errmsg" hidden>Enter the name.</span></label><label class="field">${lab('Relationship')}${relSelect('erel', 'Spouse')}</label><label class="field">${lab('Mobile number')}<input class="input" name="emobile" inputmode="tel" placeholder="98200 12345"><span class="errmsg" hidden>Enter the mobile number.</span></label></div></div>
   <div class="modal-f"><button type="button" class="btn" data-act="close-modal">Cancel</button><button class="btn btn-primary" type="submit">Save</button></div></form>`, 'Emergency contact');
 };
+INPUT['ec-who'] = el => { const box = $('#ec-new'); box.hidden = el.value !== 'new'; if (!box.hidden) box.querySelector('input').focus(); };
 FORM['ec-pick'] = f => {
   const m = memberBy(f.dataset.no), fam = famOf(m).filter(p => p.name !== m.name), v = (f.querySelector('input[name=who]:checked') || {}).value;
   const ten = x => (x || '').replace(/\D/g, '').slice(-10);
@@ -1902,7 +1924,7 @@ ACT['add-member'] = () => openModal(`<form data-form="add-member">${modalHead('A
   <div class="modal-b form"><div class="f2">
   <div class="field">${lab('Member number', 'Automatic')}<div class="input auto"><b>${nextNo()}</b>${ic('lock')}</div><small class="hint">Assigned when you save. It cannot be changed.</small></div>
   <label class="field">${lab('Full name')}<input class="input" name="name" placeholder="As on ID proof" autocomplete="off"><span class="errmsg" hidden>Enter the name.</span></label>
-  <label class="field">${lab('Mobile number')}<input class="input" name="mobile" inputmode="tel" placeholder="+91 98200 12345"><span class="errmsg" hidden>Enter a mobile number.</span></label>
+  <label class="field">${lab('Mobile number')}<input class="input" name="mobile" inputmode="tel" placeholder="98200 12345"><span class="errmsg" hidden>Enter a mobile number.</span></label>
   <label class="field">${lab('Email', 'Optional')}<input class="input" name="email" type="email" placeholder="name@example.com"></label>
   <label class="field">${lab('Flat')}<input class="input" name="flat" placeholder="Flat 1402, Tower B"><span class="errmsg" hidden>Enter the flat.</span></label>
   <label class="field">${lab('Membership')}<select class="input" name="type"><option>Resident</option><option>Tenant</option></select></label>
@@ -1912,7 +1934,7 @@ ACT['add-member'] = () => openModal(`<form data-form="add-member">${modalHead('A
   <div class="f3">
   <label class="field">${lab('Name')}<input class="input" name="ecname" placeholder="Full name" autocomplete="off"><span class="errmsg" hidden>Enter the contact’s name.</span></label>
   <label class="field">${lab('Relationship')}${relSelect('ecrel', 'Spouse')}</label>
-  <label class="field">${lab('Mobile number')}<input class="input" name="ecmobile" inputmode="tel" placeholder="+91 98200 12345"><span class="errmsg" hidden>Enter the contact’s mobile number.</span></label>
+  <label class="field">${lab('Mobile number')}<input class="input" name="ecmobile" inputmode="tel" placeholder="98200 12345"><span class="errmsg" hidden>Enter the contact’s mobile number.</span></label>
   </div></fieldset>
   <label class="field">${lab('Photo', 'Optional')}<input class="input" type="file" accept="image/*" name="photo"><small class="hint">Shown to gate staff for the face check. You can add it later.</small></label></div>
   <div class="modal-f"><button type="button" class="btn" data-act="close-modal">Cancel</button><button class="btn btn-primary" type="submit">Add member</button></div></form>`, 'Add member', true);
@@ -1937,7 +1959,7 @@ ACT['import-run'] = () => {
   $('#import-out').innerHTML = `<div class="note good">${ic('check')}<div><b>1,201 members created.</b> 1,204 rows read, 3 rejected.</div></div>
   <div class="tscroll" style="margin-top:12px"><table class="t"><thead><tr><th>Row</th><th>Member</th><th>Why it was rejected</th></tr></thead><tbody>
   <tr><td>18</td><td>Rohit Verma</td><td>Mobile number +91 98200 45612 belongs to another row</td></tr>
-  <tr><td>342</td><td>Sana Kazi</td><td>Flat number is missing</td></tr>
+  <tr><td>342</td><td>Shreya Kale</td><td>Flat number is missing</td></tr>
   <tr><td>977</td><td>Ajay Kamat</td><td>Valid till 31/02/2027 is not a date</td></tr></tbody></table></div>
   <button class="btn" style="margin-top:10px" data-act="doc">${ic('download')}Download rejected rows</button>`;
 };
@@ -1949,7 +1971,7 @@ VIEWS.amenities = sub => {
   if (sub === 'rates') return head + ratesHTML();
   if (sub === 'blocks') return head + `<section class="panel"><div class="tscroll"><table class="t"><thead><tr><th>Amenity</th><th>Date and slots</th><th>Reason</th><th>Bookings affected</th><th>By</th></tr></thead><tbody>${BLOCKS.map(b => `<tr><td><b>${esc(b.am)}</b></td><td>${esc(b.when)}</td><td>${esc(b.why)}</td><td>${esc(b.affected)}</td><td>${esc(b.by)}</td></tr>`).join('')}</tbody></table></div></section>`;
   return head + `<section class="panel"><div class="tscroll"><table class="t"><thead><tr><th>Amenity</th><th>Status</th><th>Hours</th><th class="r">Slot</th><th class="r">Capacity</th><th>Guests</th><th class="r">Member price</th></tr></thead><tbody>
-  ${AMEN.map(a => `<tr class="click" data-act="edit-amenity" data-id="${a.id}"><td><div class="who"><span class="thumb">${amImg(a)}</span><div><b>${esc(a.name)}</b><small>${esc(a.loc)}</small></div></div></td><td>${a.offline ? chip('Offline', 'Station offline') : chip('Active')}</td><td class="nowrap">${esc(a.hours)}</td><td class="r nowrap">${a.slot} min</td><td class="r">${a.id === 'banquet' ? '1 booking' : a.cap}</td><td>${a.guests ? 'Allowed' : 'Not allowed'}</td><td class="r nowrap">${a.member === 0 ? 'Free' : inr(a.member) + (a.unit ? ' <small class="muted">' + a.unit + '</small>' : '')}</td></tr>`).join('')}</tbody></table></div></section>`;
+  ${AMEN.map(a => `<tr class="click" data-act="edit-amenity" data-id="${a.id}"><td><div class="who"><span class="thumb">${amImg(a)}</span><div><b>${esc(a.name)}</b><small>${esc(a.loc)}</small></div></div></td><td>${a.offline ? chip('Offline', 'Station offline') : chip('Active')}</td><td class="nowrap">${esc(a.hours)}</td><td class="r nowrap">${a.slot} min</td><td class="r">${a.id === 'banquet' ? '1 booking a day' : a.cap}</td><td>${a.guests ? 'Allowed' : 'Not allowed'}</td><td class="r nowrap">${a.member === 0 ? 'Free' : inr(a.member) + (a.unit ? ' <small class="muted">' + a.unit + '</small>' : '')}</td></tr>`).join('')}</tbody></table></div></section>`;
 };
 const BLOCKS = [
   {am:'Squash, court 2',when:'Thu 29 Oct, 7:00 to 9:00 AM',why:'Floor polishing',affected:'2 cancelled, refunded',by:'Meera Iyer'},
@@ -2036,7 +2058,7 @@ ACT['block-pick'] = b => { b.setAttribute('aria-pressed', b.getAttribute('aria-p
 INPUT['block-calc'] = () => blockCalc();
 function blockCalc() {
   const n = $$('#block-slots [aria-pressed="true"]').length, aff = Math.max(0, n * 2 - 1);
-  const who = ['Nikhil Bhatia', 'Rekha Menon', 'Kabir Joshi', 'Priya Nair', 'Yash Thakkar', 'Gauri Patwardhan', 'Aditya Rao'];
+  const who = ['Nikhil Bhatia', 'Rekha Menon', 'Karan Joshi', 'Priya Nair', 'Yash Thakkar', 'Gauri Patwardhan', 'Aditya Rao'];
   $('#block-aff').innerHTML = !n ? '' : aff ? `<div class="note warn">${ic('alert')}<div><b>${aff} confirmed booking${aff > 1 ? 's' : ''} in these slots.</b> They are cancelled with a full refund to the wallet, and each member gets a message.<ul style="margin:6px 0 0;padding-left:18px">${who.slice(0, aff).map(w => `<li>${w}</li>`).join('')}</ul></div></div>` : `<div class="note good">${ic('check')}<div>No confirmed bookings in this slot.</div></div>`;
   $('#block-go').textContent = !n ? 'Block slots' : `Block ${n} slot${n > 1 ? 's' : ''}${aff ? ` and refund ${aff} booking${aff > 1 ? 's' : ''}` : ''}`;
 }
@@ -2053,14 +2075,21 @@ FORM.block = f => {
 
 /* ---------- bookings ---------- */
 const bkMatch = b => (S.bkF === 'All' || b.status === S.bkF) && (!S.bkQ || `${b.ref} ${b.who} ${b.am}`.toLowerCase().includes(S.bkQ.toLowerCase()));
+/* who is coming, at a glance: the member, then guests, then "+N" for the rest */
+function pplCell(b) {
+  const g = b.guests.length, extra = Math.max(0, b.people - 1 - Math.min(g, 2));
+  const faces = avatar(b.who, 'sm') + b.guests.slice(0, 2).map(n => `<span class="avatar sm guest" aria-hidden="true">${esc(initials(n.replace(/\s*\(.*\)/, '')))}</span>`).join('') + (extra ? `<span class="avatar sm more" aria-hidden="true">+${extra}</span>` : '');
+  const sub = g ? `${g} guest${g > 1 ? 's' : ''}` : b.people > 1 ? 'Members only' : 'Just the member';
+  return `<div class="ppl"><span class="ppl-st">${faces}</span><span><b>${b.people} ${b.people > 1 ? 'people' : 'person'}</b><small>${sub}</small></span></div>`;
+}
 function bkRows() {
   const rows = BOOKINGS.filter(bkMatch);
-  return rows.length ? rows.map(b => `<tr class="click${b.fresh ? ' new' : ''}" data-act="open-booking" data-ref="${b.ref}"><td class="nowrap"><b>${b.ref}</b></td><td><div class="who">${avatar(b.who)}<div><b>${esc(b.who)}</b><small>${b.no}</small></div></div></td><td><div class="who"><span class="thumb sm">${amImg(amBy(b.am))}</span><span>${esc(b.am)}</span></div></td><td class="nowrap">${b.day}, ${b.slot}</td><td class="r">${b.people}${b.guests.length ? `<small class="muted"> incl. ${b.guests.length} guest</small>` : ''}</td><td class="r num">${inr(b.amt)}</td><td>${chip(b.status)}</td></tr>`).join('')
+  return rows.length ? rows.map(b => `<tr class="click${b.fresh ? ' new' : ''}" data-act="open-booking" data-ref="${b.ref}"><td class="nowrap"><b>${b.ref}</b></td><td><div class="who">${avatar(b.who)}<div><b>${esc(b.who)}</b><small>${b.no}</small></div></div></td><td><div class="who"><span class="thumb sm">${amImg(amBy(b.am))}</span><span>${esc(b.am)}</span></div></td><td class="nowrap">${b.day}, ${b.slot}</td><td>${pplCell(b)}</td><td class="r num">${inr(b.amt)}</td><td>${chip(b.status)}</td></tr>`).join('')
     : `<tr><td colspan="7"><div class="empty">${emptyArt()}<p>No bookings match. Clear the search or choose All.</p></div></td></tr>`;
 }
 VIEWS.bookings = () => `<div class="vhead"><div><p>Bookings stay separate from wallet transactions. Reception books walk-ins with the same slots, prices and seats as the app.</p></div></div>
   <section class="panel"><div class="panel-h"><div class="toolbar" style="margin:0"><input class="input" type="search" data-input="bk-q" placeholder="Search reference, member or amenity" value="${esc(S.bkQ)}" aria-label="Search bookings">${seg('bk-f', ['All', 'Confirmed', 'Admitted', 'Completed', 'Cancelled', 'Payment pending'], S.bkF, 'Filter by status')}</div></div>
-  <div class="tscroll"><table class="t"><thead><tr><th>Reference</th><th>Member</th><th>Amenity</th><th>Slot</th><th class="r">People</th><th class="r">Amount</th><th>Status</th></tr></thead><tbody id="bk-body">${bkRows()}</tbody></table></div></section>`;
+  <div class="tscroll"><table class="t"><thead><tr><th>Reference</th><th>Member</th><th>Amenity</th><th>Slot</th><th>People</th><th class="r">Amount</th><th>Status</th></tr></thead><tbody id="bk-body">${bkRows()}</tbody></table></div></section>`;
 INPUT['bk-q'] = el => { S.bkQ = el.value; $('#bk-body').innerHTML = bkRows(); };
 ACT['bk-f'] = b => { S.bkF = b.dataset.v; $$('[data-act="bk-f"]').forEach(x => x.setAttribute('aria-pressed', x === b)); $('#bk-body').innerHTML = bkRows(); };
 ACT['open-booking'] = tr => openBooking(tr.dataset.ref);
@@ -2241,7 +2270,7 @@ FORM.change = f => {
 
 /* guests today and cash count */
 function guestsHTML() {
-  const G = [['Amit Shah', 'Rahul Sharma', 'Swimming pool, 6:00 PM', 'Admitted', 'Amenity entered'], ['Coach Sameer', 'Kabir Joshi', 'Lawn tennis, 6:00 PM', 'Admitted', 'Amenity entered'], ['Rohit Verma', 'Neha Kapoor', 'Swimming pool, 7:00 PM', 'Outstanding', 'Awaiting payment'], ['Divya Shetty', 'Pooja Shetty', 'Swimming pool, 5:00 PM', 'Completed', 'Visit completed']];
+  const G = [['Amit Shah', 'Rahul Sharma', 'Swimming pool, 6:00 PM', 'Admitted', 'Amenity entered'], ['Coach Sandeep', 'Karan Joshi', 'Lawn tennis, 6:00 PM', 'Admitted', 'Amenity entered'], ['Rohit Verma', 'Neha Kapoor', 'Swimming pool, 7:00 PM', 'Outstanding', 'Awaiting payment'], ['Divya Shetty', 'Pooja Shetty', 'Swimming pool, 5:00 PM', 'Completed', 'Visit completed']];
   return `<section class="panel"><div class="tscroll"><table class="t"><thead><tr><th>Guest</th><th>Member</th><th>Booking</th><th>Guest pass</th><th></th></tr></thead><tbody>${G.map(g => `<tr><td><div class="who">${avatar(g[0])}<b>${esc(g[0])}</b></div></td><td>${esc(g[1])}</td><td><div class="who"><span class="thumb sm">${amImg(amBy(g[2]))}</span><span>${esc(g[2])}</span></div></td><td>${chip(g[3], g[4])}</td><td class="r">${g[3] === 'Outstanding' ? `<button class="btn btn-sm btn-primary" data-act="collect" data-id="Q1">Collect ${inr(150)}</button>` : g[3] === 'Admitted' ? `<button class="btn btn-sm" data-act="resend" data-who="${esc(g[1])}">Resend pass</button>` : ''}</td></tr>`).join('')}</tbody></table></div>
   <div class="panel-b"><div class="note">${ic('info')}<div>A guest enters only through a member’s booking. One QR code works at club entry, amenity entry, amenity exit and club exit, and stops once the visit completes.</div></div></div></section>`;
 }
@@ -2445,12 +2474,12 @@ const ST_OUT = {
   admitted:{ok:true,btn:'Admitted',person:'Rahul Sharma',sub:'KC1234, resident, valid till 31 Mar 2027',facts:[['Visit','Started now'],['Inside now','215 people']]},
   amenity:{ok:true,btn:'Admitted',person:'Rahul Sharma',sub:'KC1234, booking CB-261028-0142',facts:[['Amenity','Swimming pool'],['Slot','6:00 to 7:00 PM'],['People','2 of 2']]},
   guest:{ok:true,btn:'Guest admitted',person:'Amit Shah',sub:'Guest of Rahul Sharma, charge paid',facts:[['Pass','Club and swimming pool'],['Valid','This visit only']]},
-  inside:{ok:false,why:'Already inside',person:'Kabir Joshi',text:'Scanned in at 5:42 PM and has not scanned out. If the exit scan was missed, a manager can close the old visit.',ctl:0},
+  inside:{ok:false,why:'Already inside',person:'Karan Joshi',text:'Scanned in at 5:42 PM and has not scanned out. If the exit scan was missed, a manager can close the old visit.',ctl:0},
   suspended:{ok:false,why:'Membership suspended',person:'Manish Agarwal',text:'Suspended by the club on 28 Oct. Refer the member to the club office.',ctl:1},
   wrong:{ok:false,why:'Wrong amenity',person:'Ananya Iyer',text:'This QR code is for badminton, court 2. Send the member to the badminton hall.',ctl:2},
   early:{ok:false,why:'Too early',person:'Neha Kapoor',text:'The slot starts at 7:00 PM. The door admits from 6:45 PM, 15 minutes before.',ctl:2},
   ended:{ok:false,why:'Slot ended',person:'Ishita Bose',text:'The 5:00 to 6:00 PM slot has ended. Book a new slot in the app or at reception.',ctl:2},
-  used:{ok:false,why:'Already used',person:'Zoya Siddiqui',text:'Admitted at 4:01 PM and scanned out at 4:58 PM. A QR code works once to enter and once to leave.',ctl:0},
+  used:{ok:false,why:'Already used',person:'Diya Sinha',text:'Admitted at 4:01 PM and scanned out at 4:58 PM. A QR code works once to enter and once to leave.',ctl:0},
   notin:{ok:false,why:'Not inside',person:'Kavya Reddy',text:'No club entry scan for this visit. Ask the member to scan in at the main entry first.',ctl:2},
   unpaid:{ok:false,why:'Guest unpaid',person:'Rohit Verma',sub:'Guest of Neha Kapoor',text:'The ₹150 guest charge is not paid. Collect it at reception to activate this pass.',ctl:1},
 };

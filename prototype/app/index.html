@@ -798,8 +798,8 @@ const AM = [
   { id: 'gym', name: 'Gymnasium', short: 'Free weights and machines', cat: 'fitness', hue: '#2B3445', m: 2, g: 100, cap: 25, open: 6, close: 22, len: 1, desc: 'Free weights, racks and machines. A trainer is on the floor from 6:00 to 10:00 AM and 5:00 to 9:00 PM.', rules: ['Members aged 16 and over', 'Carry a towel and wipe down equipment'], minAge: 16 },
   { id: 'cardio', name: 'Cardio gym', short: 'Treadmills, bikes, rowers', cat: 'fitness', hue: '#3A4458', m: 0, g: null, cap: 20, open: 6, close: 22, len: 1, desc: 'Treadmills, bikes and rowers. Free for members.', rules: ['Members aged 16 and over', '30 minutes per machine at busy times'], minAge: 16 },
   { id: 'steam', name: 'Steam room', short: 'Up to 6 at a time', cat: 'fitness', hue: '#5E7F9C', m: 20, g: 100, cap: 6, open: 7, close: 21, len: 1, desc: 'Steam room beside the pool changing rooms.', rules: ['Members aged 18 and over', 'Shower before entering', '20 minutes at a time'], minAge: 18 },
-  { id: 'banquet', name: 'Banquet hall', short: 'Seats 150', cat: 'halls', hue: '#5B3B7A', m: 5500, per: true, cap: 1, open: 10, close: 22, len: 4, desc: 'For parties and functions. One price per booking.', rules: ['Decorations must be removed by the end of the booking', 'Outside caterers register at the office'] },
-  { id: 'studio', name: 'Studio hall', short: 'Yoga, dance, meetings', cat: 'halls', hue: '#9A6B3F', m: 400, per: true, cap: 1, open: 6, close: 22, len: 2, desc: 'Mirrored studio with a sprung floor. One price per booking.', rules: ['Bare feet or studio shoes only'] },
+  { id: 'banquet', name: 'Banquet hall', short: 'Seats 150', cat: 'halls', hue: '#5B3B7A', m: 5500, per: true, cap: 1, open: 10, close: 22, len: 12, desc: 'For parties and functions. Booked for the whole day, 10:00 AM to 10:00 PM, at one price per day.', rules: ['Decorations must be removed by the end of the booking', 'Outside caterers register at the office'] },
+  { id: 'studio', name: 'Studio hall', short: 'Yoga, dance, meetings', cat: 'halls', hue: '#9A6B3F', m: 400, per: true, cap: 1, open: 6, close: 22, len: 16, desc: 'Mirrored studio with a sprung floor. Booked for the whole day, 6:00 AM to 10:00 PM, at one price per day.', rules: ['Bare feet or studio shoes only'] },
 ];
 // People inside each amenity now: the same numbers the admin live floor shows at 5:48 PM.
 const LIVE = { pool: [32, 40], kids: [9, 15], tennis: [6, 8], badminton: [10, 12], squash: [2, 4], tt: [4, 8], snooker: [4, 4], pooltable: [2, 4], gym: [21, 25], cardio: [11, 20], steam: [3, 6], studio: [14, 20] };
@@ -819,7 +819,7 @@ const amOf = id => AM.find(a => a.id === id) || AM[0];
 const priceAt = (a, h) => a.fl && h >= a.fl.from ? { m: a.fl.m, g: a.fl.g, c: a.fl.c, fl: true } : { m: a.m, g: a.g, c: a.c };
 const priceOf = (p, pr) => p.t === 'guest' ? pr.g : p.t === 'coach' ? pr.c : pr.m;
 const typeLabel = t => ({ member: 'Member', dependant: 'Dependant', guest: 'Guest', coach: 'Guest coach' })[t];
-const priceLine = a => a.per ? `${rs(a.m)} per booking` : a.m === 0 ? 'Free for members' : a.g != null ? `${rs(a.m)} member, ${rs(a.g)} guest` : `${rs(a.m)} per member`;
+const priceLine = a => a.per ? `${rs(a.m)} per day` : a.m === 0 ? 'Free for members' : a.g != null ? `${rs(a.m)} member, ${rs(a.g)} guest` : `${rs(a.m)} per member`;
 
 function fresh() {
   return {
@@ -1493,7 +1493,7 @@ function scrQr() {
 
 /* ---------- Amenities ---------- */
 const bookingClosed = () => S.expired;
-const fromPrice = a => a.per ? `${rs(a.m)} per booking` : a.m === 0 ? 'Free for members' : `From ${rs(a.m)} for members`;
+const fromPrice = a => a.per ? `${rs(a.m)} per day` : a.m === 0 ? 'Free for members' : `From ${rs(a.m)} for members`;
 function amRow(a) {
   return `<a class="acard" href="#/amenity/${a.id}" data-zoom="${a.id}">${amPic(a)}<span class="ac-t"><b>${a.name}</b><span class="ac-s">${a.short}</span><span class="ac-r"><span>${fromPrice(a)}</span>${liveHTML(a)}</span></span></a>`;
 }
@@ -1523,11 +1523,11 @@ function scrAmenity({ id }) {
   const fact = (l, v, w) => `<div class="fact${w ? ' w' : ''}"><span>${l}</span><b class="num">${v}</b></div>`;
   const items = [
     [a.per ? 'Booking' : 'Capacity per slot', a.per ? 'Whole hall' : `${a.cap} people`],
-    [a.per ? 'Price per booking' : 'Member price', a.m ? rs(a.m) : 'Free'],
+    [a.per ? 'Price per day' : 'Member price', a.m ? rs(a.m) : 'Free'],
   ];
   if (!a.per) items.push(['Guest price', a.g != null ? rs(a.g) : 'No guests']);
   if (a.c) items.push(['Guest coach', rs(a.c)]);
-  items.unshift(['Slot length', a.len === 1 ? '1 hour' : `${a.len} hours`]);
+  items.unshift([a.per ? 'Booked for' : 'Slot length', a.per ? 'Whole day' : a.len === 1 ? '1 hour' : `${a.len} hours`]);
   const facts = fact('Open', `${hm(a.open)} to ${hm(a.close)}`, true) + items.map(([l, v], i) => fact(l, v, items.length % 2 === 1 && i === items.length - 1)).join('');
   return {
     tone: 'dark', label: a.name, enter: z ? 'fade' : undefined,
@@ -1539,7 +1539,7 @@ ${a.fl ? `<p class="flnote">${ic('bulb')}<span>From ${hm(a.fl.from)}, flood-ligh
 <h2 class="sec">Rules</h2>
 <ul class="rules">${a.rules.map(r => `<li>${r}</li>`).join('')}${a.minAge && !a.rules.some(r => /aged/.test(r)) ? `<li>Members aged ${a.minAge} and over</li>` : ''}<li>Your QR opens the door from 15 minutes before your slot</li></ul>
 ${closed ? `<div class="note">${ic('info')}<span>Renew your membership to book.</span></div>` : ''}</div>
-<div class="dock split"><span class="dk-t"><b class="num">${a.m ? rs(a.m) : 'Free'}</b><small>${a.per ? 'per booking' : 'per member'}</small></span><button class="btn pri" data-act="startBooking" data-arg="${a.id}" ${closed ? 'disabled' : ''}>Choose a slot</button></div>`,
+<div class="dock split"><span class="dk-t"><b class="num">${a.m ? rs(a.m) : 'Free'}</b><small>${a.per ? 'per day' : 'per member'}</small></span><button class="btn pri" data-act="startBooking" data-arg="${a.id}" ${closed ? 'disabled' : ''}>${a.per ? 'Choose a day' : 'Choose a slot'}</button></div>`,
     after(el, re) {
       heroScroll(el);
       if (re) return;
@@ -1570,10 +1570,10 @@ function scrSlots({ id }) {
   if (d.slot != null && !slots.some(s => s.h === d.slot && s.left > 0)) d.slot = null;
   return {
     label: 'Select date and slot',
-    html: `${bar('Select date and slot')}<div class="progress" role="img" aria-label="Step 1 of 3"><i class="on"></i><i></i><i></i></div>
+    html: `${bar(a.per ? 'Select a day' : 'Select date and slot')}<div class="progress" role="img" aria-label="Step 1 of 3"><i class="on"></i><i></i><i></i></div>
 <div class="sum">${amPic(a)}<span><b>${a.name}</b><small>${priceLine(a)}</small></span></div>
 <div class="dates pills" role="group" aria-label="Date">${dates.map((x, i) => { const dd = D(x); return `<button class="date" data-act="pickDate" data-arg="${x}" aria-pressed="${x === d.date}" aria-label="${dayWord(x)}, ${fmtDay(x)}"><small>${i ? WD[dd.getUTCDay()] : 'Today'}</small><b class="num">${dd.getUTCDate()}</b></button>`; }).join('')}</div>
-<div class="slots">${slots.length ? slots.map(s => slotBtn(a, s, d)).join('') : `<p class="note">${ic('info')}<span>No more slots today. The ${a.name.toLowerCase()} closes at ${hm(a.close)}.</span></p>`}</div>
+<div class="slots">${slots.length ? slots.map(s => slotBtn(a, s, d)).join('') : `<p class="note">${ic('info')}<span>${a.per ? `The ${a.name.toLowerCase()} is booked by the day, and today has already started. Pick another day.` : `No more slots today. The ${a.name.toLowerCase()} closes at ${hm(a.close)}.`}</span></p>`}</div>
 <div class="dock"><button class="btn pri" id="next1" data-act="slotNext" ${d.slot == null ? 'disabled' : ''}>${a.per ? 'Next: review charges' : "Next: who's coming"}</button></div>`,
     after(el, re) {
       if (RM) return;
@@ -1669,7 +1669,7 @@ function scrReview() {
   return {
     label: 'Review and pay',
     html: `${bar('Review and pay')}<div class="progress" role="img" aria-label="Step 3 of 3"><i class="on"></i><i class="on"></i><i class="on"></i></div>
-<div class="sum">${amPic(a)}<span><b>${a.name}</b><small>${dayWord(d.date)}, ${span({ h: d.slot, end: d.slot + a.len })}${a.per ? ', whole hall' : `, ${ppl(lines.length)}`}</small></span></div>
+<div class="sum">${amPic(a)}<span><b>${a.name}</b><small>${dayWord(d.date)}, ${span({ h: d.slot, end: d.slot + a.len })}${a.per ? ', whole hall for the day' : `, ${ppl(lines.length)}`}</small></span></div>
 <div class="list">${lines.map(lineHTML).join('')}</div>
 <div class="totals">
 <div class="tl big"><span>Pay from wallet</span><span class="num">${rs(wal)}</span></div>
@@ -2038,6 +2038,7 @@ ${go2 ? `<div class="dock"><button class="btn pri" data-go="${go2[0]}">${go2[1]}
     after(el) { if (!RM) { pop($('.nd-ic', el), .6); stagger($$('.list .row', el), 160); } },
   };
 }
+document.addEventListener('input', e => { if (e.target.id === 'fmob') e.target.value = fmtMob(e.target.value.replace(/\D/g, '').slice(0, 10)); });
 /* Family members: added straight away as active; the member can edit or remove them here */
 const RELS = ['Spouse', 'Parent', 'Child', 'Sibling', 'Other'];
 let famSeq = 3;
