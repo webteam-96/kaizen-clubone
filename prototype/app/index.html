@@ -892,6 +892,9 @@ function slotsFor(a, date) {
   }
   return out;
 }
+/* club coaches a member can add to a slot; the fee is added to the booking (same list as the portal's Coaches tab) */
+const COACHES = { pool: [['Prakash Jadhav', 300], ['Meena Rao', 300]], kids: [['Meena Rao', 250]], tennis: [['Vikram Sethi', 400]], badminton: [['Pooja Nair', 250]], squash: [['Rohit Menon', 300]], gym: [['Ajay Pawar', 350]] };
+const coachOf = d => d.coach != null && (COACHES[d.am] || [])[d.coach];
 function newDraft(id, withSlot) {
   const a = amOf(id), f = withSlot ? slotsFor(a, TODAY).find(s => s.left > 0) : null;
   return { am: a.id, date: TODAY, slot: f ? f.h : null, people: [{ ...ME }] };
@@ -1637,7 +1640,8 @@ function scrPeople() {
     const young = a.minAge && f.age < a.minAge;
     return `<div class="row">${av(f.n)}<span class="grow"><b>${f.n}</b><small>${young ? `Not eligible: minimum age ${a.minAge}` : `${f.rel}, ${typeLabel(f.t).toLowerCase()}`}</small></span>${young ? '' : `<span class="num price">${rs(pr.m)}</span><button class="tog" data-act="toggleFam" data-arg="${i}" aria-pressed="${has(f.n)}" aria-label="${has(f.n) ? 'Remove' : 'Add'} ${f.n}">${has(f.n) ? ic('check') + 'Added' : 'Add'}</button>`}</div>`;
   };
-  const total = d.people.reduce((s, p) => s + priceOf(p, pr), 0);
+  const co = coachOf(d), total = d.people.reduce((s, p) => s + priceOf(p, pr), 0) + (co ? co[1] : 0);
+  const coachRow = ([n, fee], i) => `<div class="row">${av(n)}<span class="grow"><b>${n}</b><small>Coach, for this slot</small></span><span class="num price">${rs(fee)}</span><button class="tog" data-act="pickCoach" data-arg="${i}" aria-pressed="${d.coach === i}" aria-label="${d.coach === i ? 'Remove' : 'Add'} coach ${n}">${d.coach === i ? ic('check') + 'Added' : 'Add'}</button></div>`;
   return {
     label: "Who's coming",
     html: `${bar("Who's coming?")}<div class="progress" role="img" aria-label="Step 2 of 3"><i class="on"></i><i class="on"></i><i></i></div>
@@ -1649,7 +1653,8 @@ ${a.g == null ? `<p class="note" style="margin-top:0">${ic('info')}<span>Guests 
       : `${guests.length ? `<div class="list">${guests.map(([p, i]) => guestRow(p, i, pr)).join('')}</div>` : ''}
 ${guests.length < 2 ? `<button class="btn sec" style="margin-top:10px" data-act="askGuest">${ic('userplus')}Add guest</button>` : '<p class="cap" style="margin-top:8px">Guest limit reached: 2 per booking.</p>'}
 <p class="fine" style="text-align:left">Each guest gets one pass for the club entry and this amenity, shared from your phone.</p>`}
-<div class="dock"><div class="tl big" style="margin-bottom:12px"><span>Total for ${ppl(d.people.length)}</span><span class="num" data-roll="total" data-v="${total}">${rs(total)}</span></div><button class="btn pri" data-go="review">Next: review charges</button></div>`,
+${(COACHES[a.id] || []).length ? `<h2 class="sec">Coach<span class="cap">Optional</span></h2><div class="list">${COACHES[a.id].map(coachRow).join('')}</div><p class="fine" style="text-align:left">The coach's fee is added to this booking and paid from your wallet.</p>` : ''}
+<div class="dock"><div class="tl big" style="margin-bottom:12px"><span>Total for ${ppl(d.people.length)}${co ? ' and a coach' : ''}</span><span class="num" data-roll="total" data-v="${total}">${rs(total)}</span></div><button class="btn pri" data-go="review">Next: review charges</button></div>`,
   };
 }
 Object.assign(ACT, {
@@ -1661,6 +1666,13 @@ Object.assign(ACT, {
     const t = $(`.tog[data-arg="${i}"]`);
     pop(t, .86); buzz(8);
     draw(t && $('path', t), 80, 320);   // "Added" draws its tick
+  },
+  pickCoach(i) {
+    const d = S.draft; d.coach = d.coach === +i ? null : +i;
+    rerender();
+    const t = $(`.tog[data-act="pickCoach"][data-arg="${i}"]`);
+    pop(t, .86); buzz(8);
+    if (d.coach === +i) { draw(t && $('path', t), 80, 320); toast(`Coach ${COACHES[d.am][+i][0]} added`); }
   },
   removeGuest(i) { const p = S.draft.people.splice(+i, 1)[0]; rerender(); if (p) toast(`${p.n} removed from this booking`); },
   askGuest() {
@@ -1693,12 +1705,12 @@ function lineHTML(l) {
 function scrReview() {
   const d = ensureDraft(), a = amOf(d.am), pr = priceAt(a, d.slot);
   const lines = (a.per ? [d.people[0]] : d.people).map((p, i) => ({ ...p, i, price: a.per ? a.m : priceOf(p, pr) }));
-  const wal = lines.reduce((s, l) => s + l.price, 0), short = wal - S.wallet;
+  const co = a.per ? null : coachOf(d), wal = lines.reduce((s, l) => s + l.price, 0) + (co ? co[1] : 0), short = wal - S.wallet;
   return {
     label: 'Review and pay',
     html: `${bar('Review and pay')}<div class="progress" role="img" aria-label="Step 3 of 3"><i class="on"></i><i class="on"></i><i class="on"></i></div>
 <div class="sum">${amPic(a)}<span><b>${a.name}</b><small>${dayWord(d.date)}, ${span({ h: d.slot, end: d.slot + a.len })}${a.per ? ', whole hall for the day' : `, ${ppl(lines.length)}`}</small></span></div>
-<div class="list">${lines.map(lineHTML).join('')}</div>
+<div class="list">${lines.map(lineHTML).join('')}${co ? `<div class="line">${av(co[0])}<span class="ln-t"><b>${co[0]}</b><small>Coach for this slot</small><small>From your wallet</small></span><span class="num ln-a">${rs(co[1])}</span></div>` : ''}</div>
 <div class="totals">
 <div class="tl big"><span>Pay from wallet</span><span class="num">${rs(wal)}</span></div>
 <div class="tl"><span>Wallet balance</span><span class="num">${rs(S.wallet)}</span></div>
@@ -1743,9 +1755,9 @@ function finalizeBooking() {
 function createBooking() {
   const d = ensureDraft(), a = amOf(d.am), pr = priceAt(a, d.slot);
   const people = (a.per ? [d.people[0]] : d.people).map(p => ({ ...p, p: a.per ? a.m : priceOf(p, pr) }));
-  const wal = people.reduce((s, p) => s + p.p, 0);
+  const co = a.per ? null : coachOf(d), wal = people.reduce((s, p) => s + p.p, 0) + (co ? co[1] : 0);
   const id = `CB-${d.date.slice(2).replace(/-/g, '')}-${String(142 + S.bookings.length * 7).padStart(4, '0')}`;
-  const b = { id, am: a.id, date: d.date, h: d.slot, end: d.slot + a.len, st: 'confirmed', paid: wal, people, app: true };
+  const b = { id, am: a.id, date: d.date, h: d.slot, end: d.slot + a.len, st: 'confirmed', paid: wal, people, app: true, coach: co ? { n: co[0], fee: co[1] } : null };
   S.wallet -= wal;
   S.bookings.unshift(b);
   if (wal) S.txns.unshift({ id: 'TX-' + (9300 + S.txns.length), k: 'debit', t: `${a.name} booking`, d: STAMP, a: wal, ref: id, m: 'Wallet' });
@@ -1757,7 +1769,7 @@ function createBooking() {
 }
 /* hand bookings made here to the admin portal (same browser): it reads this key, also live in another tab */
 function syncBookings() {
-  const mine = S.bookings.filter(b => b.app).map(b => ({ ref: b.id, no: 'KC1234', who: 'Rahul Sharma', am: amOf(b.am).name, slot: span(b), day: dayWord(b.date), people: b.people.length, guests: b.people.filter(isGuest).map(g => g.n), amt: b.paid, payer: 'Wallet', status: b.st === 'cancelled' ? 'Cancelled' : 'Confirmed', why: b.why || '' }));
+  const mine = S.bookings.filter(b => b.app).map(b => ({ ref: b.id, no: 'KC1234', who: 'Rahul Sharma', am: amOf(b.am).name, slot: span(b), day: dayWord(b.date), people: b.people.length, guests: b.people.filter(isGuest).map(g => g.n), amt: b.paid, payer: 'Wallet', status: b.st === 'cancelled' ? 'Cancelled' : 'Confirmed', why: b.why || '', coach: b.coach ? b.coach.n : '', src: 'App' }));
   try { localStorage.setItem('clubone.appBookings', JSON.stringify(mine)); } catch (e) { /* storage blocked: the admin just won't see it */ }
 }
 function guestCard(b, g, i, when) {
@@ -1905,6 +1917,7 @@ ${live ? `<div class="qrwrap">${qrSVG('CLUBONE:B:' + b.id + ':' + sig(b.id), 'Bo
 <div class="tb-meta"><span>Booking<b class="num">${b.id}</b></span><span>${a.per ? 'Booking' : 'People'}<b class="num">${a.per ? 'Whole hall' : b.people.length}</b></span><span>Paid<b class="num">${rs(b.paid)}</b></span></div></div>
 <h2 class="sec">${a.per ? 'Booked by' : "Who's coming"}</h2>
 <div class="list">${b.people.map(personRow).join('')}</div>
+${b.coach ? `<h2 class="sec">Coach</h2><div class="list"><div class="row">${av(b.coach.n)}<span class="grow"><b>${b.coach.n}</b><small>Coach for this slot</small></span><span class="num price">${rs(b.coach.fee)}</span></div></div>` : ''}
 ${b.people.some(isGuest) && live ? `<button class="btn sec" style="margin-top:12px" data-go="guests">${ic('userplus')}Guest passes</button>` : ''}
 ${b.refund ? refundSteps(b) : ''}
 ${b.st === 'confirmed' ? (canCancel

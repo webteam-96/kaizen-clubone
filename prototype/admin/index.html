@@ -294,6 +294,17 @@ input[type="checkbox"]:not(.switch){accent-color:var(--blue)}
 .pill-opts{display:flex;flex-wrap:wrap;gap:8px}
 .pill-opts .opt{padding:9px 14px;font-weight:600;transition:background-color .2s,color .2s,border-color .2s}
 .pmw{margin-top:8px}
+.src-tag{display:block;font-size:12px;font-weight:600;margin-top:2px}
+.src-tag.app{color:var(--blue)}
+.src-tag.desk{color:#9A5B00}
+.ma-list{margin-top:6px;border:1px solid var(--hair);border-radius:14px;background:#fff;padding:4px;max-height:280px;overflow:auto}
+.ma-opt{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border:0;border-radius:10px;background:none;text-align:left;font:inherit;color:var(--ink);cursor:pointer}
+.ma-opt:hover,.ma-opt:focus-visible{background:#f2f7fd}
+.ma-opt span{flex:1;min-width:0}
+.ma-pick{display:flex;justify-content:space-between;gap:12px;padding:12px 14px;border-radius:14px;background:#f5f5f7}
+.ma-pick b{font-weight:600}
+.ma-opt b{display:block;font-weight:600}
+.ma-opt small{display:block;font-size:12px;color:var(--ink-80);font-weight:400}
 .pd-card{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .pd-card .pd-wide{grid-column:1/-1}
 .pd-qr{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:16px;padding:14px;border-radius:16px;background:#f5f5f7}
@@ -882,6 +893,8 @@ const FAMILY = {KC1234:[
   {name:'Priya Sharma',rel:'Spouse',no:'KC1235',status:'Active',mobile:'+91 98203 17919'},
   {name:'Aarav Sharma',rel:'Son, 12',no:'KC1234-F2',status:'Active'},
 ]};
+/* club coaches: a member can add one to a slot and the fee is added to the booking */
+const COACHES = {pool: [['Prakash Jadhav', 300], ['Meena Rao', 300]], kids: [['Meena Rao', 250]], tennis: [['Vikram Sethi', 400]], badminton: [['Pooja Nair', 250]], squash: [['Rohit Menon', 300]], gym: [['Ajay Pawar', 350]]};
 const STATIONS = [
   {name:'Main entry',type:'Entry gate',loc:'Lobby',on:true,last:'6:10 PM',dev:'ENT-01 tablet and 2D imager'},
   {name:'Exit lane',type:'Exit gate',loc:'Lobby',on:true,last:'6:09 PM',dev:'EXT-01 tablet and 2D imager'},
@@ -914,14 +927,14 @@ const BOOKINGS = [
   {ref:'CB-261028-0131',no:'KC1270',who:'Aditya Rao',am:'Snooker',slot:'6:00 to 7:00 PM',day:'Today',people:2,guests:[],amt:100,payer:'Wallet',status:'Confirmed'},
   {ref:'CB-261028-0151',no:'KC1247',who:'Neha Kapoor',am:'Swimming pool',slot:'7:00 to 8:00 PM',day:'Today',people:2,guests:['Rohit Verma'],amt:155,payer:'Wallet and reception',status:'Confirmed'},
   {ref:'CB-261028-0155',no:'KC1262',who:'Rohan Kulkarni',am:'Squash, court 1',slot:'7:00 to 7:45 PM',day:'Today',people:2,guests:[],amt:30,payer:'Wallet',status:'Confirmed'},
-  {ref:'CB-261028-0158',no:'KC1295',who:'Tanvi Gokhale',am:'Studio hall',slot:'7:00 to 8:00 PM',day:'Today',people:1,guests:[],amt:400,payer:'Wallet',status:'Confirmed'},
+  {ref:'CB-261028-0158',no:'KC1295',who:'Tanvi Gokhale',am:'Studio hall',slot:'7:00 to 8:00 PM',day:'Today',people:1,guests:[],amt:400,payer:'Wallet',src:'Walk-in',status:'Confirmed'},
   {ref:'CB-261028-0160',no:'KC1284',who:'Harish Pillai',am:'Banquet hall',slot:'Full day, 10:00 AM to 10:00 PM',day:'Today',people:1,guests:[],amt:5500,payer:'Wallet',status:'Confirmed'},
   {ref:'CB-261028-0163',no:'KC1299',who:'Siddharth Jain',am:'Badminton, court 1',slot:'8:00 to 9:00 PM',day:'Today',people:1,guests:[],amt:20,payer:'Wallet',status:'Payment pending'},
-  {ref:'CB-261028-0120',no:'KC1273',who:'Pooja Shetty',am:'Gymnasium',slot:'5:00 to 6:00 PM',day:'Today',people:1,guests:[],amt:2,payer:'Wallet',status:'Completed'},
+  {ref:'CB-261028-0120',no:'KC1273',who:'Pooja Shetty',am:'Gymnasium',slot:'5:00 to 6:00 PM',day:'Today',people:1,guests:[],amt:2,payer:'Wallet',src:'Walk-in',status:'Completed'},
   {ref:'CB-261028-0118',no:'KC1313',who:'Yash Thakkar',am:'Table tennis',slot:'5:00 to 6:00 PM',day:'Today',people:2,guests:[],amt:60,payer:'Wallet',status:'Completed'},
   {ref:'CB-261028-0112',no:'KC1281',who:'Diya Sinha',am:'Swimming pool',slot:'4:00 to 5:00 PM',day:'Today',people:1,guests:[],amt:5,payer:'Wallet',status:'Completed'},
   {ref:'CB-261028-0104',no:'KC1302',who:'Leela Fernandes',am:'Steam',slot:'3:00 to 3:30 PM',day:'Today',people:1,guests:[],amt:20,payer:'Wallet',status:'Cancelled'},
-  {ref:'CB-261028-0097',no:'KC1306',who:'Arvind Nair',am:'Gymnasium',slot:'4:00 to 5:00 PM',day:'Today',people:1,guests:[],amt:2,payer:'Wallet',status:'Completed'},
+  {ref:'CB-261028-0097',no:'KC1306',who:'Arvind Nair',am:'Gymnasium',slot:'4:00 to 5:00 PM',day:'Today',people:1,guests:[],amt:2,payer:'Wallet',src:'Walk-in',status:'Completed'},
   {ref:'CB-261029-0012',no:'KC1234',who:'Rahul Sharma',am:'Lawn tennis, court 2',slot:'7:00 to 8:00 AM',day:'Thu 29 Oct',people:1,guests:[],amt:50,payer:'Wallet',status:'Confirmed'},
 ];
 const QUEUE = [
@@ -1028,7 +1041,7 @@ const amBy = s => { s = String(s).toLowerCase(); return AMEN.find(a => s.include
 const amImg = (a, lazy = true) => a ? `<img src="${IMG}${a.id}.jpg" alt="" width="1200" height="800" decoding="async"${lazy ? ' loading="lazy"' : ''}${a.pos ? ` style="object-position:${a.pos}"` : ''}>` : '';
 addEventListener('error', e => { if (e.target instanceof HTMLImageElement) e.target.remove(); }, true);
 const memberBy = no => MEMBERS.find(m => m.no === no);
-const memCard = m => `<div class="panel ma-card">${avatar(m.name, 'xl')}<div class="grow">${chip(m.status)}<b>${esc(m.name)}</b><span class="muted cap">${m.no}, ${esc(m.flat)}, valid till ${m.valid}</span><span class="ma-face">${ic(PHOTO[m.name] ? 'user' : 'info')}${PHOTO[m.name] ? 'Check the face matches' : 'No photo on file. Check the ID proof.'}</span></div></div>`;
+const memCard = m => `<div class="panel ma-card">${avatar(m.name, 'xl')}<div class="grow">${chip(m.status)}<b>${esc(m.name)}</b><span class="muted cap">${m.no}, ${esc(m.flat)}, valid till ${m.valid}</span></div></div>`;
 const store = {
   get(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } },
   set(k, v) { try { v == null ? sessionStorage.removeItem(k) : sessionStorage.setItem(k, v); } catch (e) {} },
@@ -1177,8 +1190,8 @@ const SUB = {
   dashboard: {cta: () => has('station') && {label: 'Open station mode', href: 'station'}},
   access: {cta: () => ({label: 'Manual admission', act: 'manual-admit'})},
   members: {cta: () => S.role === 'admin' && {label: 'Add member', act: 'add-member'}},
-  amenities: {tabs: () => [['', 'Amenities'], ['rates', 'Rate card'], ['blocks', 'Blocked slots']],
-    cta: sub => S.role === 'admin' ? (sub === 'rates' ? {label: 'Save rate card', act: 'save-rates'} : {label: 'Add amenity', act: 'edit-amenity', id: 'new'}) : S.role === 'manager' && {label: 'Block a slot', act: 'block-slot'}},
+  amenities: {tabs: () => [['', 'Amenities'], ['rates', 'Rate card'], ['coaches', 'Coaches'], ['blocks', 'Blocked slots']],
+    cta: sub => S.role === 'admin' ? (sub === 'rates' ? {label: 'Save rate card', act: 'save-rates'} : sub === 'coaches' ? {label: 'Add coach', act: 'add-coach'} : {label: 'Add amenity', act: 'edit-amenity', id: 'new'}) : S.role === 'manager' && {label: 'Block a slot', act: 'block-slot'}},
   bookings: {cta: () => has('reception') && {label: 'Walk-in booking', href: 'reception/walkin'}},
   reception: {tabs: () => [['', 'Payment queue', QUEUE.length, 'cnt-queue'], ['walkin', 'Walk-in booking'], ['change', 'Change or allot a slot'], ['guests', 'Guests today'], ['cash', 'Cash count']],
     cta: () => ({label: 'Collect payment', act: 'collect-pick'})},
@@ -1278,6 +1291,8 @@ function need(form, names) {
   });
   return ok;
 }
+/* a field flagged by need() clears itself as soon as it gets a value */
+['input', 'change'].forEach(ev => document.addEventListener(ev, e => { const el = e.target; if (el.getAttribute && el.getAttribute('aria-invalid') === 'true' && String(el.value).trim()) { el.classList.remove('err'); el.setAttribute('aria-invalid', 'false'); const m = el.closest('.field') && el.closest('.field').querySelector('.errmsg'); if (m) m.hidden = true; } }));
 const seg = (act, items, cur, label) => `<div class="seg" role="group" aria-label="${label}">${items.map(k => `<button type="button" data-act="${act}" data-v="${esc(k)}" aria-pressed="${k === cur}">${esc(k)}</button>`).join('')}</div>`;
 const reasonField = (label = 'Reason', ph = '') => `<label class="field">${label}<textarea class="input" name="reason" placeholder="${esc(ph)}"></textarea><span class="errmsg" hidden>Enter a reason. It is saved in the audit trail.</span></label>`;
 
@@ -1718,11 +1733,11 @@ function findMember(q) {
   return MEMBERS.find(x => x.no.toLowerCase() === q) || (d.length >= 6 ? MEMBERS.find(x => x.mobile.replace(/\D/g, '').endsWith(d)) : null);
 }
 function maFound(q) {
-  if (!(q || '').trim()) return `<div class="note">${ic('info')}<div>Enter a member number or mobile number, then compare the photo with the person.</div></div>`;
+  if (!(q || '').trim()) return '';
   const m = findMember(q);
   if (!m) return `<div class="note warn">${ic('alert')}<div>No member matches. Check the number with the member.</div></div>`;
   const ok = m.status === 'Active';
-  return `${memCard(m)}
+  return `<div class="ma-pick"><b>${esc(m.name)}</b><span class="num">${m.mobile}</span></div>
   ${ok ? '' : `<div class="note bad" style="margin-top:10px">${ic('ban')}<div>Membership ${m.status.toLowerCase()}. Manual admission is not allowed. Request a manager override instead.</div></div>`}`;
 }
 ACT['manual-admit'] = b => {
@@ -1730,21 +1745,30 @@ ACT['manual-admit'] = b => {
   closeDrawer(true);
   openModal(`<form data-form="manual">${modalHead('Manual admission', 'For a genuine member whose code cannot be read. Each manual entry is logged with your name and the reason.')}
   <div class="modal-b form">
-    <label class="field">Member number or mobile number<input class="input" name="q" value="${esc(pref)}" placeholder="KC1234 or 98765 43210" data-input="ma-q" autocomplete="off"><span class="errmsg" hidden>Enter a member number or mobile number.</span></label>
-    <div id="ma-found">${maFound(pref)}</div>
-    <div class="f2"><label class="field">Reason<select class="input" name="reason"><option value="">Choose a reason</option><option>Phone battery is empty</option><option>Code cannot be read</option><option>Gate controller not responding</option><option>Printed card damaged</option></select><span class="errmsg" hidden>Choose a reason.</span></label>
-    <label class="field">Station<select class="input" name="station">${STATIONS.filter(s => s.type !== 'Amenity').map(s => `<option>${s.name}</option>`).join('')}</select></label></div>
+    <div class="field ma-combo">Member<input class="input" type="search" name="q" value="${esc(pref && memberBy(pref) ? memberBy(pref).name : pref)}"${pref ? ` data-no="${esc(pref)}"` : ''} placeholder="Search by name or mobile number" data-input="ma-q" autocomplete="off" role="combobox" aria-controls="ma-list" aria-expanded="${!pref}"><div class="ma-list" id="ma-list" role="listbox" aria-label="Members"${pref ? ' hidden' : ''}>${maList('')}</div><span class="errmsg" hidden>Choose the member.</span></div>
+    <div id="ma-found">${pref ? maFound(pref) : ''}</div>
+    <div class="f2"><label class="field">Reason<select class="input" name="reason"><option value="">Choose a reason</option><option>Phone battery is empty</option><option>Code cannot be read</option><option>Gate controller not responding</option></select><span class="errmsg" hidden>Choose a reason.</span></label>
+    <label class="field">Station<select class="input" name="station"><optgroup label="Club gates">${STATIONS.filter(s => s.type === 'Entry gate').map(s => `<option>${s.name}</option>`).join('')}</optgroup><optgroup label="Amenity entries">${STATIONS.filter(s => s.type === 'Amenity').map(s => `<option>${s.name}</option>`).join('')}</optgroup></select></label></div>
   </div>
   <div class="modal-f"><button type="button" class="btn" data-act="close-modal">Cancel</button><button class="btn btn-primary" type="submit">${ic('doorin')}Admit and log</button></div></form>`, 'Manual admission');
 };
-INPUT['ma-q'] = el => { $('#ma-found').innerHTML = maFound(el.value); };
+const maList = q => {
+  q = (q || '').trim().toLowerCase(); const d = q.replace(/\D/g, '');
+  const r = MEMBERS.filter(m => !q || m.name.toLowerCase().includes(q) || m.no.toLowerCase().includes(q) || (d.length >= 2 && m.mobile.replace(/\D/g, '').includes(d))).slice(0, 6);
+  return r.length ? r.map(m => `<button type="button" class="ma-opt" role="option" data-act="ma-pick" data-no="${m.no}"><span><b>${esc(m.name)}</b><small>${m.mobile}</small></span></button>`).join('') : '<p class="muted" style="padding:10px 12px;margin:0">No member matches. Check the spelling or the number.</p>';
+};
+INPUT['ma-q'] = el => { delete el.dataset.no; const l = $('#ma-list'); l.innerHTML = maList(el.value); l.hidden = false; el.setAttribute('aria-expanded', 'true'); $('#ma-found').innerHTML = findMember(el.value) ? maFound(el.value) : ''; };
+ACT['ma-pick'] = b => { const f = b.closest('form'), q = f.elements.q; q.value = memberBy(b.dataset.no).name; q.dataset.no = b.dataset.no; q.setAttribute('aria-expanded', 'false'); $('#ma-list').hidden = true; $('#ma-found').innerHTML = maFound(b.dataset.no); f.elements.reason.focus(); };
+document.addEventListener('focusin', e => { if (e.target.name === 'q' && e.target.closest('.ma-combo')) { const l = $('#ma-list'); l.innerHTML = maList(e.target.value === findMember(e.target.value)?.no ? '' : e.target.value); l.hidden = false; } });
+document.addEventListener('click', e => { const l = $('#ma-list'); if (l && !e.target.closest('.ma-combo')) l.hidden = true; });
 FORM.manual = f => {
   if (!need(f, ['q', 'reason'])) return;
-  const m = findMember(f.elements.q.value);
+  const m = findMember(f.elements.q.dataset.no || f.elements.q.value);
   if (!m) { toast('No member matches that number. Check it with the member.', true); return; }
   if (m.status !== 'Active') { toast(`${esc(m.name)} is ${m.status.toLowerCase()}. Request a manager override instead.`, true); return; }
-  const e = {t: now().getTime(), id: Math.random().toString(36).slice(2, 8), kind: 'in', who: m.name, station: f.elements.station.value, manual: true};
-  S.events.unshift(e); S.inside++; S.checkins++;
+  const st = f.elements.station.value, am = AMEN.find(a => DOOR[a.id] === st);
+  const e = {t: now().getTime(), id: Math.random().toString(36).slice(2, 8), kind: am ? 'am' : 'in', who: m.name, station: st, am: am && am.id, manual: true};
+  S.events.unshift(e); if (am) am.in = Math.min(am.cap, am.in + 1); else { S.inside++; S.checkins++; }
   AUDIT.unshift([hm(now()), ROLES[S.role].name, 'Manual admission', `${m.name} at ${e.station}`, f.elements.reason.value]);
   closeModal();
   toast(`${esc(m.name)} admitted at ${esc(e.station)}. Logged as a manual entry with your name and reason.`);
@@ -1974,6 +1998,7 @@ const canEditAm = () => S.role === 'admin';
 VIEWS.amenities = sub => {
   const head = `<div class="vhead"><div><p>What members see in the app and what attendants can admit comes from here.</p></div><div class="actions">${canEditAm() ? `<button class="btn" data-act="block-slot">${ic('ban')}Block a date or slot</button>` : ''}</div></div>`;
   if (sub === 'rates') return head + ratesHTML();
+  if (sub === 'coaches') return head + coachesHTML();
   if (sub === 'blocks') return head + `<section class="panel"><div class="tscroll"><table class="t"><thead><tr><th>Amenity</th><th>Date and slots</th><th>Reason</th><th>Bookings affected</th><th>By</th></tr></thead><tbody>${BLOCKS.map(b => `<tr><td><b>${esc(b.am)}</b></td><td>${esc(b.when)}</td><td>${esc(b.why)}</td><td>${esc(b.affected)}</td><td>${esc(b.by)}</td></tr>`).join('')}</tbody></table></div></section>`;
   return head + `<section class="panel"><div class="tscroll"><table class="t"><thead><tr><th>Amenity</th><th>Status</th><th>Hours</th><th>Slot</th><th>Capacity</th><th>Guests</th><th>Member price</th><th>Guest price</th></tr></thead><tbody>
   ${AMEN.map(a => `<tr class="click" data-act="edit-amenity" data-id="${a.id}"><td><div class="who"><span class="thumb">${amImg(a)}</span><div><b>${esc(a.name)}</b><small>${esc(a.loc)}</small></div></div></td><td>${a.offline ? chip('Offline', 'Station offline') : chip('Active')}</td><td class="nowrap">${esc(a.hours)}</td><td class="nowrap">${a.unit ? 'Full day' : a.slot + ' min'}</td><td class="nowrap">${a.id === 'banquet' ? '1 a day' : a.cap}</td><td>${a.guests ? 'Allowed' : '<span class="muted">Not allowed</span>'}</td><td class="nowrap">${a.member === 0 ? 'Free' : inr(a.member) + (a.unit ? ' <small class="muted">' + a.unit + '</small>' : '')}</td><td class="nowrap">${a.guest == null ? '<span class="muted">-</span>' : inr(a.guest)}</td></tr>`).join('')}</tbody></table></div></section>`;
@@ -1982,6 +2007,26 @@ const BLOCKS = [
   {am:'Squash, court 2',when:'Thu 29 Oct, 7:00 to 9:00 AM',why:'Floor polishing',affected:'2 cancelled, refunded',by:'Meera Iyer'},
   {am:'Swimming pool',when:'Mon 2 Nov, 6:00 to 8:00 AM',why:'Filter maintenance',affected:'None yet',by:'Arjun Menon'},
 ];
+function coachesHTML() {
+  const ed = canEditAm(), rows = Object.entries(COACHES).flatMap(([id, list]) => list.map(([n, fee], i) => ({id, n, fee, i})));
+  return `<section class="panel"><div class="panel-h"><div><h2>Coaches</h2><p>A member can add a coach when booking a slot, in the app or at the desk. The fee is added to the booking.</p></div></div>
+  <div class="tscroll"><table class="t"><thead><tr><th>Amenity</th><th>Coach</th><th>Fee per slot</th>${ed ? '<th><span class="sr">Remove</span></th>' : ''}</tr></thead><tbody>
+  ${rows.map(r => { const a = AMEN.find(x => x.id === r.id); return `<tr><td><div class="who"><span class="thumb sm">${amImg(a)}</span><span>${esc(a.name)}</span></div></td><td><div class="who">${avatar(r.n, 'sm')}<b>${esc(r.n)}</b></div></td><td>${ed ? `<input class="input num" style="width:124px" inputmode="numeric" data-input="coach-fee" data-id="${r.id}" data-i="${r.i}" value="${r.fee}" aria-label="Fee for ${esc(r.n)}, ${esc(a.name)}">` : inr(r.fee)}</td>${ed ? `<td><button type="button" class="iconbtn" data-act="coach-del" data-id="${r.id}" data-i="${r.i}" aria-label="Remove ${esc(r.n)} from ${esc(a.name)}" title="Remove">${ic('x')}</button></td>` : ''}</tr>`; }).join('')}</tbody></table></div>
+  <div class="panel-b"><div class="note">${ic('info')}<div>Club coaches are separate from a guest coach the member brings, which is charged at the guest coach rate on the rate card.</div></div></div></section>`;
+}
+INPUT['coach-fee'] = el => { const v = Math.max(0, Math.round(+el.value.replace(/\D/g, '') || 0)); COACHES[el.dataset.id][+el.dataset.i][1] = v; };
+ACT['coach-del'] = b => { const [n] = COACHES[b.dataset.id].splice(+b.dataset.i, 1)[0]; if (!COACHES[b.dataset.id].length) delete COACHES[b.dataset.id]; toast(`${esc(n)} removed from ${esc(AMEN.find(x => x.id === b.dataset.id).name.toLowerCase())}.`); paintView(VIEWS.amenities('coaches')); };
+ACT['add-coach'] = () => openModal(`<form data-form="add-coach">${modalHead('Add a coach', 'Members see the coach and the fee when they book that amenity.')}
+  <div class="modal-b form"><label class="field">Amenity<select class="input" name="am">${AMEN.filter(a => !a.unit).map(a => `<option value="${a.id}">${esc(a.name)}</option>`).join('')}</select></label>
+  <div class="f2"><label class="field">Coach name<input class="input" name="name" autocomplete="off"><span class="errmsg" hidden>Enter the coach’s name.</span></label><label class="field">Fee per slot (₹)<input class="input num" name="fee" inputmode="numeric"><span class="errmsg" hidden>Enter the fee.</span></label></div></div>
+  <div class="modal-f"><button type="button" class="btn" data-act="close-modal">Cancel</button><button class="btn btn-primary" type="submit">Add coach</button></div></form>`, 'Add a coach');
+FORM['add-coach'] = f => {
+  if (!need(f, ['name', 'fee'])) return;
+  const id = f.elements.am.value, n = f.elements.name.value.trim(), fee = Math.round(+f.elements.fee.value.replace(/\D/g, '') || 0);
+  (COACHES[id] = COACHES[id] || []).push([n, fee]);
+  AUDIT.unshift([hm(now()), me(), 'Coach added', `${n}, ${AMEN.find(a => a.id === id).name}, ${'₹' + num(fee)} per slot`, '']);
+  closeModal(); toast(`${esc(n)} added. Members can choose them when booking.`); if (parse().view === 'amenities') paintView(VIEWS.amenities('coaches'));
+};
 function ratesHTML() {
   const ed = canEditAm(), cell = (v, k, i) => ed ? `<input class="input num" style="width:124px" inputmode="numeric" data-rate="${i}" data-k="${k}" value="${v == null ? '' : v}" aria-label="${k} price" placeholder="-">` : (v == null ? '<span class="muted">-</span>' : inr(v));
   return `<section class="panel"><div class="panel-h"><div><h2>Rate card</h2><p>From the club’s current rate screen. Prices are per person per slot unless marked.</p></div>
@@ -2079,7 +2124,8 @@ FORM.block = f => {
 };
 
 /* ---------- bookings ---------- */
-const bkMatch = b => (S.bkF === 'All' || b.status === S.bkF) && (!S.bkQ || `${b.ref} ${b.who} ${b.am}`.toLowerCase().includes(S.bkQ.toLowerCase()));
+const srcOf = b => b.src || (/reception/i.test(b.payer) ? 'Walk-in' : 'App');
+const bkMatch = b => (S.bkF === 'All' || b.status === S.bkF || srcOf(b) === S.bkF) && (!S.bkQ || `${b.ref} ${b.who} ${b.am}`.toLowerCase().includes(S.bkQ.toLowerCase()));
 /* who is coming, at a glance: the member, then guests, then "+N" for the rest */
 function pplCell(b) {
   const g = b.guests.length, extra = Math.max(0, b.people - 1 - Math.min(g, 2));
@@ -2089,29 +2135,29 @@ function pplCell(b) {
 }
 function bkRows() {
   const rows = BOOKINGS.filter(bkMatch);
-  return rows.length ? rows.map(b => `<tr class="click${b.fresh ? ' new' : ''}" data-act="open-booking" data-ref="${b.ref}"><td class="nowrap"><b>${b.ref}</b></td><td><div class="who">${avatar(b.who)}<div><b>${esc(b.who)}</b><small>${b.no}</small></div></div></td><td><div class="who"><span class="thumb sm">${amImg(amBy(b.am))}</span><span>${esc(b.am)}</span></div></td><td class="nowrap">${b.day}, ${b.slot}</td><td>${pplCell(b)}</td><td class="r num">${inr(b.amt)}</td><td>${chip(b.status)}</td></tr>`).join('')
+  return rows.length ? rows.map(b => `<tr class="click${b.fresh ? ' new' : ''}" data-act="open-booking" data-ref="${b.ref}"><td class="nowrap"><b>${b.ref}</b><small class="src-tag ${srcOf(b) === 'App' ? 'app' : 'desk'}">${srcOf(b) === 'App' ? 'App booking' : 'Walk-in'}</small></td><td><div class="who">${avatar(b.who)}<div><b>${esc(b.who)}</b><small>${b.no}</small></div></div></td><td><div class="who"><span class="thumb sm">${amImg(amBy(b.am))}</span><span>${esc(b.am)}</span></div></td><td class="nowrap">${b.day}, ${b.slot}</td><td>${pplCell(b)}</td><td class="r num">${inr(b.amt)}</td><td>${chip(b.status)}</td></tr>`).join('')
     : `<tr><td colspan="7"><div class="empty">${emptyArt()}<p>No bookings match. Clear the search or choose All.</p></div></td></tr>`;
 }
 VIEWS.bookings = () => `<div class="vhead"><div><p>Bookings stay separate from wallet transactions. Reception books walk-ins with the same slots, prices and seats as the app.</p></div></div>
-  <section class="panel"><div class="panel-h"><div class="toolbar" style="margin:0"><input class="input" type="search" data-input="bk-q" placeholder="Search reference, member or amenity" value="${esc(S.bkQ)}" aria-label="Search bookings">${seg('bk-f', ['All', 'Confirmed', 'Admitted', 'Completed', 'Cancelled', 'Payment pending'], S.bkF, 'Filter by status')}</div></div>
+  <section class="panel"><div class="panel-h"><div class="toolbar" style="margin:0"><input class="input" type="search" data-input="bk-q" placeholder="Search reference, member or amenity" value="${esc(S.bkQ)}" aria-label="Search bookings">${seg('bk-f', ['All', 'App', 'Walk-in', 'Confirmed', 'Admitted', 'Completed', 'Cancelled', 'Payment pending'], S.bkF, 'Filter by status')}</div></div>
   <div class="tscroll"><table class="t"><thead><tr><th>Reference</th><th>Member</th><th>Amenity</th><th>Slot</th><th>People</th><th class="r">Amount</th><th>Status</th></tr></thead><tbody id="bk-body">${bkRows()}</tbody></table></div></section>`;
 INPUT['bk-q'] = el => { S.bkQ = el.value; $('#bk-body').innerHTML = bkRows(); };
 ACT['bk-f'] = b => { S.bkF = b.dataset.v; $$('[data-act="bk-f"]').forEach(x => x.setAttribute('aria-pressed', x === b)); $('#bk-body').innerHTML = bkRows(); };
 ACT['open-booking'] = tr => openBooking(tr.dataset.ref);
 function bkHistory(b) {
-  const h = [['ok', 'Booked in the app', '5:47 PM, slot and people chosen'], ['ok', b.payer.startsWith('Wallet') ? `Paid ${'₹' + num(b.amt)} from the wallet` : 'Payment recorded', '5:51 PM, seats confirmed in the same step'], ['ok', 'Confirmed, QR code issued', '5:51 PM, push and SMS sent']];
+  const h = [srcOf(b) === 'Walk-in' ? ['ok', 'Booked at the reception desk', '5:47 PM, walk-in booking'] : ['ok', 'Booked in the app', '5:47 PM, slot and people chosen'], ['ok', b.payer.startsWith('Wallet') ? `Paid ${'₹' + num(b.amt)} from the wallet` : 'Payment recorded', '5:51 PM, seats confirmed in the same step'], ['ok', 'Confirmed, QR code issued', '5:51 PM, push and SMS sent']];
   if (b.guests.length) h.push(['ok', `Guest pass issued for ${b.guests[0]}`, 'Shared through the phone’s share sheet']);
   if (b.status === 'Payment pending') return [['ok', 'Booked in the app', '6:06 PM'], ['', 'Wallet top-up waiting for Cashfree', 'No seat is taken until the booking is paid']];
   if (['Admitted', 'Completed'].includes(b.status)) h.push(['ok', `Admitted at the ${b.am.split(',')[0].toLowerCase()} door`, `${b.people} of ${b.people} people`]);
   if (b.status === 'Completed') h.push(['ok', 'Scanned out', 'Within the grace period, no extra time']);
-  if (b.status === 'Cancelled') h.push(['bad', 'Cancelled by the member', `${b.why ? `Reason: ${b.why}. ` : ''}Full refund of ₹${num(b.amt)} to the wallet, completed`]);
+  if (b.status === 'Cancelled') h.push(['bad', b.cancelBy === 'desk' ? 'Cancelled at the reception desk' : 'Cancelled by the member', `${b.why ? `Reason: ${b.why}. ` : ''}Full refund of ₹${num(b.amt)} to the wallet, completed`]);
   return h;
 }
 function openBooking(ref) {
   const b = BOOKINGS.find(x => x.ref === ref); if (!b) return;
   const canCancel = ['Confirmed', 'Payment pending'].includes(b.status) && ['manager', 'admin', 'reception'].includes(S.role);
   openDrawer(`<div class="drawer-h"><div class="grow"><h2>${esc(b.am)}</h2><p>${b.ref}, ${b.day}, ${b.slot}</p><div style="margin-top:8px">${chip(b.status)}</div></div>${drawerClose()}</div>
-  <div class="drawer-b"><figure class="am-photo" style="margin-bottom:20px">${amImg(amBy(b.am), false)}</figure><dl class="kv"><dt>Member</dt><dd>${esc(b.who)}, ${b.no}</dd><dt>People</dt><dd>${b.people}${b.guests.length ? ` including ${b.guests.map(esc).join(', ')}` : ''}</dd><dt>Amount</dt><dd>${inr(b.amt)}</dd><dt>Paid by</dt><dd>${esc(b.payer)}</dd></dl>
+  <div class="drawer-b"><figure class="am-photo" style="margin-bottom:20px">${amImg(amBy(b.am), false)}</figure><dl class="kv"><dt>Member</dt><dd>${esc(b.who)}, ${b.no}</dd><dt>People</dt><dd>${b.people}${b.guests.length ? ` including ${b.guests.map(esc).join(', ')}` : ''}</dd><dt>Amount</dt><dd>${inr(b.amt)}</dd><dt>Paid by</dt><dd>${esc(b.payer)}</dd><dt>Booked</dt><dd>${srcOf(b) === 'App' ? 'In the member app' : 'Walk-in, at the reception desk'}</dd>${b.coach ? `<dt>Coach</dt><dd>${esc(b.coach)}</dd>` : ''}</dl>
   <h3 style="margin:22px 0 12px">Status history</h3><ol class="timeline">${bkHistory(b).map(([k, t, s]) => `<li class="${k}"><b>${esc(t)}</b><small>${esc(s)}</small></li>`).join('')}</ol></div>
   <div class="drawer-f">${canCancel ? `<button class="btn" data-act="go" data-href="reception/change/${b.ref}">${ic('swap')}Change slot</button><button class="btn btn-danger" data-act="staff-cancel" data-ref="${b.ref}">${ic('x')}Cancel with full refund</button>` : '<button class="btn" data-act="close-drawer">Close</button>'}</div>`, b.ref);
 }
@@ -2262,12 +2308,14 @@ ACT['send-rcpt'] = () => toast('Receipt sent to the member by push and SMS.');
 ACT['q-clear'] = b => { const i = QUEUE.findIndex(x => x.id === b.dataset.id); if (i > -1) QUEUE.splice(i, 1); closeModal(); if ($('#q-body')) $('#q-body').innerHTML = qRows(); const cnt = $('#cnt-queue'); if (cnt) cnt.textContent = QUEUE.length; toast('Removed from the queue. The original receipt stays in the payment history.'); };
 
 /* walk-in booking */
-const W = {no: 'KC1234', am: 'badminton', slot: null, people: 1, guests: [], mode: 'Cash'};
+const W = {no: 'KC1234', am: 'badminton', slot: null, people: 1, guests: [], mode: 'Wallet', coach: null};
 const WSLOTS = [['6:00 PM', 0], ['7:00 PM', 3], ['8:00 PM', 6], ['9:00 PM', 9]];
 function walkinCharges() {
   const a = AMEN.find(x => x.id === W.am), g = W.guests.length, mCount = Math.max(1, W.people - g);
   const lines = [[`${a.name}, ${mCount} member${mCount > 1 ? 's' : ''}`, a.member * mCount, 'wallet']];
-  W.guests.forEach((x, i) => lines.push([`Guest: ${x.name || 'Guest ' + (i + 1)}`, a.guest || 0, x.payer || 'desk']));
+  W.guests.forEach((x, i) => lines.push([`Guest: ${x.name || 'Guest ' + (i + 1)}`, a.guest || 0]));
+  const c = W.coach != null && (COACHES[W.am] || [])[W.coach];
+  if (c) lines.push([`Coach: ${c[0]}`, c[1]]);
   return lines;
 }
 function walkinHTML() {
@@ -2280,45 +2328,50 @@ function walkinHTML() {
     <div class="field">Slot today<div class="pill-opts">${WSLOTS.map(([s, left]) => `<button type="button" class="opt" data-act="w-slot" data-v="${s}" aria-pressed="${W.slot === s}" ${left ? '' : 'disabled'}><b>${s}</b><small>${left ? left + ' seats left' : 'Full'}</small></button>`).join('')}</div></div>
     <div class="row" style="justify-content:flex-start;gap:20px;flex-wrap:wrap"><div class="field">People<div class="stepper"><button type="button" data-act="w-people" data-d="-1" aria-label="Fewer people">${ic('minus')}</button><output class="num">${W.people}</output><button type="button" data-act="w-people" data-d="1" aria-label="More people">${ic('plus')}</button></div></div>
     ${a.guests ? `<button type="button" class="btn" data-act="w-guest" ${W.guests.length >= 2 ? 'disabled' : ''} style="margin-top:20px">${ic('guest')}Add a guest</button><small class="muted" style="margin-top:20px">Guest limit 2 per booking</small>` : `<small class="muted" style="margin-top:20px">${esc(a.name)} does not allow guests.</small>`}</div>
-    ${W.guests.map((g, i) => `<div class="f3" style="align-items:end"><label class="field">Guest name<input class="input" value="${esc(g.name)}" data-input="w-gname" data-i="${i}"></label><label class="field">Mobile number<input class="input" inputmode="tel" value="${esc(g.mobile)}" data-input="w-gmob" data-i="${i}"></label><label class="field">Guest charge paid by<select class="input" data-input="w-gpay" data-i="${i}"><option value="desk" ${g.payer !== 'wallet' ? 'selected' : ''}>Pay at desk now</option><option value="wallet" ${g.payer === 'wallet' ? 'selected' : ''}>Member’s wallet</option></select></label></div>`).join('')}
+    ${W.guests.map((g, i) => `<div class="f2" style="align-items:end"><label class="field">Guest name<input class="input" value="${esc(g.name)}" data-input="w-gname" data-i="${i}"></label><label class="field">Mobile number<input class="input" inputmode="tel" value="${esc(g.mobile)}" data-input="w-gmob" data-i="${i}"></label></div>`).join('')}
+    ${(COACHES[W.am] || []).length ? `<label class="field">${lab('Coach', 'Optional')}<select class="input" data-input="w-coach"><option value="">No coach</option>${COACHES[W.am].map(([n, fee], i) => `<option value="${i}" ${W.coach === i ? 'selected' : ''}>${esc(n)}, ${'₹' + num(fee)} for the slot</option>`).join('')}</select></label>` : ''}
   </div></section>
   <section class="panel"><figure class="sum-photo">${amImg(a, false)}</figure><div class="panel-h"><div><h2>Charges</h2><p>${esc(a.name)}, ${esc(a.loc.toLowerCase())}</p></div></div><div class="panel-b">
-    <ul class="list">${lines.map(l => `<li><div class="grow">${esc(l[0])}<small>${l[2] === 'wallet' ? 'Member’s wallet' : 'Pay at desk'}</small></div><b class="num">${inr(l[1])}</b></li>`).join('')}</ul>
+    <ul class="list">${lines.map(l => `<li><div class="grow">${esc(l[0])}</div><b class="num">${inr(l[1])}</b></li>`).join('')}</ul>
     <div class="row" style="border-top:2px solid var(--ink);padding-top:10px;margin-top:4px"><b>Total</b><b class="num" style="font:600 34px/1.2 var(--display);letter-spacing:-.374px">${inr(total)}</b></div>
-    <p class="muted cap" style="margin:6px 0 14px">Each charge has one payer, so nothing is charged twice. ${esc(m.name)}’s wallet: ${inr(m.wallet ?? 0)}.</p>
-    ${lines.some(l => l[2] === 'wallet') ? `<label class="row" style="justify-content:flex-start;gap:10px;font-size:14px;margin-bottom:12px"><input type="checkbox" name="consent" style="width:20px;height:20px">The member agrees to the wallet deduction</label>` : ''}
-    ${lines.some(l => l[2] === 'desk') ? `<div class="field" style="margin-bottom:12px">Desk payment${payPicker('w-mode', W.mode)}<div style="margin-top:4px">${payDetail(W.mode, lines.filter(l => l[2] === 'desk').reduce((t, l) => t + l[1], 0))}</div></div>` : ''}
+    ${total ? `<div class="field" style="margin:14px 0 12px">Payment${wPicker(m, total)}${W.mode === 'UPI' ? `<div style="margin-top:4px">${payDetail('UPI', total)}</div>` : ''}</div>` : ''}
     <button class="btn btn-primary" type="submit" style="width:100%;min-height:48px">Confirm booking${total ? ' and take ' + inr(total) : ''}</button>
   </div></section></form>`;
 }
 const wRefresh = () => { const y = window.scrollY; paintView(VIEWS.reception('walkin')); window.scrollTo(0, y); };
-INPUT['w-set'] = el => { W[el.dataset.k] = el.value; if (el.dataset.k === 'am') { W.guests = []; W.people = 1; } wRefresh(); };
+INPUT['w-set'] = el => { W[el.dataset.k] = el.value; if (el.dataset.k === 'am') { W.guests = []; W.people = 1; W.coach = null; } wRefresh(); };
 ACT['w-slot'] = b => { W.slot = b.dataset.v; $$('[data-act="w-slot"]').forEach(x => x.setAttribute('aria-pressed', x === b)); };
 ACT['w-people'] = b => { W.people = Math.min(6, Math.max(1 + W.guests.length, W.people + +b.dataset.d)); wRefresh(); };
 ACT['w-guest'] = () => { if (W.guests.length >= 2) return; W.guests.push({name: '', mobile: '', payer: 'desk'}); W.people = Math.max(W.people, 1 + W.guests.length); wRefresh(); };
 INPUT['w-gname'] = el => { W.guests[+el.dataset.i].name = el.value; };
 INPUT['w-gmob'] = el => { W.guests[+el.dataset.i].mobile = el.value; };
-INPUT['w-gpay'] = el => { W.guests[+el.dataset.i].payer = el.value; wRefresh(); };
+INPUT['w-coach'] = el => { W.coach = el.value === '' ? null : +el.value; wRefresh(); };
 ACT['w-mode'] = b => { W.mode = b.dataset.v; wRefresh(); };
 FORM.walkin = f => {
   if (!W.slot) { toast('Choose a slot first. Full slots cannot be booked.', true); return; }
   if (W.guests.some(g => !g.name.trim() || g.mobile.replace(/\D/g, '').length < 10)) { toast('Enter each guest’s name and 10-digit mobile number. The guest pass is sent to the member.', true); return; }
-  const lines = walkinCharges(), wallet = lines.filter(l => l[2] === 'wallet').reduce((s, l) => s + l[1], 0), desk = lines.filter(l => l[2] === 'desk').reduce((s, l) => s + l[1], 0), m = memberBy(W.no);
-  if (wallet && f.elements.consent && !f.elements.consent.checked) { toast('Tick the consent box before deducting from the wallet.', true); return; }
-  if (wallet > (m.wallet ?? 0)) { toast(`Wallet balance is ${inr(m.wallet ?? 0)}, short by ${inr(wallet - (m.wallet ?? 0))}. Take the amount at the desk instead.`, true); return; }
-  if (desk && payBad(f, W.mode)) return;
+  const lines = walkinCharges(), total = lines.reduce((s, l) => s + l[1], 0), m = memberBy(W.no), byWallet = W.mode === 'Wallet';
+  if (byWallet && total > (m.wallet ?? 0)) { toast(`Wallet balance is ${inr(m.wallet ?? 0)}, short by ${inr(total - (m.wallet ?? 0))}. Take cash or UPI instead.`, true); return; }
+  const wallet = byWallet ? total : 0, desk = byWallet ? 0 : total, c = W.coach != null && (COACHES[W.am] || [])[W.coach];
   m.wallet = (m.wallet ?? 0) - wallet; S.collected += desk;
   const ref = 'CB-261028-0' + (164 + BOOKINGS.length - 15), a = AMEN.find(x => x.id === W.am);
-  BOOKINGS.unshift({ref, no: m.no, who: m.name, am: a.name, slot: W.slot.replace(' PM', '') + ' to ' + (parseInt(W.slot) + 1) + ':00 PM', day: 'Today', people: W.people, guests: W.guests.map(g => g.name), amt: wallet + desk, payer: desk && wallet ? 'Wallet and reception' : desk ? 'Reception' : 'Wallet', status: 'Confirmed'});
+  BOOKINGS.unshift({ref, no: m.no, who: m.name, am: a.name, slot: W.slot.replace(' PM', '') + ' to ' + (parseInt(W.slot) + 1) + ':00 PM', day: 'Today', people: W.people, guests: W.guests.map(g => g.name), amt: total, payer: desk ? `Reception, ${W.mode}` : 'Wallet', status: 'Confirmed', src: 'Walk-in', coach: c ? c[0] : ''});
   AUDIT.unshift([hm(now()), me(), 'Walk-in booking', `${ref}, ${a.name} ${W.slot}`, '']);
   openModal(`<div class="modal-b" style="text-align:center;padding-top:24px"><div class="ok-burst">${ic('check')}</div><h2>Booked. ${ref}</h2><p class="muted" style="margin:6px auto 0;max-width:40ch">${esc(a.name)} at ${W.slot} for ${W.people}. The QR code is in ${esc(m.name)}’s app under My Bookings${W.guests.length ? `, with ${W.guests.length} guest pass${W.guests.length > 1 ? 'es' : ''} to share` : ''}.</p></div>
-  <div class="modal-b"><div class="receipt">${wallet ? `<div class="row"><span>From wallet</span><b>${inr(wallet)}</b></div>` : ''}${desk ? `<div class="row"><span>At the desk, ${paidAs(f, W.mode)}</span><b>${inr(desk)}</b></div>` : ''}<div class="row"><span>Recorded by</span><span>${esc(me())}, ${hm(now())}</span></div></div></div>
+  <div class="modal-b"><div class="receipt">${wallet ? `<div class="row"><span>From wallet</span><b>${inr(wallet)}</b></div>` : ''}${desk ? `<div class="row"><span>At the desk, ${W.mode}</span><b>${inr(desk)}</b></div>` : ''}<div class="row"><span>Recorded by</span><span>${esc(me())}, ${hm(now())}</span></div></div></div>
   <div class="modal-f"><button class="btn btn-primary" data-act="close-modal" data-autofocus>Done</button></div>`, 'Booking confirmed');
-  Object.assign(W, {slot: null, people: 1, guests: []}); wRefresh();
+  Object.assign(W, {slot: null, people: 1, guests: [], coach: null}); wRefresh();
 };
 
+const WALLET_IC = '<svg class="pmk" viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="10" fill="#0066cc"/><rect x="9" y="13" width="22" height="15" rx="3" fill="none" stroke="#fff" stroke-width="1.8"/><path d="M24 20.5h7" stroke="#fff" stroke-width="1.8"/><circle cx="26" cy="20.5" r="1.4" fill="#fff"/></svg>';
+/* walk-in payment: the member's wallet, cash, or UPI with a QR code to scan */
+const wPicker = (m, total) => `<div class="pmw" role="group" aria-label="Payment">${[
+  ['Wallet', WALLET_IC, 'Member’s wallet', `Balance ${'₹' + num(m.wallet ?? 0)}${(m.wallet ?? 0) < total ? ', not enough for this booking' : ''}`],
+  ['Cash', CASH_IC, 'Cash', 'Count it and give change'],
+  ['UPI', UPI_IC, 'UPI', 'Show a QR code to scan with any UPI app']].map(([v, i, t, sub]) => `<button type="button" class="pm-row" data-act="w-mode" data-v="${v}" aria-pressed="${W.mode === v}">${i}<span><b>${t}</b><small>${sub}</small></span></button>`).join('')}</div>`;
+
 /* change or allot a slot */
-const CH = {ref: 'CB-261029-0012', pick: null};
+const CH = {ref: 'CB-261029-0012', pick: null, mode: 'Wallet'};
 const CHSLOTS = [['6:00 AM', '2 seats left', 50, true], ['8:00 AM', 'Full', 50, false], ['6:00 PM', 'Flood light, 3 left', 150, true], ['7:00 PM', 'Blocked', 150, false]];
 function changeHTML(arg) {
   if (arg) CH.ref = arg;
@@ -2330,14 +2383,35 @@ function changeHTML(arg) {
     ${reasonField('Reason', 'For example: member asked to move to the evening')}
   </div></section>
   <section class="panel"><div class="panel-h"><h2>Price difference</h2></div><div class="panel-b">
-    ${!pick ? '<p class="muted">Choose a new slot to see any difference.</p>' : diff === 0 ? `<div class="note good">${ic('check')}<div>Same price. No payment needed.</div></div>` : diff > 0 ? `<div class="note warn">${ic('rupee')}<div><b>${inr(diff)} more</b> for the flood light rate. Collect it at the desk or from the wallet.</div></div><div class="seg" role="group" aria-label="Collect from" style="margin-top:12px"><button type="button" aria-pressed="true">Wallet</button><button type="button" aria-pressed="false">Cash</button><button type="button" aria-pressed="false">UPI</button></div>` : `<div class="note">${ic('info')}<div>${inr(-diff)} goes back to the wallet as a refund.</div></div>`}
+    ${!pick ? '<p class="muted">Choose a new slot to see any difference.</p>' : diff === 0 ? `<div class="note good">${ic('check')}<div>Same price. No payment needed.</div></div>` : diff > 0 ? `<div class="row"><span>To collect</span><b class="num">${inr(diff)}</b></div><div class="seg" role="group" aria-label="Collect from" style="margin-top:12px">${['Wallet', 'Cash', 'UPI'].map(v => `<button type="button" data-act="ch-mode" data-v="${v}" aria-pressed="${CH.mode === v}">${v}</button>`).join('')}</div>${CH.mode === 'UPI' ? `<div style="margin-top:12px">${payDetail('UPI', diff)}</div>` : ''}` : `<div class="note">${ic('info')}<div>${inr(-diff)} goes back to the wallet as a refund.</div></div>`}
     <p class="muted cap" style="margin:14px 0">A new QR code is issued and the old one is cancelled. The member gets a message with the new slot.</p>
     <button class="btn btn-primary" type="submit" style="width:100%;min-height:48px" ${pick ? '' : 'disabled'}>Move booking${pick ? ' to ' + pick[0] : ''}</button>
     <a class="btn btn-ghost" href="#/reception/walkin" style="width:100%;margin-top:8px">Allot a new slot instead</a>
+    <button type="button" class="btn btn-ghost" data-act="ch-cancel" style="width:100%;margin-top:8px;color:var(--deny-ink)">${ic('x')}Cancel this booking</button>
   </div></section></form>`;
 }
 INPUT['ch-ref'] = el => { CH.ref = el.value; CH.pick = null; paintView(VIEWS.reception('change')); };
 ACT['ch-pick'] = b => { CH.pick = b.dataset.v; const r = $('form[data-form="change"] textarea[name="reason"]'), keep = r ? r.value : '', y = window.scrollY; paintView(VIEWS.reception('change')); $('form[data-form="change"] textarea[name="reason"]').value = keep; window.scrollTo(0, y); };
+ACT['ch-mode'] = b => { CH.mode = b.dataset.v; const r = $('form[data-form="change"] textarea[name="reason"]'), keep = r ? r.value : '', y = window.scrollY; paintView(VIEWS.reception('change')); $('form[data-form="change"] textarea[name="reason"]').value = keep; window.scrollTo(0, y); };
+const DESK_CANCEL = ['Member asked to cancel', 'Amenity closed or under maintenance', 'Booked by mistake', 'Member is unwell', 'Other'];
+ACT['ch-cancel'] = () => {
+  const b = BOOKINGS.find(x => x.ref === CH.ref);
+  openModal(`<form data-form="ch-cancel">${modalHead(`Cancel ${b.ref}?`, `${esc(b.who)}, ${esc(b.am)}, ${b.day}, ${b.slot}.`)}
+  <div class="modal-b form"><label class="field">Reason<select class="input" name="why"><option value="">Choose a reason</option>${DESK_CANCEL.map(r => `<option>${r}</option>`).join('')}</select><span class="errmsg" hidden>Choose a reason.</span></label>
+  <label class="field">${lab('Note', 'Optional')}<textarea class="input" name="note" rows="2" placeholder="Anything the member should know"></textarea></label>
+  <div class="note good">${ic('rupee')}<div><b>${inr(b.amt)} goes back to ${esc(b.who)}’s wallet</b> at once. The QR code${b.guests.length ? ' and guest passes stop' : ' stops'} working, and the member gets a message.</div></div></div>
+  <div class="modal-f"><button type="button" class="btn" data-act="close-modal">Keep booking</button><button class="btn btn-primary" type="submit" style="background:var(--deny-ink);border-color:var(--deny-ink)">Cancel and refund ${inr(b.amt)}</button></div></form>`, 'Cancel booking');
+};
+FORM['ch-cancel'] = f => {
+  if (!need(f, ['why'])) return;
+  const b = BOOKINGS.find(x => x.ref === CH.ref), m = memberBy(b.no), note = f.elements.note.value.trim();
+  b.status = 'Cancelled'; b.why = f.elements.why.value + (note ? `, ${note}` : ''); b.cancelBy = 'desk';
+  if (m) m.wallet = (m.wallet ?? 0) + b.amt;
+  AUDIT.unshift([hm(now()), me(), 'Booking cancelled at the desk', `${b.ref}, ${b.who}, refund ${'₹' + num(b.amt)} to the wallet`, b.why]);
+  closeModal(); toast(`${b.ref} cancelled. ${inr(b.amt)} refunded to ${esc(b.who)}’s wallet.`);
+  const next = BOOKINGS.find(x => x.status === 'Confirmed'); CH.ref = next ? next.ref : CH.ref; CH.pick = null;
+  paintView(VIEWS.reception('change'));
+};
 FORM.change = f => {
   if (!need(f, ['reason'])) return;
   const b = BOOKINGS.find(x => x.ref === CH.ref), from = b.slot;
