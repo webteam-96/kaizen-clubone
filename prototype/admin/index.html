@@ -295,8 +295,8 @@ input[type="checkbox"]:not(.switch){accent-color:var(--blue)}
 .pill-opts .opt{padding:9px 14px;font-weight:600;transition:background-color .2s,color .2s,border-color .2s}
 .pmw{margin-top:8px}
 .src-tag{display:block;font-size:12px;font-weight:600;margin-top:2px}
-.src-tag.app{color:var(--blue)}
-.src-tag.desk{color:#9A5B00}
+.src-tag.s-app{color:var(--blue)}
+.src-tag.s-desk{color:#9A5B00}
 .ma-list{margin-top:6px;border:1px solid var(--hair);border-radius:14px;background:#fff;padding:4px;max-height:280px;overflow:auto}
 .ma-opt{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border:0;border-radius:10px;background:none;text-align:left;font:inherit;color:var(--ink);cursor:pointer}
 .ma-opt:hover,.ma-opt:focus-visible{background:#f2f7fd}
@@ -2135,7 +2135,7 @@ function pplCell(b) {
 }
 function bkRows() {
   const rows = BOOKINGS.filter(bkMatch);
-  return rows.length ? rows.map(b => `<tr class="click${b.fresh ? ' new' : ''}" data-act="open-booking" data-ref="${b.ref}"><td class="nowrap"><b>${b.ref}</b><small class="src-tag ${srcOf(b) === 'App' ? 'app' : 'desk'}">${srcOf(b) === 'App' ? 'App booking' : 'Walk-in'}</small></td><td><div class="who">${avatar(b.who)}<div><b>${esc(b.who)}</b><small>${b.no}</small></div></div></td><td><div class="who"><span class="thumb sm">${amImg(amBy(b.am))}</span><span>${esc(b.am)}</span></div></td><td class="nowrap">${b.day}, ${b.slot}</td><td>${pplCell(b)}</td><td class="r num">${inr(b.amt)}</td><td>${chip(b.status)}</td></tr>`).join('')
+  return rows.length ? rows.map(b => `<tr class="click${b.fresh ? ' new' : ''}" data-act="open-booking" data-ref="${b.ref}"><td class="nowrap"><b>${b.ref}</b><small class="src-tag ${srcOf(b) === 'App' ? 's-app' : 's-desk'}">${srcOf(b) === 'App' ? 'App booking' : 'Walk-in'}</small></td><td><div class="who">${avatar(b.who)}<div><b>${esc(b.who)}</b><small>${b.no}</small></div></div></td><td><div class="who"><span class="thumb sm">${amImg(amBy(b.am))}</span><span>${esc(b.am)}</span></div></td><td style="min-width:132px">${b.day}<br>${b.slot}</td><td>${pplCell(b)}</td><td class="r num">${inr(b.amt)}</td><td>${chip(b.status)}</td></tr>`).join('')
     : `<tr><td colspan="7"><div class="empty">${emptyArt()}<p>No bookings match. Clear the search or choose All.</p></div></td></tr>`;
 }
 VIEWS.bookings = () => `<div class="vhead"><div><p>Bookings stay separate from wallet transactions. Reception books walk-ins with the same slots, prices and seats as the app.</p></div></div>
