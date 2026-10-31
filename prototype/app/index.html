@@ -186,6 +186,10 @@ h2.sec .cap{font-weight:400}
 .pass-meta b{display:block;font:600 17px/1.24 var(--text);letter-spacing:-.374px;color:#fff}
 .pass .btn{margin-top:24px}
 .pass .btn.pri,.balance .btn.pri{background:#fff;color:var(--ink);box-shadow:0 8px 20px -8px rgba(0,0,0,.6)}
+/* the wallet rides on the pass, under a hairline, so the balance is always in view */
+.pass-wal{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:20px;padding-top:18px;border-top:1px solid rgba(255,255,255,.14);font-size:13px;line-height:1.43;letter-spacing:-.1px;color:rgba(255,255,255,.62)}
+.pass-wal b{display:block;margin-top:2px;font:700 26px/1.15 var(--display);letter-spacing:-.022em;color:#fff}
+.pass .pw-add{margin-top:0;min-height:40px;padding:9px 18px;font-size:15px;background:rgba(255,255,255,.14);color:#fff}
 .book-cta{margin-top:20px}
 .rail{display:grid;grid-auto-flow:column;grid-auto-columns:64%;gap:14px;overflow-x:auto;margin:0 -20px;padding:4px 20px 6px;scroll-snap-type:x mandatory;scroll-padding-inline:20px;overscroll-behavior-x:contain;scrollbar-width:none}
 .rail::-webkit-scrollbar{display:none}
@@ -195,8 +199,6 @@ h2.sec .cap{font-weight:400}
 .rc-t{display:flex;flex-direction:column;gap:2px;padding:10px 2px 0}
 .rc-t b{font:600 17px/1.24 var(--text);letter-spacing:-.374px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rc-n{font-size:14px;line-height:1.43;letter-spacing:-.224px;color:#6e6e73}
-.wcard{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-top:24px;padding:22px 22px 22px 24px;background:var(--card);border-radius:24px;box-shadow:var(--lift)}
-.wbal{display:block;margin-top:4px;font:700 38px/1.1 var(--display);letter-spacing:-.025em}
 .admit{display:block;padding:24px;margin-top:16px;background:var(--card);border-radius:24px;box-shadow:var(--lift)}
 .admit .chip{margin-bottom:12px}
 .ad-h{display:block;font:600 21px/1.19 var(--display);letter-spacing:-.2px}
@@ -1445,6 +1447,7 @@ function passHTML() {
   return `<section class="pass" id="pass" aria-label="Membership pass">
 <div class="pass-top"><span class="brand">ClubOne<small>The Clubhouse</small></span>${st}</div>
 <div class="pass-mid">${av('Rahul Sharma', ' xl')}<div><span class="pass-name">Rahul Sharma</span><span class="pass-meta"><span>Member no.<b class="num">KC1234</b></span><span>${S.expired ? 'Expired on' : 'Valid till'}<b class="num">${fmtLong(S.expired ? EXPIRED_ON : S.till)}</b></span></span></div></div>
+<div class="pass-wal"><span>Wallet balance<b class="num">${rs(S.wallet)}</b></span><button class="btn sm pw-add" data-go="addmoney">${ic('plus')}Add money</button></div>
 ${S.expired ? '<button class="btn pri sm" data-act="askRenew">Renew membership</button>' : `<button class="btn pri sm" data-act="openQr">${ic('qr')}Show entry QR</button>`}
 </section>`;
 }
@@ -1468,8 +1471,7 @@ ${S.expired ? `<div class="note err">${ic('alert')}<span>Your membership ended o
 <h2 class="sec">Today at the club<button data-act="book" aria-label="See all amenities">See all</button></h2>
 <ul class="rail" aria-label="Amenities">${RAIL.map(id => railCard(amOf(id))).join('')}</ul>
 <h2 class="sec">Upcoming<button data-go="bookings" aria-label="See all bookings">See all</button></h2>
-${up.length ? `<div class="tickets">${up.map(ticketHTML).join('')}</div>` : '<p class="cap">No upcoming bookings. Book a court, the pool or the gym and your QR code appears here.</p>'}
-<section class="wcard"><div><span class="cap">Wallet balance</span><span class="num wbal">${rs(S.wallet)}</span></div><button class="btn sec sm" data-go="addmoney">Add money</button></section>`,
+${up.length ? `<div class="tickets">${up.map(ticketHTML).join('')}</div>` : '<p class="cap">No upcoming bookings. Book a court, the pool or the gym and your QR code appears here.</p>'}`,
     after(el, re) {
       heroScroll(el);
       if (re || RM) return;
@@ -2220,7 +2222,6 @@ function scrProfile() {
     label: 'Profile and membership',
     html: `${bar('Profile and membership')}${passHTML()}
 <div class="list kv" style="margin-top:16px">${kv.map(([l, v]) => `<div class="row"><span>${l}</span><b>${v}</b></div>`).join('')}</div>
-<button class="btn pri" style="margin-top:14px" data-act="askRenew">${ic('cal')}Renew membership</button>
 <h2 class="sec">Family members</h2>
 ${FAM.length ? `<div class="list">${FAM.map(famRow).join('')}</div>` : '<p class="cap">No family members yet. Add your spouse, children or parents so you can bring them on your bookings.</p>'}
 <button class="btn sec" style="margin-top:12px" data-act="famAdd">${ic('plus')}Add family member</button>
